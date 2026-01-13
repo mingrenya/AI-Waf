@@ -72,3 +72,21 @@ func NotFound(c *gin.Context, err error) {
 func InternalServerError(c *gin.Context, err error, showErr bool) {
 	Error(c, model.ErrInternalServerError(err), showErr)
 }
+
+// SuccessWithPagination 返回带分页信息的成功响应
+func SuccessWithPagination(c *gin.Context, data interface{}, total int64, page int, pageSize int) {
+	resp := model.APIResponse{
+		Code:    http.StatusOK,
+		Success: true,
+		Message: "Success",
+		Data: gin.H{
+			"items":    data,
+			"total":    total,
+			"page":     page,
+			"pageSize": pageSize,
+		},
+		Timestamp: model.NewSuccessResponse("", nil).Timestamp,
+	}
+	resp = WithRequestID(c, resp)
+	c.JSON(http.StatusOK, resp)
+}

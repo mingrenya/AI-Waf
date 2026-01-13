@@ -1,12 +1,12 @@
 package controller
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mingrenya/AI-Waf/server/dto"
+	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/service"
 	"github.com/mingrenya/AI-Waf/server/utils/response"
 )
