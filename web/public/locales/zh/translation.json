@@ -5,7 +5,8 @@
         "logs": "日志",
         "rules": "规则",
         "settings": "设置",
-        "logout": "登出"
+        "logout": "登出",
+        "alerts": "告警"
     },
     "breadcrumb": {
         "logs": {
@@ -26,6 +27,11 @@
             "settings": "设置",
             "siteManager": "站点管理",
             "certManager": "证书管理"
+        },
+        "alerts": {
+            "channel": "通道",
+            "rule": "规则",
+            "history": "历史"
         }
     },
     "common": {
@@ -641,6 +647,89 @@
         "qpsChart": {
             "title": "实时QPS监控",
             "tooltip": "{{time}}: {{value}} QPS"
+        }
+    },
+    "alert": {
+        "management": "告警管理",
+        "channels": "告警通道",
+        "rules": "告警规则",
+        "history": "告警历史",
+        "channelManagement": "通道管理",
+        "ruleManagement": "规则管理",
+        "historyManagement": "告警历史",
+        "addChannel": "添加通道",
+        "addRule": "添加规则",
+        "channelName": "通道名称",
+        "channelType": {
+            "webhook": "Webhook",
+            "slack": "Slack",
+            "discord": "Discord",
+            "dingtalk": "钉钉",
+            "wecom": "企业微信"
+        },
+        "ruleName": "规则名称",
+        "severity": {
+            "low": "低",
+            "medium": "中",
+            "high": "高",
+            "critical": "紧急"
+        },
+        "conditions": "触发条件",
+        "enabled": "已启用",
+        "disabled": "已禁用",
+        "status": "状态",
+        "testChannel": "测试通道",
+        "testChannelSuccess": "测试消息发送成功",
+        "testChannelFailed": "测试消息发送失败",
+        "testChannelDescription": "发送测试消息以验证通道配置",
+        "testMessage": "测试消息",
+        "testMessagePlaceholder": "输入测试消息内容...",
+        "sendTest": "发送测试",
+        "deleteChannelTitle": "删除通道",
+        "deleteChannelDescription": "确定要删除此通道吗?此操作无法撤销。",
+        "deleteChannelSuccess": "通道删除成功",
+        "deleteChannelFailed": "通道删除失败",
+        "deleteRuleTitle": "删除规则",
+        "deleteRuleDescription": "确定要删除此告警规则吗?",
+        "deleteRuleSuccess": "告警规则删除成功",
+        "deleteRuleFailed": "告警规则删除失败",
+        "updateSuccess": "更新成功",
+        "updateFailed": "更新失败",
+        "createSuccess": "通道创建成功",
+        "createFailed": "通道创建失败",
+        "form": {
+            "channelName": "通道名称",
+            "channelNamePlaceholder": "请输入通道名称",
+            "channelNameRequired": "通道名称为必填项",
+            "channelTypeLabel": "通道类型",
+            "channelTypeDisabled": "创建后不能更改通道类型",
+            "enableChannel": "启用通道",
+            "enableChannelDescription": "通过此通道接收告警通知",
+            "channelConfiguration": "通道配置",
+            "webhookUrl": "Webhook URL",
+            "httpMethod": "HTTP 方法",
+            "slackWebhookUrl": "Slack Webhook URL",
+            "discordWebhookUrl": "Discord Webhook URL",
+            "dingtalkAccessToken": "钉钉 Access Token",
+            "dingtalkSecret": "钉钉密钥",
+            "wecomWebhookKey": "企业微信 Webhook Key"
+        },
+        "dialog": {
+            "createChannelTitle": "创建告警通道",
+            "createChannelDescription": "配置新的通知渠道以接收告警消息",
+            "updateChannelTitle": "更新告警通道",
+            "updateChannelDescription": "修改告警通道配置",
+            "createRuleTitle": "创建告警规则",
+            "createRuleDescription": "配置新的告警规则和触发条件",
+            "updateRuleTitle": "更新告警规则",
+            "updateRuleDescription": "修改告警规则配置"
+        },
+        "deleteDialog": {
+            "confirmTitle": "确认删除",
+            "confirmDescription": "确定要删除此项吗？此操作无法撤销。",
+            "cancel": "取消",
+            "deleting": "删除中...",
+            "delete": "删除"
         }
     }
 }

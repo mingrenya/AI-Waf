@@ -1,0 +1,64 @@
+# Dependencies
+node_modules
+**/node_modules
+pnpm-lock.yaml
+
+# Build outputs
+dist
+build
+.next
+out
+**/dist
+**/build
+
+# Development files
+.vite
+.turbo
+*.log
+*.log.*
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Testing
+coverage
+.nyc_output
+**/__tests__
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+
+# Documentation
+*.md
+!README.md
+docs
+doc
+
+# Other
+.editorconfig
+.prettierrc
+.eslintrc
+tsconfig.tsbuildinfo

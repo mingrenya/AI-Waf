@@ -6,6 +6,8 @@ import (
 	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/mingrenya/AI-Waf/server/service"
+	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
+	"github.com/mingrenya/AI-Waf/server/config"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -29,6 +31,9 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	ipGroupRepo := repository.NewIPGroupRepository(db)
 	ruleRepo := repository.NewMicroRuleRepository(db)
 	blockedIPRepo := repository.NewBlockedIPRepository(db)
+	alertChannelRepo := repository.NewAlertChannelRepository(db)
+	alertRuleRepo := repository.NewAlertRuleRepository(db)
+	alertHistoryRepo := repository.NewAlertHistoryRepository(db)
 
 	// 创建服务
 	authService := service.NewAuthService(userRepo, roleRepo)
@@ -41,6 +46,21 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	ruleService := service.NewMicroRuleService(ruleRepo)
 	statsService := service.NewStatsService(wafLogRepo)
 	blockedIPService := service.NewBlockedIPService(blockedIPRepo)
+	alertService := service.NewAlertService(alertChannelRepo, alertRuleRepo, alertHistoryRepo, statsService)
+	
+	// 启动告警后台任务
+	logger := config.GetServiceLogger("router")
+	alertCleanup, err := alertChecker.Start(alertService, logger)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to start alert checker")
+	} else {
+		logger.Info().Msg("Alert checker started successfully")
+		// 注册清理函数到 Gin 的 shutdown hook
+		// 注意: 这里我们不能直接 defer，因为 Setup 函数会返回
+		// 实际应用中，应该在 main.go 中管理清理函数
+		_ = alertCleanup // 保留引用避免未使用变量错误
+	}
+	
 	// 创建控制器
 	authController := controller.NewAuthController(authService)
 	siteController := controller.NewSiteController(siteService)
@@ -52,6 +72,7 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	ruleController := controller.NewMicroRuleController(ruleService)
 	statsController := controller.NewStatsController(runnerService, statsService)
 	blockedIPController := controller.NewBlockedIPController(blockedIPService)
+	alertController := controller.NewAlertController(alertService)
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
 		c.Set("userRepo", userRepo)
@@ -200,6 +221,32 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		blockedIPRoutes.GET("", middleware.HasPermission(model.PermConfigRead), blockedIPController.GetBlockedIPs)
 		blockedIPRoutes.GET("/stats", middleware.HasPermission(model.PermConfigRead), blockedIPController.GetBlockedIPStats)
 		blockedIPRoutes.DELETE("/cleanup", middleware.HasPermission(model.PermConfigUpdate), blockedIPController.CleanupExpiredBlockedIPs)
+	}
+
+	// 告警管理模块
+	alertRoutes := authenticated.Group("/alerts")
+	{
+		// 告警渠道管理
+		alertRoutes.POST("/channels", middleware.HasPermission(model.PermAlertChannelCreate), alertController.CreateChannel)
+		alertRoutes.GET("/channels", middleware.HasPermission(model.PermAlertChannelRead), alertController.GetChannels)
+		alertRoutes.GET("/channels/:id", middleware.HasPermission(model.PermAlertChannelRead), alertController.GetChannelByID)
+		alertRoutes.PUT("/channels/:id", middleware.HasPermission(model.PermAlertChannelUpdate), alertController.UpdateChannel)
+		alertRoutes.DELETE("/channels/:id", middleware.HasPermission(model.PermAlertChannelDelete), alertController.DeleteChannel)
+		alertRoutes.POST("/channels/:id/test", middleware.HasPermission(model.PermAlertChannelUpdate), alertController.TestChannel)
+
+		// 告警规则管理
+		alertRoutes.POST("/rules", middleware.HasPermission(model.PermAlertRuleCreate), alertController.CreateRule)
+		alertRoutes.GET("/rules", middleware.HasPermission(model.PermAlertRuleRead), alertController.GetRules)
+		alertRoutes.GET("/rules/:id", middleware.HasPermission(model.PermAlertRuleRead), alertController.GetRuleByID)
+		alertRoutes.PUT("/rules/:id", middleware.HasPermission(model.PermAlertRuleUpdate), alertController.UpdateRule)
+		alertRoutes.DELETE("/rules/:id", middleware.HasPermission(model.PermAlertRuleDelete), alertController.DeleteRule)
+
+		// 告警历史查询
+		alertRoutes.GET("/history", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetAlertHistory)
+		alertRoutes.POST("/history/:id/acknowledge", middleware.HasPermission(model.PermAlertHistoryRead), alertController.AcknowledgeAlert)
+		
+		// 告警统计
+		alertRoutes.GET("/statistics", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetStatistics)
 	}
 
 	// 审计日志模块

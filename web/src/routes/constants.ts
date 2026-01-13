@@ -4,8 +4,7 @@ export const ROUTES = {
     LOGS: "/logs",
     MONITOR: "/monitor",
     RULES: "/rules",
-    SETTINGS: "/settings",
-} as const
+    SETTINGS: "/settings",    ALERTS: "/alerts",} as const
 
 export type RouteKey = keyof typeof ROUTES
 export type RoutePath = typeof ROUTES[RouteKey]

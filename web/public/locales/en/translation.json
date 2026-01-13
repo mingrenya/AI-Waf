@@ -5,6 +5,7 @@
         "logs": "Logs",
         "rules": "Rules",
         "settings": "Settings",
+        "alerts": "Alerts",
         "logout": "Logout"
     },
     "breadcrumb": {
@@ -26,6 +27,11 @@
             "settings": "Settings",
             "siteManager": "Site Management",
             "certManager": "Certificate Management"
+        },
+        "alerts": {
+            "channel": "Channels",
+            "rule": "Rules",
+            "history": "History"
         }
     },
     "common": {
@@ -641,6 +647,89 @@
         "qpsChart": {
             "title": "Realtime QPS Monitor",
             "tooltip": "{{time}}: {{value}} QPS"
+        }
+    },
+    "alert": {
+        "management": "Alert Management",
+        "channels": "Alert Channels",
+        "rules": "Alert Rules",
+        "history": "Alert History",
+        "channelManagement": "Channel Management",
+        "ruleManagement": "Rule Management",
+        "historyManagement": "Alert History",
+        "addChannel": "Add Channel",
+        "addRule": "Add Rule",
+        "channelName": "Channel Name",
+        "channelType": {
+            "webhook": "Webhook",
+            "slack": "Slack",
+            "discord": "Discord",
+            "dingtalk": "DingTalk",
+            "wecom": "Enterprise WeChat"
+        },
+        "ruleName": "Rule Name",
+        "severity": {
+            "low": "Low",
+            "medium": "Medium",
+            "high": "High",
+            "critical": "Critical"
+        },
+        "conditions": "Conditions",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "status": "Status",
+        "testChannel": "Test Channel",
+        "testChannelSuccess": "Test message sent successfully",
+        "testChannelFailed": "Failed to send test message",
+        "testChannelDescription": "Send a test message to verify channel configuration",
+        "testMessage": "Test Message",
+        "testMessagePlaceholder": "Enter your test message...",
+        "sendTest": "Send Test",
+        "deleteChannelTitle": "Delete Channel",
+        "deleteChannelDescription": "Are you sure you want to delete this channel? This action cannot be undone.",
+        "deleteChannelSuccess": "Channel deleted successfully",
+        "deleteChannelFailed": "Failed to delete channel",
+        "deleteRuleTitle": "Delete Rule",
+        "deleteRuleDescription": "Are you sure you want to delete this alert rule?",
+        "deleteRuleSuccess": "Alert rule deleted successfully",
+        "deleteRuleFailed": "Failed to delete alert rule",
+        "updateSuccess": "Updated successfully",
+        "updateFailed": "Update failed",
+        "createSuccess": "Channel created successfully",
+        "createFailed": "Failed to create channel",
+        "form": {
+            "channelName": "Channel Name",
+            "channelNamePlaceholder": "Enter channel name",
+            "channelNameRequired": "Channel name is required",
+            "channelTypeLabel": "Channel Type",
+            "channelTypeDisabled": "Channel type cannot be changed after creation",
+            "enableChannel": "Enable Channel",
+            "enableChannelDescription": "Receive alert notifications through this channel",
+            "channelConfiguration": "Channel Configuration",
+            "webhookUrl": "Webhook URL",
+            "httpMethod": "HTTP Method",
+            "slackWebhookUrl": "Slack Webhook URL",
+            "discordWebhookUrl": "Discord Webhook URL",
+            "dingtalkAccessToken": "DingTalk Access Token",
+            "dingtalkSecret": "DingTalk Secret",
+            "wecomWebhookKey": "WeCom Webhook Key"
+        },
+        "dialog": {
+            "createChannelTitle": "Create Alert Channel",
+            "createChannelDescription": "Configure a new notification channel for alert messages",
+            "updateChannelTitle": "Update Alert Channel",
+            "updateChannelDescription": "Modify alert channel configuration",
+            "createRuleTitle": "Create Alert Rule",
+            "createRuleDescription": "Configure a new alert rule with conditions and channels",
+            "updateRuleTitle": "Update Alert Rule",
+            "updateRuleDescription": "Modify alert rule configuration"
+        },
+        "deleteDialog": {
+            "confirmTitle": "Confirm Deletion",
+            "confirmDescription": "Are you sure you want to delete this item? This action cannot be undone.",
+            "cancel": "Cancel",
+            "deleting": "Deleting...",
+            "delete": "Delete"
         }
     }
 }

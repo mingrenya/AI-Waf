@@ -2,7 +2,7 @@
 
 import { Link, useLocation, useNavigate } from "react-router"
 import { cn } from "@/lib/utils"
-import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, BookOpen, Github } from "lucide-react"
+import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, BookOpen, Github, Bell } from "lucide-react"
 import { ROUTES } from "@/routes/constants"
 import { useTranslation } from "react-i18next"
 import type { TFunction } from "i18next"
@@ -31,6 +31,12 @@ function createSidebarConfig(t: TFunction) {
             display: true,
         },
         {
+            title: t("sidebar.alerts"),
+            icon: Bell,
+            href: ROUTES.ALERTS,
+            display: true,
+        },
+        {
             title: t("sidebar.settings"),
             icon: Settings,
             href: ROUTES.SETTINGS,
@@ -43,6 +49,7 @@ interface SidebarDisplayConfig {
     monitor?: boolean
     logs?: boolean
     rules?: boolean
+    alerts?: boolean
     settings?: boolean
 }
 

@@ -12,6 +12,7 @@ import { MonitorLayOut } from "@/pages/monitor/layout"
 import { RulesLayOut } from "@/pages/rule/layout"
 import { SettingLayOut } from "@/pages/setting/layout"
 import { LogLayOut } from "@/pages/logs/layout"
+import { AlertLayOut } from "@/pages/alert/layout"
 
 // 直接导入子组件
 import GlobalSettingPage from "@/pages/setting/pages/global-setting/page"
@@ -24,6 +25,9 @@ import MicroRulePage from "@/pages/rule/pages/micro-rule/page"
 import StatsPage from "@/pages/monitor/pages/stats/page"
 import ViewerPage from "@/pages/monitor/pages/security-dashboard/page"
 import FlowControlPage from "@/pages/rule/pages/cc/page"
+import AlertChannelPage from "@/pages/alert/pages/channel/page"
+import AlertRulePage from "@/pages/alert/pages/rule/page"
+import AlertHistoryPage from "@/pages/alert/pages/history/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
 // 懒加载认证页面
@@ -81,6 +85,14 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
                 { title: t('breadcrumb.settings.settings'), path: "global", component: <GlobalSettingPage /> },
                 { title: t('breadcrumb.settings.siteManager'), path: "site", component: <SiteManagerPage /> },
                 { title: t('breadcrumb.settings.certManager'), path: "cert", component: <CertificatesPage /> }
+            ]
+        },
+        [ROUTES.ALERTS]: {
+            defaultPath: "channel",
+            items: [
+                { title: t('breadcrumb.alerts.channel'), path: "channel", component: <AlertChannelPage /> },
+                { title: t('breadcrumb.alerts.rule'), path: "rule", component: <AlertRulePage /> },
+                { title: t('breadcrumb.alerts.history'), path: "history", component: <AlertHistoryPage /> }
             ]
         }
     }
@@ -150,6 +162,11 @@ export function useRoutes(): RouteObject[] {
                     path: ROUTES.SETTINGS,
                     element: <SettingLayOut />,
                     children: createChildRoutes(breadcrumbMap[ROUTES.SETTINGS])
+                },
+                {
+                    path: ROUTES.ALERTS,
+                    element: <AlertLayOut />,
+                    children: createChildRoutes(breadcrumbMap[ROUTES.ALERTS])
                 }
             ]
         }]

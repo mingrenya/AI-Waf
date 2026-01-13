@@ -43,6 +43,19 @@ const (
 
 	// WAF日志权限
 	PermWAFLogRead = "waf:log:read"
+
+	// 告警管理权限
+	PermAlertChannelCreate = "alert:channel:create"
+	PermAlertChannelRead   = "alert:channel:read"
+	PermAlertChannelUpdate = "alert:channel:update"
+	PermAlertChannelDelete = "alert:channel:delete"
+
+	PermAlertRuleCreate = "alert:rule:create"
+	PermAlertRuleRead   = "alert:rule:read"
+	PermAlertRuleUpdate = "alert:rule:update"
+	PermAlertRuleDelete = "alert:rule:delete"
+
+	PermAlertHistoryRead = "alert:history:read"
 )
 
 // Role 角色模型
@@ -67,6 +80,9 @@ func GetDefaultRolePermissions() map[string][]string {
 			PermSystemRestart, PermSystemStatus,
 			PermWAFLogRead,
 			PermCertCreate, PermCertRead, PermCertUpdate, PermCertDelete,
+			PermAlertChannelCreate, PermAlertChannelRead, PermAlertChannelUpdate, PermAlertChannelDelete,
+			PermAlertRuleCreate, PermAlertRuleRead, PermAlertRuleUpdate, PermAlertRuleDelete,
+			PermAlertHistoryRead,
 		},
 		RoleAuditor: {
 			// 审计员可以查看用户、站点、配置和审计日志
@@ -77,6 +93,9 @@ func GetDefaultRolePermissions() map[string][]string {
 			PermSystemStatus,
 			PermWAFLogRead,
 			PermCertRead,
+			PermAlertChannelRead,
+			PermAlertRuleRead,
+			PermAlertHistoryRead,
 		},
 		RoleConfigurator: {
 			// 配置管理员可以管理站点和配置
@@ -85,6 +104,9 @@ func GetDefaultRolePermissions() map[string][]string {
 			PermSystemStatus,
 			PermWAFLogRead,
 			PermCertRead, PermCertUpdate, PermCertDelete,
+			PermAlertChannelCreate, PermAlertChannelRead, PermAlertChannelUpdate, PermAlertChannelDelete,
+			PermAlertRuleCreate, PermAlertRuleRead, PermAlertRuleUpdate, PermAlertRuleDelete,
+			PermAlertHistoryRead,
 		},
 		RoleUser: {
 			// 普通用户只能查看站点和系统状态
@@ -92,6 +114,9 @@ func GetDefaultRolePermissions() map[string][]string {
 			PermSystemStatus,
 			PermWAFLogRead,
 			PermCertRead,
+			PermAlertChannelRead,
+			PermAlertRuleRead,
+			PermAlertHistoryRead,
 		},
 	}
 }

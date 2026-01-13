@@ -8,7 +8,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example # 请替换为您的实际密码
       # 可选：指定初始数据库名称
-      # MONGO_INITDB_DATABASE: waf_db
+      MONGO_INITDB_DATABASE: waf_db
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb # 添加配置数据卷
@@ -17,7 +17,7 @@ services:
     networks:
       - waf-network
     # 可选：添加命令行参数
-    # command: --wiredTigerCacheSizeGB 1.5
+    command: --wiredTigerCacheSizeGB 1.5
 
   # MRYa WAF 服务（统一使用小写命名）
   mrya:

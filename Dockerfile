@@ -2,8 +2,10 @@
 # 阶段1: 构建Node.js前端
 # 生产环境使用固定版本
 FROM node:23.10.0-alpine AS frontend-builder
-# 安装pnpm
-RUN npm install -g pnpm@10.11.0
+# 安装pnpm（使用最新稳定版本）
+RUN npm install -g pnpm@10.28.0
+# 设置环境变量禁用更新检查
+ENV PNPM_CHECK_VERSION=false
 # 设置工作目录
 WORKDIR /app
 # 复制前端项目文件

@@ -1,0 +1,182 @@
+#1 [internal] load local bake definitions
+#1 reading from stdin 507B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.69kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/haproxy:3.0.10
+#3 DONE 2.2s
+
+#4 [internal] load metadata for docker.io/library/golang:1.24.1-alpine
+#4 ...
+
+#5 [internal] load metadata for docker.io/library/node:23.10.0-alpine
+#5 DONE 2.8s
+
+#4 [internal] load metadata for docker.io/library/golang:1.24.1-alpine
+#4 DONE 2.9s
+
+#6 [internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [backend-builder  1/10] FROM docker.io/library/golang:1.24.1-alpine@sha256:43c094ad24b6ac0546c62193baeb3e6e49ce14d3250845d166c77c25f64b0386
+#7 DONE 0.0s
+
+#8 [frontend-builder 1/6] FROM docker.io/library/node:23.10.0-alpine@sha256:6eae672406a2bc8ed93eab6f9f76a02eb247e06ba82b2f5032c0a4ae07e825ba
+#8 DONE 0.0s
+
+#9 [stage-2  1/14] FROM docker.io/library/haproxy:3.0.10@sha256:fe285e6491bcf392651ecf18f67476369d5f25ad8d8c07817b285e99e8782386
+#9 DONE 0.0s
+
+#10 [stage-2  4/14] RUN usermod -a -G haproxy mrya
+#10 CACHED
+
+#11 [stage-2  5/14] WORKDIR /app
+#11 CACHED
+
+#12 [stage-2  2/14] RUN apt-get update && apt-get install -y libcap2-bin &&     rm -rf /var/lib/apt/lists/*
+#12 CACHED
+
+#13 [stage-2  3/14] RUN groupadd --gid 1000 mrya &&     useradd --uid 1000 --gid mrya --home-dir /home/mrya --create-home --shell /bin/bash mrya
+#13 CACHED
+
+#14 [stage-2  6/14] RUN chown mrya:mrya /app
+#14 CACHED
+
+#15 [internal] load build context
+#15 transferring context: 3.92MB 0.7s done
+#15 DONE 0.8s
+
+#16 [frontend-builder 2/6] RUN npm install -g pnpm@10.28.0
+#16 CACHED
+
+#17 [frontend-builder 3/6] WORKDIR /app
+#17 CACHED
+
+#18 [backend-builder  2/10] WORKDIR /build
+#18 CACHED
+
+#19 [backend-builder  3/10] COPY coraza-spoa/ ./coraza-spoa/
+#19 CACHED
+
+#20 [backend-builder  4/10] COPY pkg/ ./pkg/
+#20 CACHED
+
+#21 [backend-builder  5/10] COPY server/ ./server/
+#21 CACHED
+
+#22 [backend-builder  6/10] COPY go.work ./
+#22 CACHED
+
+#23 [backend-builder  7/10] COPY geo-ip/ ./geo-ip/
+#23 CACHED
+
+#24 [frontend-builder 4/6] COPY web/ ./
+#24 DONE 3.1s
+
+#25 [frontend-builder 5/6] RUN pnpm install
+#25 21.39 [?25l[36m?[39m [1mThe modules directory at "/app/node_modules" will be removed and reinstalled from scratch. Proceed?[22m [2m(Y/n)[22m [2m‣[22m [36mtrue[39m[4D[?25h
+#25 DONE 21.5s
+
+#26 [frontend-builder 6/6] RUN pnpm build
+#26 0.483 
+#26 0.483 > waf@0.0.0 build /app
+#26 0.483 > tsc -b && vite build
+#26 0.483 
+#26 1.881 src/feature/alert/components/index.ts(13,83): error TS1002: Unterminated string literal.
+#26 1.881 src/feature/alert/components/index.ts(14,9): error TS1005: '>' expected.
+#26 1.881 src/feature/alert/components/index.ts(14,13): error TS1005: ';' expected.
+#26 1.881 src/feature/alert/components/index.ts(15,12): error TS1005: '>' expected.
+#26 1.881 src/feature/alert/components/index.ts(15,16): error TS1005: ';' expected.
+#26 1.881 src/feature/alert/components/index.ts(15,27): error TS1109: Expression expected.
+#26 1.881 src/feature/alert/components/index.ts(22,42): error TS1005: ',' expected.
+#26 1.881 src/feature/alert/components/index.ts(22,48): error TS1005: ',' expected.
+#26 1.881 src/feature/alert/components/index.ts(22,53): error TS1005: ';' expected.
+#26 1.882 src/feature/alert/components/index.ts(22,68): error TS1161: Unterminated regular expression literal.
+#26 1.882 src/feature/alert/components/index.ts(27,48): error TS1005: ',' expected.
+#26 1.882 src/feature/alert/components/index.ts(27,54): error TS1005: ',' expected.
+#26 1.882 src/feature/alert/components/index.ts(27,59): error TS1005: ';' expected.
+#26 1.882 src/feature/alert/components/index.ts(27,74): error TS1161: Unterminated regular expression literal.
+#26 1.883 src/feature/alert/components/index.ts(29,49): error TS1005: ',' expected.
+#26 1.883 src/feature/alert/components/index.ts(29,55): error TS1005: ',' expected.
+#26 1.883 src/feature/alert/components/index.ts(29,60): error TS1005: ';' expected.
+#26 1.883 src/feature/alert/components/index.ts(29,75): error TS1161: Unterminated regular expression literal.
+#26 2.026  ELIFECYCLE  Command failed with exit code 2.
+#26 ERROR: process "/bin/sh -c pnpm build" did not complete successfully: exit code: 2
+------
+ > [frontend-builder 6/6] RUN pnpm build:
+1.882 src/feature/alert/components/index.ts(22,68): error TS1161: Unterminated regular expression literal.
+1.882 src/feature/alert/components/index.ts(27,48): error TS1005: ',' expected.
+1.882 src/feature/alert/components/index.ts(27,54): error TS1005: ',' expected.
+1.882 src/feature/alert/components/index.ts(27,59): error TS1005: ';' expected.
+1.882 src/feature/alert/components/index.ts(27,74): error TS1161: Unterminated regular expression literal.
+1.883 src/feature/alert/components/index.ts(29,49): error TS1005: ',' expected.
+1.883 src/feature/alert/components/index.ts(29,55): error TS1005: ',' expected.
+1.883 src/feature/alert/components/index.ts(29,60): error TS1005: ';' expected.
+1.883 src/feature/alert/components/index.ts(29,75): error TS1161: Unterminated regular expression literal.
+2.026  ELIFECYCLE  Command failed with exit code 2.
+------
+Dockerfile:15
+
+--------------------
+
+  13 |     # 安装依赖并构建前端
+
+  14 |     RUN pnpm install
+
+  15 | >>> RUN pnpm build
+
+  16 |     
+
+  17 |     # 阶段2: 构建Go后端
+
+--------------------
+
+failed to solve: process "/bin/sh -c pnpm build" did not complete successfully: exit code: 2
+
+#1 [internal] load local bake definitions
+#1 reading from stdin 507B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.75kB done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/golang:1.24.1-alpine
+#3 ERROR: failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fgolang%3Apull&service=registry.docker.io": proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused
+
+#4 [internal] load metadata for docker.io/library/node:23.10.0-alpine
+#4 ERROR: failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fnode%3Apull&service=registry.docker.io": proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused
+
+#5 [internal] load metadata for docker.io/library/haproxy:3.0.10
+#5 ERROR: failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fhaproxy%3Apull&service=registry.docker.io": proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused
+------
+ > [internal] load metadata for docker.io/library/node:23.10.0-alpine:
+------
+------
+ > [internal] load metadata for docker.io/library/haproxy:3.0.10:
+------
+------
+ > [internal] load metadata for docker.io/library/golang:1.24.1-alpine:
+------
+Dockerfile:18
+
+--------------------
+
+  16 |     
+
+  17 |     # 阶段2: 构建Go后端
+
+  18 | >>> FROM golang:1.24.1-alpine AS backend-builder
+
+  19 |     # 设置Go环境变量
+
+  20 |     ENV GO111MODULE=on \
+
+--------------------
+
+failed to solve: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fgolang%3Apull&service=registry.docker.io": proxyconnect tcp: dial tcp 127.0.0.1:7890: connect: connection refused
+
