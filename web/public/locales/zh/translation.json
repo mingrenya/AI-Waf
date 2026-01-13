@@ -1,0 +1,646 @@
+{
+    "sidebar": {
+        "title": "RuiQi WAF",
+        "monitor": "监控",
+        "logs": "日志",
+        "rules": "规则",
+        "settings": "设置",
+        "logout": "登出"
+    },
+    "breadcrumb": {
+        "logs": {
+            "attack": "攻击事件",
+            "protect": "防护日志"
+        },
+        "monitor": {
+            "overview": "监控",
+            "dashboard": "防护大屏"
+        },
+        "rules": {
+            "system": "系统规则",
+            "user": "自定义规则",
+            "ipGroup": "IP 组管理",
+            "flowControl": "频率限制"
+        },
+        "settings": {
+            "settings": "设置",
+            "siteManager": "站点管理",
+            "certManager": "证书管理"
+        }
+    },
+    "common": {
+        "loading": "加载中...",
+        "language": "选择语言",
+        "copied": "已复制",
+        "save": "保存",
+        "create": "创建",
+        "delete": "删除",
+        "cancel": "取消",
+        "submitting": "提交中..."
+    },
+    "error": {
+        "title": "发生了错误",
+        "code": "错误代码",
+        "appProblem": "应用程序遇到了意外问题",
+        "unexpected": "发生了意外错误",
+        "refresh": "刷新页面",
+        "returnHome": "返回首页",
+        "loading": "加载数据时发生错误",
+        "message": "错误信息",
+        "details": "错误详情",
+        "requestId": "请求ID",
+        "cannotParse": "无法解析错误详情",
+        "viewDetails": "查看详情",
+        "hideDetails": "隐藏详情",
+        "retry": "重试",
+        "network": {
+            "title": "网络连接错误",
+            "description": "无法连接到服务器，请检查您的网络连接。"
+        },
+        "timeout": {
+            "title": "请求超时",
+            "description": "服务器响应时间过长，请稍后重试。"
+        },
+        "forbidden": {
+            "title": "访问被拒绝",
+            "description": "您没有权限访问此资源。"
+        },
+        "unauthorized": {
+            "title": "未授权访问",
+            "description": "您的登录状态已失效，请重新登录。"
+        },
+        "server": {
+            "title": "服务器错误",
+            "description": "服务器暂时无法处理您的请求，请稍后重试。"
+        },
+        "client": {
+            "title": "请求错误",
+            "description": "请求参数或格式有误。"
+        },
+        "validation": {
+            "title": "数据验证失败",
+            "description": "提交的数据未通过验证。"
+        },
+        "unknown": {
+            "title": "发生错误",
+            "description": "加载数据时发生未知错误。"
+        }
+    },
+    "auth": {
+        "login": "登录",
+        "loginDescription": "输入您的账号和密码登录系统",
+        "username": "用户名",
+        "usernamePlaceholder": "输入用户名",
+        "password": "密码",
+        "passwordPlaceholder": "输入密码",
+        "loggingIn": "登录中...",
+        "resetPassword": "重置密码",
+        "firstLoginReset": "首次登录需要重置密码",
+        "enterOldAndNewPassword": "请输入当前密码和新密码",
+        "currentPassword": "当前密码",
+        "enterCurrentPassword": "输入当前密码",
+        "newPassword": "新密码",
+        "enterNewPassword": "输入新密码",
+        "confirmNewPassword": "确认新密码",
+        "enterNewPasswordAgain": "再次输入新密码",
+        "submitting": "提交中...",
+        "passwordRequirement": "密码长度至少为6位字符"
+    },
+    "filter": "筛选",
+    "reset": "重置",
+    "search": "搜索",
+    "domain": "域名",
+    "dstPort": "目的端口",
+    "srcIp": "源IP",
+    "attackCount": "攻击次数",
+    "firstAttackTime": "首次攻击时间",
+    "lastAttackTime": "最近攻击时间",
+    "status": "攻击状态",
+    "attackEnded": "攻击已结束",
+    "noOngoingAttack": "当前时刻未受到持续攻击",
+    "ongoing": "攻击进行中",
+    "attackDuration": "持续时长",
+    "autoRefresh": "轮询",
+    "interval": "间隔",
+    "second": "秒",
+    "refresh": "刷新",
+    "domainPlaceholder": "输入域名",
+    "dstIp": "目标IP",
+    "srcPort": "源端口",
+    "portPlaceholder": "输入端口",
+    "ipPlaceholder": "输入IP",
+    "startTime": "开始时间",
+    "endTime": "结束时间",
+    "ruleId": "规则ID",
+    "ruleIdPlaceholder": "输入规则ID",
+    "requestId": "请求ID",
+    "requestIdPlaceholder": "输入请求ID",
+    "attackTarget": "攻击目标",
+    "createdAt": "创建时间",
+    "detail": "详情",
+    "noResult": "没有数据",
+    "attackDetail": {
+        "title": "攻击日志详情",
+        "highRiskAttack": "高危攻击",
+        "overview": "攻击详情",
+        "target": "攻击目标",
+        "message": "攻击信息",
+        "viewRuleDetail": "查看规则详情",
+        "attackTime": "攻击时间",
+        "detectedPayload": "检测到的载荷",
+        "attackSource": "攻击来源",
+        "blockThisIp": "拦截此 IP",
+        "location": "地理位置",
+        "noLocationInfo": "无地理位置信息",
+        "targetInfo": "目标信息",
+        "technicalDetails": "详情",
+        "copyCurl": "复制 cURL",
+        "encoding": "编码",
+        "request": "请求",
+        "response": "响应",
+        "logs": "日志",
+        "copyAll": "复制全部",
+        "noResponse": "无数据"
+    },
+    "globalSetting": {
+        "title": "通用设置",
+        "description": "部分设置需要重启引擎才会生效，例如站点的变更，引擎的配置",
+        "engine": {
+            "management": "引擎管理",
+            "setting": "引擎设置",
+            "status": "引擎状态",
+            "currentStatus": "当前状态:",
+            "loading": "加载中...",
+            "running": "运行中",
+            "stopped": "已停止",
+            "processing": "处理中...",
+            "start": "启动",
+            "stop": "停止",
+            "restart": "重启",
+            "forceStop": "强制停止",
+            "reload": "热重载",
+            "operationSuccess": "操作成功",
+            "operationCompleted": "运行器控制操作已成功执行",
+            "operationFailed": "操作失败",
+            "operationError": "控制运行器时出现错误"
+        },
+        "config": {
+            "generalConfig": "通用配置",
+            "engineThreads": "引擎线程数",
+            "threadsDescription": "设置HAProxy的线程数，范围0-256，需重启生效",
+            "threadsWarning": "设置为0时，系统将根据CPU核心数自动分配线程数",
+            "responseCheck": "响应检测",
+            "responseCheckDescription": "启用WAF对响应内容的检测，需重启生效",
+            "debugMode": "调试模式",
+            "debugModeDescription": "启用系统调试模式，会产生更详细的日志，需重启生效",
+            "engineDirectives": "引擎指令设置",
+            "engineDirectivesPlaceholder": "输入引擎指令配置...",
+            "engineDirectivesDescription": "配置WAF引擎的核心指令，使用指令语法，需重启生效",
+            "haproxyConfigDir": "HAProxy配置根目录",
+            "haproxyConfigDirDescription": "HAProxy配置文件存放的根目录，需重启生效",
+            "haproxyBinPath": "HAProxy可执行文件路径",
+            "haproxyBinPathDescription": "HAProxy二进制执行文件的路径，需重启生效",
+            "internationalization": "国际化",
+            "internationalizationDescription": "设置系统界面语言",
+            "theme": "主题设置",
+            "themeDescription": "切换浅色和深色主题模式",
+            "saving": "保存中...",
+            "saveSettings": "保存设置",
+            "updateSuccess": "更新成功",
+            "systemConfigUpdated": "系统配置已成功更新",
+            "updateFailed": "更新失败",
+            "updateError": "更新配置时出现错误"
+        }
+    },
+    "certificate": {
+        "management": "证书管理",
+        "refresh": "刷新",
+        "add": "添加证书",
+        "name": "证书名称",
+        "domains": "域名",
+        "issuerAndExpiry": "颁发机构与过期时间",
+        "issuer": "颁发机构",
+        "expiryDate": "过期时间: ",
+        "expiringSoon": "即将过期",
+        "expired": "已过期",
+        "edit": "编辑",
+        "delete": "删除",
+        "dialog": {
+            "createTitle": "创建新证书",
+            "updateTitle": "更新证书",
+            "createDescription": "请填写证书信息并上传公钥和私钥文件，或直接粘贴内容。系统将自动解析证书信息。",
+            "updateDescription": "编辑证书信息，修改后将自动保存。",
+            "parseFailed": "证书解析失败: ",
+            "unknownError": "未知错误",
+            "fileReadFailed": "文件读取失败: ",
+            "certName": "证书名称",
+            "description": "描述 (可选)",
+            "descriptionPlaceholder": "输入证书描述",
+            "publicKeyFile": "公钥文件",
+            "uploadPublicKey": "上传公钥文件",
+            "publicKeyContent": "公钥内容",
+            "publicKeyPlaceholder": "输入PEM格式的公钥内容",
+            "privateKeyFile": "私钥文件",
+            "uploadPrivateKey": "上传私钥文件",
+            "privateKeyContent": "私钥内容",
+            "privateKeyPlaceholder": "输入PEM格式的私钥内容",
+            "orEnterContent": "或直接输入内容",
+            "parsedInfo": "证书解析信息",
+            "issuer": "颁发机构",
+            "expiryDate": "过期日期",
+            "fingerprint": "指纹",
+            "domains": "域名",
+            "submitting": "提交中...",
+            "create": "创建",
+            "update": "更新"
+        },
+        "deleteDialog": {
+            "confirmTitle": "确认删除",
+            "confirmDescription": "您确定要删除此证书吗？此操作无法撤销。",
+            "cancel": "取消",
+            "deleting": "删除中...",
+            "delete": "删除"
+        },
+        "toast": {
+            "createSuccess": "创建成功",
+            "certificateCreated": "证书已成功创建",
+            "createFailed": "创建失败",
+            "createError": "创建证书时出现错误",
+            "updateSuccess": "更新成功",
+            "certificateUpdated": "证书已成功更新",
+            "updateFailed": "更新失败",
+            "updateError": "更新证书时出现错误",
+            "deleteSuccess": "删除成功",
+            "certificateDeleted": "证书已成功删除",
+            "deleteFailed": "删除失败",
+            "deleteError": "删除证书时出现错误"
+        }
+    },
+    "site": {
+        "management": "站点管理",
+        "refresh": "刷新",
+        "add": "添加站点",
+        "edit": "编辑",
+        "delete": "删除",
+        "name": "站点名称",
+        "domain": "域名",
+        "listenPort": "监听端口",
+        "backend": "上游服务器",
+        "https": "HTTPS",
+        "status": "站点状态",
+        "wafStatus": "WAF状态",
+        "enabled": "已启用",
+        "disabled": "未启用",
+        "active": "激活",
+        "inactive": "未激活",
+        "noData": "暂无站点数据",
+        "dialog": {
+            "createTitle": "创建新站点",
+            "updateTitle": "更新站点",
+            "createDescription": "请填写站点信息，包括基本信息、HTTPS设置、后端服务器和WAF设置。",
+            "updateDescription": "编辑站点信息，修改后将自动保存。",
+            "basicInfo": "基本信息",
+            "siteName": "站点名称",
+            "siteNamePlaceholder": "请输入站点名称",
+            "domainPlaceholder": "请输入域名",
+            "siteStatus": "站点状态",
+            "siteActive": "站点是否激活",
+            "httpsSettings": "HTTPS设置",
+            "enableHttps": "启用HTTPS",
+            "httpsDescription": "开启后需要配置证书",
+            "selectCertificate": "选择证书",
+            "uploadNewCert": "上传新证书",
+            "selectedCertInfo": "已选证书信息",
+            "backendServers": "后端服务器",
+            "addServer": "添加服务器",
+            "server": "服务器",
+            "hostAddress": "主机地址",
+            "hostPlaceholder": "如: 192.168.1.1 或 backend.com",
+            "port": "端口",
+            "enableSsl": "启用SSL",
+            "backendHttps": "后端使用HTTPS",
+            "wafSettings": "WAF设置",
+            "enableWaf": "启用WAF",
+            "wafDescription": "Web应用防火墙",
+            "wafMode": "WAF模式",
+            "selectWafMode": "选择WAF模式",
+            "observationMode": "观察模式",
+            "observationDescription": "只记录不拦截",
+            "protectionMode": "防护模式",
+            "protectionDescription": "记录并拦截攻击",
+            "submitting": "提交中...",
+            "createSite": "创建站点",
+            "updateSite": "更新站点"
+        },
+        "deleteDialog": {
+            "confirmTitle": "确认删除",
+            "confirmDescription": "您确定要删除此站点吗？此操作无法撤销，可能会影响当前正在使用此站点的服务。",
+            "cancel": "取消",
+            "deleting": "删除中...",
+            "delete": "删除"
+        },
+        "toast": {
+            "createSuccess": "创建成功",
+            "siteCreated": "站点已成功创建",
+            "createFailed": "创建失败",
+            "createError": "创建站点时出现错误",
+            "updateSuccess": "更新成功",
+            "siteUpdated": "站点已成功更新",
+            "updateFailed": "更新失败",
+            "updateError": "更新站点时出现错误",
+            "deleteSuccess": "删除成功",
+            "siteDeleted": "站点已成功删除",
+            "deleteFailed": "删除失败",
+            "deleteError": "删除站点时出现错误"
+        },
+        "view": {
+            "cardView": "卡片视图",
+            "tableView": "表格视图"
+        },
+        "card": {
+            "upstreamServers": "上游服务器:",
+            "certInfo": "证书信息:"
+        }
+    },
+    "table": {
+        "selected": "已选择 {{selected}} 条，共 {{total}} 条",
+        "rowsPerPage": "每页行数",
+        "pageInfo": "第 {{current}} 页，共 {{total}} 页",
+        "firstPage": "转到第一页",
+        "previousPage": "转到上一页",
+        "nextPage": "转到下一页",
+        "lastPage": "转到最后一页"
+    },
+    "ipGroup": {
+        "title": "IP 组管理",
+        "createButton": "创建 IP 组",
+        "table": {
+            "name": "组名称",
+            "ipAddresses": "IP 地址",
+            "actions": "操作"
+        },
+        "form": {
+            "name": "组名称",
+            "namePlaceholder": "请输入组名称",
+            "ipAddresses": "IP 地址",
+            "ipAddressPlaceholder": "输入 IP 地址或 CIDR (例如 192.168.1.1 或 10.0.0.0/24)",
+            "noIpAddresses": "尚未添加 IP 地址"
+        },
+        "dialog": {
+            "createTitle": "创建 IP 组",
+            "editTitle": "编辑 IP 组",
+            "createDescription": "创建一个新的 IP 地址组用于规则匹配",
+            "editDescription": "编辑选中的 IP 地址组及其成员"
+        },
+        "deleteDialog": {
+            "title": "删除 IP 组",
+            "description": "确定要删除 IP 组 {{name}} 吗？此操作无法撤销。"
+        },
+        "validation": {
+            "nameRequired": "组名称不能为空",
+            "nameMaxLength": "组名称不能超过50个字符",
+            "ipItemRequired": "IP 地址不能为空",
+            "ipItemInvalid": "IP 地址或 CIDR 格式无效",
+            "ipItemDuplicate": "此 IP 地址已添加",
+            "itemsRequired": "至少需要添加一个 IP 地址"
+        },
+        "toast": {
+            "createSuccess": "创建成功",
+            "ipGroupCreated": "IP 组已成功创建",
+            "createFailed": "创建失败",
+            "createError": "创建 IP 组时出现错误",
+            "updateSuccess": "更新成功",
+            "ipGroupUpdated": "IP 组已成功更新",
+            "updateFailed": "更新失败",
+            "updateError": "更新 IP 组时出现错误",
+            "deleteSuccess": "删除成功",
+            "ipGroupDeleted": "IP 组已成功删除",
+            "deleteFailed": "删除失败",
+            "deleteError": "删除 IP 组时出现错误",
+            "blockSuccess": "IP 已拦截",
+            "ipBlocked": "IP 地址 {{ip}} 已添加到黑名单",
+            "blockFailed": "拦截失败",
+            "blockError": "拦截 IP 地址时出现错误"
+        }
+    },
+    "microRule": {
+        "title": "自定义规则管理",
+        "refresh": "刷新",
+        "add": "添加规则",
+        "table": {
+            "name": "规则名称",
+            "type": "规则类型",
+            "status": "状态",
+            "priority": "优先级",
+            "edit": "编辑",
+            "delete": "删除"
+        },
+        "form": {
+            "name": "规则名称",
+            "namePlaceholder": "请输入规则名称",
+            "type": "规则类型",
+            "selectType": "选择规则类型",
+            "whitelist": "白名单",
+            "blacklist": "黑名单",
+            "status": "状态",
+            "selectStatus": "选择状态",
+            "enabled": "启用",
+            "disabled": "禁用",
+            "priority": "优先级",
+            "priorityPlaceholder": "输入优先级 (0-9999)",
+            "condition": "规则条件"
+        },
+        "condition": {
+            "conditionType": "条件类型",
+            "selectConditionType": "选择条件类型",
+            "simpleCondition": "简单条件",
+            "compositeCondition": "复合条件",
+            "target": "匹配目标",
+            "selectTarget": "选择匹配目标",
+            "sourceIp": "源 IP",
+            "url": "URL",
+            "path": "路径",
+            "matchType": "匹配方式",
+            "selectMatchType": "选择匹配方式",
+            "matchValue": "匹配值",
+            "enterMatchValue": "输入匹配值",
+            "operator": "逻辑运算符",
+            "selectOperator": "选择逻辑运算符",
+            "and": "且(AND)",
+            "or": "或(OR)",
+            "conditionGroup": "条件组",
+            "addSimpleCondition": "添加条件",
+            "addCompositeCondition": "添加条件组",
+            "addNestedCondition": "添加嵌套条件"
+        },
+        "matchTypes": {
+            "equal": "等于",
+            "not_equal": "不等于",
+            "fuzzy": "模糊匹配",
+            "in_cidr": "在CIDR范围内",
+            "not_in_cidr": "不在CIDR范围内",
+            "in_ipgroup": "在IP组内",
+            "not_in_ipgroup": "不在IP组内",
+            "include": "包含",
+            "contains": "包含",
+            "not_contains": "不包含",
+            "prefix_keyword": "前缀匹配",
+            "regex": "正则表达式"
+        },
+        "dialog": {
+            "createTitle": "创建新规则",
+            "updateTitle": "更新规则",
+            "createDescription": "创建自定义WAF规则以保护您的站点",
+            "updateDescription": "编辑规则信息，修改后将自动保存"
+        },
+        "deleteDialog": {
+            "confirmTitle": "确认删除",
+            "confirmDescription": "您确定要删除此规则吗？此操作无法撤销，可能会影响您的安全设置。",
+            "cancel": "取消",
+            "deleting": "删除中...",
+            "delete": "删除"
+        },
+        "toast": {
+            "createSuccess": "创建成功",
+            "microRuleCreated": "规则已成功创建",
+            "createFailed": "创建失败",
+            "createError": "创建规则时出现错误",
+            "updateSuccess": "更新成功",
+            "microRuleUpdated": "规则已成功更新",
+            "updateFailed": "更新失败",
+            "updateError": "更新规则时出现错误",
+            "deleteSuccess": "删除成功",
+            "microRuleDeleted": "规则已成功删除",
+            "deleteFailed": "删除失败",
+            "deleteError": "删除规则时出现错误"
+        }
+    },
+    "stats": {
+        "title": "监控统计",
+        "overview": "核心指标",
+        "timeRange": {
+            "24h": "24小时",
+            "7d": "7天",
+            "30d": "30天"
+        },
+        "totalRequests": "总请求数",
+        "inboundTraffic": "入站流量",
+        "outboundTraffic": "出站流量",
+        "maxQPS": "最大QPS",
+        "4xxErrors": "4xx错误",
+        "5xxErrors": "5xx错误",
+        "blockCount": "拦截次数",
+        "attackIPCount": "攻击IP数",
+        "realtimeQPS": "实时QPS",
+        "trafficTrend": "流量趋势",
+        "requestsAndBlocks": "请求与拦截趋势",
+        "requests": "请求数",
+        "blocks": "拦截数"
+    },
+    "flowControl": {
+        "blockIpList": "拦截ip列表",
+        "title": "流量控制",
+        "pageTitle": "流量控制管理",
+        "pageDescription": "管理基于IP的访问频率限制和封禁IP列表",
+        "configSettings": "流量控制配置",
+        "refresh": "刷新",
+        "cleanup": "清理过期记录",
+        "cleaning": "清理中...",
+        "filters": "过滤条件",
+        "filterByIP": "按IP地址过滤",
+        "filterByReason": "按封禁原因过滤",
+        "clearFilters": "清除",
+        "expired": "已过期",
+        "untilUnblock": "后解封",
+        "hours": "小时",
+        "minutes": "分钟",
+        "seconds": "秒",
+        "table": {
+            "ip": "IP地址",
+            "reason": "封禁原因",
+            "requestUri": "请求路径",
+            "blockedAt": "封禁时间",
+            "status": "状态"
+        },
+        "status": {
+            "placeholder": "状态",
+            "all": "全部",
+            "active": "生效中",
+            "expired": "已过期"
+        },
+        "reason": {
+            "all": "全部原因",
+            "highFrequencyVisit": "高频访问",
+            "highFrequencyAttack": "高频攻击",
+            "highFrequencyError": "高频错误"
+        },
+        "pagination": {
+            "info": "第 {{current}} 页，共 {{total}} 页，总计 {{count}} 条记录",
+            "previous": "上一页",
+            "next": "下一页"
+        },
+        "dialog": {
+            "title": "流量控制配置",
+            "description": "配置基于IP的访问频率、攻击频率和错误频率限制，保护系统免受恶意攻击"
+        },
+        "visitLimit": {
+            "title": "访问频率限制",
+            "description": "限制单个IP在指定时间窗口内的访问次数，防止高频访问"
+        },
+        "attackLimit": {
+            "title": "攻击频率限制",
+            "description": "限制单个IP在指定时间窗口内的攻击次数，防止恶意攻击"
+        },
+        "errorLimit": {
+            "title": "错误频率限制",
+            "description": "限制单个IP在指定时间窗口内的错误响应次数，防止恶意探测"
+        },
+        "enabled": "启用限制",
+        "enabledDescription": "开启此限制规则",
+        "threshold": "触发阈值",
+        "thresholdDescription": "统计时间窗口内的最大请求数",
+        "attackThresholdDescription": "统计时间窗口内的最大攻击次数",
+        "errorThresholdDescription": "统计时间窗口内的最大错误次数",
+        "statDuration": "统计时间窗口",
+        "statDurationDescription": "统计时间窗口长度（秒）",
+        "blockDuration": "封禁时长",
+        "blockDurationDescription": "触发限制后的封禁时长（秒）",
+        "burstCount": "突发请求数",
+        "burstCountDescription": "允许的突发请求数量",
+        "paramsCapacity": "缓存容量",
+        "paramsCapacityDescription": "最多缓存的IP数量",
+        "updating": "更新中...",
+        "updateConfig": "更新配置",
+        "toast": {
+            "updateSuccess": "更新成功",
+            "configUpdated": "流量控制配置已成功更新",
+            "updateFailed": "更新失败",
+            "updateError": "更新配置时出现错误",
+            "cleanupSuccess": "清理成功",
+            "cleanupMessage": "已清理 {{count}} 条过期记录",
+            "cleanupFailed": "清理失败",
+            "cleanupError": "清理过期记录时出现错误"
+        }
+    },
+    "securityDashboard": {
+        "title": "安全防护监控大屏",
+        "stats": {
+            "blockCount24h": "近24小时拦截数",
+            "attackIPCount24h": "近24小时攻击IP数",
+            "totalRequests24h": "近24小时访问次数"
+        },
+        "attackIPList": {
+            "title": "24小时攻击IP",
+            "noData": "暂无攻击IP数据",
+            "attackCount": "次"
+        },
+        "realtimeAttacks": {
+            "title": "实时攻击列表",
+            "noData": "暂无实时攻击数据"
+        },
+        "qpsChart": {
+            "title": "实时QPS监控",
+            "tooltip": "{{time}}: {{value}} QPS"
+        }
+    }
+}

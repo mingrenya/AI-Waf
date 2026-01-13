@@ -1,0 +1,5477 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "RuiQi 应用防火墙管理系统 API",
+        "title": "RuiQi-WAF API",
+        "termsOfService": "https://github.com/HUAHUAI23/RuiQi",
+        "contact": {
+            "name": "API Support",
+            "url": "https://github.com/HUAHUAI23/RuiQi",
+            "email": "huahua1319873800@outlook.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:2333",
+    "basePath": "/api/v1",
+    "paths": {
+        "/api/runner/control": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "执行启动、停止、重启、强制停止或热重载操作",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "运行器管理"
+                ],
+                "summary": "控制后台运行器",
+                "parameters": [
+                    {
+                        "description": "运行器控制请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RunnerControlRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RunnerControlResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/runner/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取WAF后台运行器的运行状态",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "运行器管理"
+                ],
+                "summary": "获取后台运行器状态",
+                "responses": {
+                    "200": {
+                        "description": "获取运行器状态成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RunnerStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blocked-ips": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取被封禁的IP地址列表，支持分页、过滤和排序",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "封禁IP管理"
+                ],
+                "summary": "获取封禁IP列表",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码，从1开始",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量，最大100",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "192.168.1.1",
+                        "description": "IP地址过滤，支持模糊匹配",
+                        "name": "ip",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "high_frequency_attack",
+                        "description": "封禁原因过滤",
+                        "name": "reason",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "active",
+                            "expired",
+                            "all"
+                        ],
+                        "type": "string",
+                        "default": "all",
+                        "description": "状态过滤：active-生效中，expired-已过期，all-全部",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "blocked_at",
+                            "blocked_until",
+                            "ip"
+                        ],
+                        "type": "string",
+                        "default": "blocked_at",
+                        "description": "排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "排序方向：asc-升序，desc-降序",
+                        "name": "sortDir",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取封禁IP列表成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BlockedIPListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blocked-ips/cleanup": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除已过期的封禁IP记录，释放存储空间",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "封禁IP管理"
+                ],
+                "summary": "清理过期的封禁IP记录",
+                "responses": {
+                    "200": {
+                        "description": "清理完成",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BlockedIPCleanupResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blocked-ips/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取封禁IP的统计信息，包括总数、生效数、过期数、按原因统计和按小时统计",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "封禁IP管理"
+                ],
+                "summary": "获取封禁IP统计信息",
+                "responses": {
+                    "200": {
+                        "description": "获取统计信息成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BlockedIPStatsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/certificates": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有SSL/TLS证书列表，支持分页",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "证书管理"
+                ],
+                "summary": "获取证书列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取证书列表成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CertificateListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建一个新的SSL/TLS证书",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "证书管理"
+                ],
+                "summary": "创建新证书",
+                "parameters": [
+                    {
+                        "description": "证书信息",
+                        "name": "certificate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CertificateCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "证书创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.CertificateStore"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "证书名称已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/certificates/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取证书详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "证书管理"
+                ],
+                "summary": "获取单个证书",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "证书ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取证书详情成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.CertificateStore"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "证书不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定证书的信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "证书管理"
+                ],
+                "summary": "更新证书",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "证书ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "证书更新信息",
+                        "name": "certificate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CertificateUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "证书更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.CertificateStore"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "证书不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "证书名称已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定的SSL/TLS证书",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "证书管理"
+                ],
+                "summary": "删除证书",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "证书ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "证书删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "证书不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/config": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前系统配置信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "配置管理"
+                ],
+                "summary": "获取系统配置",
+                "responses": {
+                    "200": {
+                        "description": "获取配置成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ConfigResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "配置不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "使用补丁方式更新系统配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "配置管理"
+                ],
+                "summary": "更新系统配置",
+                "parameters": [
+                    {
+                        "description": "配置更新信息",
+                        "name": "config",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ConfigPatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "配置更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ConfigResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "配置不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ip-groups": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有IP组列表，支持分页",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IP组管理"
+                ],
+                "summary": "获取IP组列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取IP组列表成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.IPGroupListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建一个新的IP地址组，用于后续IP规则匹配",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IP组管理"
+                ],
+                "summary": "创建IP组",
+                "parameters": [
+                    {
+                        "description": "IP组信息",
+                        "name": "ipGroup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.IPGroupCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IP组创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.IPGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "IP组名称已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ip-groups/blacklist/add": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "将指定的IP地址或CIDR添加到系统默认黑名单组中",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IP组管理"
+                ],
+                "summary": "添加IP到黑名单",
+                "parameters": [
+                    {
+                        "description": "IP地址或CIDR",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AddIPToBlacklistRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IP添加成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "系统默认黑名单不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ip-groups/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取IP组详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IP组管理"
+                ],
+                "summary": "获取单个IP组",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "IP组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取IP组详情成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.IPGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "无效的ID格式",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "IP组不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定IP组的信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IP组管理"
+                ],
+                "summary": "更新IP组",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "IP组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "IP组更新信息",
+                        "name": "ipGroup",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.IPGroupUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IP组更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.IPGroup"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止操作系统默认IP组",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "IP组不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "IP组名称已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定的IP组，系统默认IP组不允许删除",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "IP组管理"
+                ],
+                "summary": "删除IP组",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "IP组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "IP组删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的ID格式",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止删除系统默认IP组",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "IP组不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/micro-rules": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有WAF微规则列表，支持分页",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取微规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取微规则列表成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MicroRuleListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建一个新的WAF微规则，用于匹配和过滤请求",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "创建微规则",
+                "parameters": [
+                    {
+                        "description": "微规则信息",
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.MicroRuleCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "微规则创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MicroRuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "微规则名称已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/micro-rules/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取微规则详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取单个微规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "微规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取微规则详情成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MicroRuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "无效的ID格式",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "微规则不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定微规则的信息，系统默认规则不允许修改",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "更新微规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "微规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "微规则更新信息",
+                        "name": "rule",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.MicroRuleUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "微规则更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MicroRuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止修改系统默认规则",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "微规则不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "微规则名称已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定的微规则，系统默认规则不允许删除",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "删除微规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "微规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "微规则删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "无效的ID格式",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止删除系统默认规则",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "微规则不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/site": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有站点配置列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "获取站点列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取站点列表成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SiteListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建一个新的站点配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "创建新站点",
+                "parameters": [
+                    {
+                        "description": "站点信息",
+                        "name": "site",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateSiteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "站点创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "域名和端口组合已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/site/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据ID获取站点详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "获取单个站点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "站点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取站点详情成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "站点不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新指定站点的配置",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "更新站点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "站点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "站点更新信息",
+                        "name": "site",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateSiteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "站点更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SiteResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "站点不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "域名和端口组合已被其他站点使用",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定的站点配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "删除站点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "站点ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "站点删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "404": {
+                        "description": "站点不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/combined-time-series": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "同时获取请求数和拦截数的时间序列数据，用于图表展示",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取组合时间序列数据",
+                "parameters": [
+                    {
+                        "enum": [
+                            "24h",
+                            "7d",
+                            "30d"
+                        ],
+                        "type": "string",
+                        "default": "24h",
+                        "description": "时间范围：24h(24小时)、7d(7天)、30d(30天)",
+                        "name": "timeRange",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取组合时间序列数据成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.CombinedTimeSeriesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/overview": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定时间范围内的统计概览数据，包括请求数、流量、错误率等",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取统计概览数据",
+                "parameters": [
+                    {
+                        "enum": [
+                            "24h",
+                            "7d",
+                            "30d"
+                        ],
+                        "type": "string",
+                        "default": "24h",
+                        "description": "时间范围：24h(24小时)、7d(7天)、30d(30天)",
+                        "name": "timeRange",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取统计概览成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.OverviewStats"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/realtime-qps": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取最近的实时QPS数据点",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取实时QPS数据",
+                "parameters": [
+                    {
+                        "maximum": 60,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 30,
+                        "description": "返回的数据点数量，默认30个点，最大60个点",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取实时QPS数据成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.RealtimeQPSResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/time-series": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定时间范围和指标类型的时间序列数据，用于图表展示",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取时间序列数据",
+                "parameters": [
+                    {
+                        "enum": [
+                            "24h",
+                            "7d",
+                            "30d"
+                        ],
+                        "type": "string",
+                        "default": "24h",
+                        "description": "时间范围：24h(24小时)、7d(7天)、30d(30天)",
+                        "name": "timeRange",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "requests",
+                            "blocks"
+                        ],
+                        "type": "string",
+                        "default": "requests",
+                        "description": "指标类型：requests(请求数)、blocks(拦截数)",
+                        "name": "metric",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取时间序列数据成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.TimeSeriesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/stats/traffic-time-series": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取指定时间范围的入站和出站流量时间序列数据，用于图表展示",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取流量时间序列数据",
+                "parameters": [
+                    {
+                        "enum": [
+                            "24h",
+                            "7d",
+                            "30d"
+                        ],
+                        "type": "string",
+                        "default": "24h",
+                        "description": "时间范围：24h(24小时)、7d(7天)、30d(30天)",
+                        "name": "timeRange",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取流量时间序列数据成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.TrafficTimeSeriesResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/waf/logs": {
+            "get": {
+                "description": "查询详细的WAF攻击日志记录，提供多条件筛选和分页功能，支持按规则ID、IP、域名、端口和时间范围过滤",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WAF安全日志"
+                ],
+                "summary": "获取详细攻击日志",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "规则ID，触发攻击检测的WAF规则标识",
+                        "name": "ruleId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "来源IP地址，攻击者地址",
+                        "name": "srcIp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "目标IP地址，被攻击的服务器地址",
+                        "name": "dstIp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "域名，被攻击的站点域名",
+                        "name": "domain",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "来源端口号，发起攻击的端口",
+                        "name": "srcPort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "目标端口号，被攻击的服务端口",
+                        "name": "dstPort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "请求ID，唯一标识HTTP请求的ID",
+                        "name": "requestId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "查询起始时间 (ISO8601格式，如: 2024-03-17T00:00:00Z)",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "查询结束时间 (ISO8601格式，如: 2024-03-18T23:59:59Z)",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页码，从1开始计数 (默认: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页记录数，最大100条 (默认: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AttackLogResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/waf/logs/events": {
+            "get": {
+                "description": "按来源IP、目标端口和域名聚合的攻击事件统计，支持多维度筛选和分页",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WAF安全日志"
+                ],
+                "summary": "获取聚合攻击事件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "来源IP地址，攻击者地址",
+                        "name": "srcIp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "目标IP地址，被攻击的服务器地址",
+                        "name": "dstIp",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "域名，被攻击的站点域名",
+                        "name": "domain",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "来源端口号，发起攻击的端口",
+                        "name": "srcPort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "目标端口号，被攻击的服务端口",
+                        "name": "dstPort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "查询起始时间 (ISO8601格式，如: 2024-03-17T00:00:00Z)",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "查询结束时间 (ISO8601格式，如: 2024-03-18T23:59:59Z)",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页码，从1开始计数 (默认: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页记录数，最大100条 (默认: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AttackEventResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "用户登录并获取JWT令牌",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "登录信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LoginResponseData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "用户名或密码错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前登录用户的详细信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "获取当前用户信息",
+                "responses": {
+                    "200": {
+                        "description": "获取用户信息成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.GetUserInfoResponseData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/reset-password": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "用户重置自己的密码",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "重置密码",
+                "parameters": [
+                    {
+                        "description": "密码重置信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserPasswordResetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "密码重置成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误或原密码错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取HAProxy原始的统计信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取HAProxy原始统计数据",
+                "responses": {
+                    "200": {
+                        "description": "获取统计数据成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取系统中所有用户的列表",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "获取所有用户",
+                "responses": {
+                    "200": {
+                        "description": "获取用户列表成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.User"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理员创建新用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "创建新用户",
+                "parameters": [
+                    {
+                        "description": "用户创建信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "用户创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ResetPasswordResponseData"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "409": {
+                        "description": "用户名已存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理员更新指定用户的信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "更新用户信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户更新信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "用户更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "用户不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "管理员删除指定用户",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "删除用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "用户删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "用户不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.AddIPToBlacklistRequest": {
+            "description": "添加IP地址或CIDR到系统默认黑名单的请求",
+            "type": "object",
+            "required": [
+                "ip"
+            ],
+            "properties": {
+                "ip": {
+                    "description": "IP地址或CIDR",
+                    "type": "string",
+                    "example": "192.168.1.1"
+                }
+            }
+        },
+        "dto.AppConfigDTO": {
+            "type": "object",
+            "properties": {
+                "directives": {
+                    "description": "指令配置",
+                    "type": "string"
+                },
+                "logFile": {
+                    "description": "日志文件",
+                    "type": "string"
+                },
+                "logFormat": {
+                    "description": "日志格式",
+                    "type": "string"
+                },
+                "logLevel": {
+                    "description": "日志级别",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "应用名称",
+                    "type": "string"
+                },
+                "transactionTTL": {
+                    "description": "事务超时时间(毫秒)",
+                    "type": "integer",
+                    "example": 60000
+                }
+            }
+        },
+        "dto.AppConfigPatchDTO": {
+            "type": "object",
+            "properties": {
+                "directives": {
+                    "description": "指令配置",
+                    "type": "string"
+                },
+                "logFile": {
+                    "description": "日志文件",
+                    "type": "string",
+                    "example": "/dev/stdout"
+                },
+                "logFormat": {
+                    "description": "日志格式",
+                    "type": "string",
+                    "example": "console"
+                },
+                "logLevel": {
+                    "description": "日志级别",
+                    "type": "string",
+                    "example": "info"
+                },
+                "name": {
+                    "description": "应用名称",
+                    "type": "string",
+                    "example": "coraza"
+                },
+                "transactionTTL": {
+                    "description": "事务超时时间(毫秒)",
+                    "type": "integer",
+                    "example": 60000
+                }
+            }
+        },
+        "dto.AttackEventAggregateResult": {
+            "description": "攻击事件的聚合统计结果，提供IP、域名、端口维度的攻击信息汇总，包含攻击次数、首次和最近攻击时间、持续时间等关键指标",
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "攻击总次数，同一来源的攻击计数",
+                    "type": "integer",
+                    "example": 15
+                },
+                "domain": {
+                    "description": "域名，被攻击的站点",
+                    "type": "string",
+                    "example": "example.com"
+                },
+                "dstPort": {
+                    "description": "目标端口号，被攻击的服务端口",
+                    "type": "integer",
+                    "example": 443
+                },
+                "durationInMinutes": {
+                    "description": "攻击持续时间(分钟)，从首次到最近攻击的时间跨度",
+                    "type": "number",
+                    "example": 18.2
+                },
+                "firstAttackTime": {
+                    "description": "首次攻击时间，该IP首次发起攻击的时间点",
+                    "type": "string",
+                    "example": "2024-03-18T08:12:33Z"
+                },
+                "isOngoing": {
+                    "description": "是否正在进行中，标识攻击是否仍在持续",
+                    "type": "boolean",
+                    "example": true
+                },
+                "lastAttackTime": {
+                    "description": "最近攻击时间，该IP最后一次攻击的时间点",
+                    "type": "string",
+                    "example": "2024-03-18T08:30:45Z"
+                },
+                "srcIp": {
+                    "description": "来源IP地址，攻击者地址",
+                    "type": "string",
+                    "example": "192.168.1.100"
+                },
+                "srcIpInfo": {
+                    "description": "来源IP地址，攻击者地址",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.IPInfo"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.AttackEventResponse": {
+            "description": "攻击事件查询的分页响应结构体，包含聚合结果列表及分页元数据，用于前端展示和翻页控制",
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "description": "当前页码，从1开始计数",
+                    "type": "integer",
+                    "example": 1
+                },
+                "pageSize": {
+                    "description": "每页大小，当前设置的每页记录数",
+                    "type": "integer",
+                    "example": 10
+                },
+                "results": {
+                    "description": "聚合结果列表，当前页的攻击事件记录",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AttackEventAggregateResult"
+                    }
+                },
+                "totalCount": {
+                    "description": "总记录数，符合条件的攻击事件总数",
+                    "type": "integer",
+                    "example": 35
+                },
+                "totalPages": {
+                    "description": "总页数，根据总记录数和每页大小计算",
+                    "type": "integer",
+                    "example": 4
+                }
+            }
+        },
+        "dto.AttackLogResponse": {
+            "description": "攻击日志查询的分页响应结构体，返回详细的WAF日志记录及分页信息，便于安全分析和事件追踪",
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "description": "当前页码，从1开始计数",
+                    "type": "integer",
+                    "example": 1
+                },
+                "pageSize": {
+                    "description": "每页大小，当前设置的每页记录数",
+                    "type": "integer",
+                    "example": 10
+                },
+                "results": {
+                    "description": "日志记录列表，当前页的WAF攻击日志详情",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.WAFLog"
+                    }
+                },
+                "totalCount": {
+                    "description": "总记录数，符合查询条件的日志总数",
+                    "type": "integer",
+                    "example": 128
+                },
+                "totalPages": {
+                    "description": "总页数，根据总记录数和每页大小计算",
+                    "type": "integer",
+                    "example": 13
+                }
+            }
+        },
+        "dto.BackendDTO": {
+            "type": "object",
+            "required": [
+                "servers"
+            ],
+            "properties": {
+                "servers": {
+                    "description": "服务器列表，至少需要一个服务器",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/dto.ServerDTO"
+                    }
+                }
+            }
+        },
+        "dto.BlockedIPCleanupResponse": {
+            "description": "清理过期封禁IP记录的响应数据",
+            "type": "object",
+            "properties": {
+                "deletedCount": {
+                    "description": "删除的记录数量",
+                    "type": "integer",
+                    "example": 25
+                },
+                "message": {
+                    "description": "操作结果消息",
+                    "type": "string",
+                    "example": "已成功清理过期的封禁IP记录"
+                }
+            }
+        },
+        "dto.BlockedIPHourlyStats": {
+            "description": "按小时的封禁统计",
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "该小时的封禁数量",
+                    "type": "integer",
+                    "example": 10
+                },
+                "hour": {
+                    "description": "小时时间点",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                }
+            }
+        },
+        "dto.BlockedIPListResponse": {
+            "description": "封禁IP分页列表响应",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "IP列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BlockedIPResponse"
+                    }
+                },
+                "page": {
+                    "description": "当前页码",
+                    "type": "integer",
+                    "example": 1
+                },
+                "pages": {
+                    "description": "总页数",
+                    "type": "integer",
+                    "example": 10
+                },
+                "size": {
+                    "description": "每页数量",
+                    "type": "integer",
+                    "example": 10
+                },
+                "total": {
+                    "description": "总数量",
+                    "type": "integer",
+                    "example": 100
+                }
+            }
+        },
+        "dto.BlockedIPResponse": {
+            "description": "封禁IP详细信息",
+            "type": "object",
+            "properties": {
+                "blockedAt": {
+                    "description": "封禁开始时间",
+                    "type": "string",
+                    "example": "2023-12-01T10:00:00Z"
+                },
+                "blockedUntil": {
+                    "description": "封禁结束时间",
+                    "type": "string",
+                    "example": "2023-12-01T11:00:00Z"
+                },
+                "ip": {
+                    "description": "被封禁的IP地址",
+                    "type": "string",
+                    "example": "192.168.1.1"
+                },
+                "isActive": {
+                    "description": "是否仍在封禁中",
+                    "type": "boolean",
+                    "example": true
+                },
+                "reason": {
+                    "description": "封禁原因",
+                    "type": "string",
+                    "example": "high_frequency_attack"
+                },
+                "remainingTTL": {
+                    "description": "剩余封禁时间（秒）",
+                    "type": "integer",
+                    "example": 3600
+                },
+                "requestUri": {
+                    "description": "请求URI",
+                    "type": "string",
+                    "example": "/api/v1/login"
+                }
+            }
+        },
+        "dto.BlockedIPStatsResponse": {
+            "description": "封禁IP统计信息",
+            "type": "object",
+            "properties": {
+                "activeBlocked": {
+                    "description": "当前生效的封禁数量",
+                    "type": "integer",
+                    "example": 50
+                },
+                "expiredBlocked": {
+                    "description": "已过期的封禁数量",
+                    "type": "integer",
+                    "example": 950
+                },
+                "last24HourStats": {
+                    "description": "最近24小时统计",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BlockedIPHourlyStats"
+                    }
+                },
+                "reasonStats": {
+                    "description": "按原因统计",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "totalBlocked": {
+                    "description": "总封禁数量",
+                    "type": "integer",
+                    "example": 1000
+                }
+            }
+        },
+        "dto.CertificateCreateRequest": {
+            "description": "创建证书的请求参数",
+            "type": "object",
+            "required": [
+                "privateKey",
+                "publicKey"
+            ],
+            "properties": {
+                "description": {
+                    "description": "证书描述",
+                    "type": "string",
+                    "example": "用于example.com的证书"
+                },
+                "domains": {
+                    "description": "证书绑定的域名列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"example.com\"]"
+                    ]
+                },
+                "expireDate": {
+                    "description": "证书过期日期",
+                    "type": "string",
+                    "example": "2023-12-31T23:59:59Z"
+                },
+                "fingerPrint": {
+                    "description": "证书指纹",
+                    "type": "string",
+                    "example": "AA:BB:CC:DD:..."
+                },
+                "issuerName": {
+                    "description": "颁发机构",
+                    "type": "string",
+                    "example": "Let's Encrypt"
+                },
+                "name": {
+                    "description": "证书名称/别名",
+                    "type": "string",
+                    "example": "example-cert"
+                },
+                "privateKey": {
+                    "description": "私钥内容（PEM格式）",
+                    "type": "string"
+                },
+                "publicKey": {
+                    "description": "公钥内容（PEM格式）",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CertificateDTO": {
+            "type": "object",
+            "required": [
+                "certName",
+                "expireDate",
+                "fingerPrint",
+                "issuerName",
+                "privateKey",
+                "publicKey"
+            ],
+            "properties": {
+                "certName": {
+                    "description": "证书名称",
+                    "type": "string",
+                    "example": "my-cert"
+                },
+                "expireDate": {
+                    "description": "过期时间",
+                    "type": "string"
+                },
+                "fingerPrint": {
+                    "description": "证书指纹",
+                    "type": "string"
+                },
+                "issuerName": {
+                    "description": "颁发机构",
+                    "type": "string",
+                    "example": "Let's Encrypt"
+                },
+                "privateKey": {
+                    "description": "私钥内容",
+                    "type": "string"
+                },
+                "publicKey": {
+                    "description": "公钥内容",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CertificateListResponse": {
+            "description": "证书列表响应",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "证书列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.CertificateStore"
+                    }
+                },
+                "total": {
+                    "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.CertificateUpdateRequest": {
+            "description": "更新证书的请求参数",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "description": "证书描述",
+                    "type": "string",
+                    "example": "用于example.com的证书"
+                },
+                "domains": {
+                    "description": "证书绑定的域名列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"example.com\"]"
+                    ]
+                },
+                "expireDate": {
+                    "description": "证书过期日期",
+                    "type": "string",
+                    "example": "2023-12-31T23:59:59Z"
+                },
+                "fingerPrint": {
+                    "description": "证书指纹",
+                    "type": "string",
+                    "example": "AA:BB:CC:DD:..."
+                },
+                "issuerName": {
+                    "description": "颁发机构",
+                    "type": "string",
+                    "example": "Let's Encrypt"
+                },
+                "name": {
+                    "description": "证书名称/别名",
+                    "type": "string",
+                    "example": "example-cert"
+                },
+                "privateKey": {
+                    "description": "私钥内容（PEM格式）",
+                    "type": "string"
+                },
+                "publicKey": {
+                    "description": "公钥内容（PEM格式）",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CombinedTimeSeriesResponse": {
+            "description": "同时包含请求数和拦截数的时间序列数据",
+            "type": "object",
+            "properties": {
+                "blocks": {
+                    "description": "拦截数时间序列",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TimeSeriesResponse"
+                        }
+                    ]
+                },
+                "requests": {
+                    "description": "请求数时间序列",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TimeSeriesResponse"
+                        }
+                    ]
+                },
+                "timeRange": {
+                    "description": "时间范围",
+                    "type": "string",
+                    "example": "24h"
+                }
+            }
+        },
+        "dto.ConfigPatchRequest": {
+            "description": "用于部分更新配置的请求参数",
+            "type": "object",
+            "properties": {
+                "engine": {
+                    "description": "引擎配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.EnginePatchDTO"
+                        }
+                    ]
+                },
+                "haproxy": {
+                    "description": "HAProxy配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.HaproxyPatchDTO"
+                        }
+                    ]
+                },
+                "isDebug": {
+                    "description": "是否开启调试模式",
+                    "type": "boolean",
+                    "example": false
+                },
+                "isK8s": {
+                    "description": "是否在K8s环境",
+                    "type": "boolean",
+                    "example": false
+                },
+                "isResponseCheck": {
+                    "description": "是否检查响应",
+                    "type": "boolean",
+                    "example": false
+                },
+                "name": {
+                    "description": "配置名称",
+                    "type": "string",
+                    "example": "AppConfig"
+                }
+            }
+        },
+        "dto.ConfigResponse": {
+            "description": "配置响应",
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "engine": {
+                    "description": "引擎配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.EngineDTO"
+                        }
+                    ]
+                },
+                "haproxy": {
+                    "description": "HAProxy配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.HaproxyDTO"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "配置ID",
+                    "type": "string"
+                },
+                "isDebug": {
+                    "description": "是否开启调试模式",
+                    "type": "boolean"
+                },
+                "isK8s": {
+                    "description": "是否在K8s环境",
+                    "type": "boolean"
+                },
+                "isResponseCheck": {
+                    "description": "是否检查响应",
+                    "type": "boolean"
+                },
+                "name": {
+                    "description": "配置名称",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateSiteRequest": {
+            "description": "创建站点的请求参数",
+            "type": "object",
+            "required": [
+                "backend",
+                "domain",
+                "listenPort",
+                "name"
+            ],
+            "properties": {
+                "activeStatus": {
+                    "description": "站点状态",
+                    "type": "boolean",
+                    "example": true
+                },
+                "backend": {
+                    "description": "后端服务器配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.BackendDTO"
+                        }
+                    ]
+                },
+                "certificate": {
+                    "description": "证书信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.CertificateDTO"
+                        }
+                    ]
+                },
+                "domain": {
+                    "description": "域名",
+                    "type": "string",
+                    "example": "example.com"
+                },
+                "enableHTTPS": {
+                    "description": "是否启用HTTPS",
+                    "type": "boolean",
+                    "example": false
+                },
+                "listenPort": {
+                    "description": "监听端口",
+                    "type": "integer",
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "example": 8080
+                },
+                "name": {
+                    "description": "站点名称",
+                    "type": "string",
+                    "example": "my-site"
+                },
+                "wafEnabled": {
+                    "description": "是否启用WAF",
+                    "type": "boolean",
+                    "example": false
+                },
+                "wafMode": {
+                    "description": "WAF模式",
+                    "type": "string",
+                    "enum": [
+                        "protection",
+                        "observation"
+                    ],
+                    "example": "observation"
+                }
+            }
+        },
+        "dto.EngineDTO": {
+            "type": "object",
+            "properties": {
+                "appConfig": {
+                    "description": "应用配置列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AppConfigDTO"
+                    }
+                },
+                "asnDBPath": {
+                    "description": "ASN数据库路径",
+                    "type": "string"
+                },
+                "bind": {
+                    "description": "引擎绑定地址",
+                    "type": "string"
+                },
+                "cityDBPath": {
+                    "description": "城市数据库路径",
+                    "type": "string"
+                },
+                "flowController": {
+                    "description": "流量控制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.FlowControllerDTO"
+                        }
+                    ]
+                },
+                "useBuiltinRules": {
+                    "description": "是否使用内置规则",
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.EnginePatchDTO": {
+            "type": "object",
+            "properties": {
+                "appConfig": {
+                    "description": "应用配置列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AppConfigPatchDTO"
+                    }
+                },
+                "asnDBPath": {
+                    "description": "ASN数据库路径",
+                    "type": "string",
+                    "example": "/opt/geoip/GeoLite2-ASN.mmdb"
+                },
+                "bind": {
+                    "description": "引擎绑定地址",
+                    "type": "string",
+                    "example": "127.0.0.1:2342"
+                },
+                "cityDBPath": {
+                    "description": "城市数据库路径",
+                    "type": "string",
+                    "example": "/opt/geoip/GeoLite2-City.mmdb"
+                },
+                "flowController": {
+                    "description": "流量控制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.FlowControllerPatchDTO"
+                        }
+                    ]
+                },
+                "useBuiltinRules": {
+                    "description": "是否使用内置规则",
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "dto.FlowControllerDTO": {
+            "type": "object",
+            "properties": {
+                "attackLimit": {
+                    "description": "攻击频率限制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LimitConfigDTO"
+                        }
+                    ]
+                },
+                "errorLimit": {
+                    "description": "错误频率限制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LimitConfigDTO"
+                        }
+                    ]
+                },
+                "visitLimit": {
+                    "description": "访问频率限制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LimitConfigDTO"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.FlowControllerPatchDTO": {
+            "type": "object",
+            "properties": {
+                "attackLimit": {
+                    "description": "攻击频率限制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LimitConfigPatchDTO"
+                        }
+                    ]
+                },
+                "errorLimit": {
+                    "description": "错误频率限制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LimitConfigPatchDTO"
+                        }
+                    ]
+                },
+                "visitLimit": {
+                    "description": "访问频率限制配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LimitConfigPatchDTO"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.GetUserInfoResponseData": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "1234567890"
+                },
+                "needReset": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "role": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "user123"
+                }
+            }
+        },
+        "dto.HaproxyDTO": {
+            "type": "object",
+            "properties": {
+                "backupsNumber": {
+                    "description": "备份数量",
+                    "type": "integer"
+                },
+                "configBaseDir": {
+                    "description": "配置文件根目录",
+                    "type": "string"
+                },
+                "haproxyBin": {
+                    "description": "HAProxy二进制文件路径",
+                    "type": "string"
+                },
+                "spoeAgentAddr": {
+                    "description": "SPOE代理地址",
+                    "type": "string"
+                },
+                "spoeAgentPort": {
+                    "description": "SPOE代理端口",
+                    "type": "integer"
+                },
+                "thread": {
+                    "description": "线程数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.HaproxyPatchDTO": {
+            "type": "object",
+            "properties": {
+                "backupsNumber": {
+                    "description": "备份数量",
+                    "type": "integer",
+                    "example": 5
+                },
+                "configBaseDir": {
+                    "description": "配置文件根目录",
+                    "type": "string",
+                    "example": "/RuiQi"
+                },
+                "haproxyBin": {
+                    "description": "HAProxy二进制文件路径",
+                    "type": "string",
+                    "example": "haproxy"
+                },
+                "spoeAgentAddr": {
+                    "description": "SPOE代理地址",
+                    "type": "string",
+                    "example": "127.0.0.1"
+                },
+                "spoeAgentPort": {
+                    "description": "SPOE代理端口",
+                    "type": "integer",
+                    "example": 2342
+                },
+                "thread": {
+                    "description": "线程数",
+                    "type": "integer",
+                    "maximum": 256,
+                    "minimum": 0,
+                    "example": 4
+                }
+            }
+        },
+        "dto.IPGroupCreateRequest": {
+            "description": "创建IP组的请求参数",
+            "type": "object",
+            "required": [
+                "items",
+                "name"
+            ],
+            "properties": {
+                "items": {
+                    "description": "IP地址或CIDR列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"192.168.1.1\"]"
+                    ]
+                },
+                "name": {
+                    "description": "IP组名称",
+                    "type": "string",
+                    "example": "内部服务器"
+                }
+            }
+        },
+        "dto.IPGroupListResponse": {
+            "description": "IP组列表响应",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "IP组列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.IPGroup"
+                    }
+                },
+                "total": {
+                    "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.IPGroupUpdateRequest": {
+            "description": "更新IP组的请求参数",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "IP地址或CIDR列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[\"192.168.1.1\"]"
+                    ]
+                },
+                "name": {
+                    "description": "IP组名称",
+                    "type": "string",
+                    "example": "内部服务器"
+                }
+            }
+        },
+        "dto.LimitConfigDTO": {
+            "type": "object",
+            "properties": {
+                "blockDuration": {
+                    "description": "封禁时长（秒）",
+                    "type": "integer"
+                },
+                "burstCount": {
+                    "description": "允许的突发请求数",
+                    "type": "integer"
+                },
+                "enabled": {
+                    "description": "是否启用",
+                    "type": "boolean"
+                },
+                "paramsCapacity": {
+                    "description": "缓存容量",
+                    "type": "integer"
+                },
+                "statDuration": {
+                    "description": "统计时间窗口（秒）",
+                    "type": "integer"
+                },
+                "threshold": {
+                    "description": "阈值",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.LimitConfigPatchDTO": {
+            "type": "object",
+            "properties": {
+                "blockDuration": {
+                    "description": "封禁时长（秒）",
+                    "type": "integer",
+                    "example": 600
+                },
+                "burstCount": {
+                    "description": "允许的突发请求数",
+                    "type": "integer",
+                    "example": 10
+                },
+                "enabled": {
+                    "description": "是否启用",
+                    "type": "boolean",
+                    "example": true
+                },
+                "paramsCapacity": {
+                    "description": "缓存容量",
+                    "type": "integer",
+                    "example": 10000
+                },
+                "statDuration": {
+                    "description": "统计时间窗口（秒）",
+                    "type": "integer",
+                    "example": 60
+                },
+                "threshold": {
+                    "description": "阈值",
+                    "type": "integer",
+                    "example": 100
+                }
+            }
+        },
+        "dto.LoginResponseData": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "description": "JWT token",
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIs..."
+                },
+                "user": {
+                    "description": "用户信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.User"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.MicroRuleCreateRequest": {
+            "description": "创建微规则的请求参数",
+            "type": "object",
+            "required": [
+                "condition",
+                "name",
+                "priority",
+                "status",
+                "type"
+            ],
+            "properties": {
+                "condition": {
+                    "description": "规则条件",
+                    "type": "object"
+                },
+                "name": {
+                    "description": "规则名称",
+                    "type": "string",
+                    "example": "SQL注入防护规则"
+                },
+                "priority": {
+                    "description": "优先级字段，数字越大优先级越高",
+                    "type": "integer",
+                    "example": 100
+                },
+                "status": {
+                    "description": "规则状态",
+                    "type": "string",
+                    "enum": [
+                        "enabled",
+                        "disabled"
+                    ],
+                    "example": "enabled"
+                },
+                "type": {
+                    "description": "规则类型",
+                    "type": "string",
+                    "enum": [
+                        "whitelist",
+                        "blacklist"
+                    ],
+                    "example": "blacklist"
+                }
+            }
+        },
+        "dto.MicroRuleListResponse": {
+            "description": "微规则列表响应",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "微规则列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.MicroRuleResponse"
+                    }
+                },
+                "total": {
+                    "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.MicroRuleResponse": {
+            "description": "微规则响应参数",
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "description": "规则条件",
+                    "type": "object"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "60a763d0f03239868b50e810"
+                },
+                "name": {
+                    "description": "规则名称",
+                    "type": "string",
+                    "example": "SQL注入防护规则"
+                },
+                "priority": {
+                    "description": "优先级字段，数字越大优先级越高",
+                    "type": "integer",
+                    "example": 100
+                },
+                "status": {
+                    "description": "规则状态",
+                    "type": "string",
+                    "enum": [
+                        "enabled",
+                        "disabled"
+                    ],
+                    "example": "enabled"
+                },
+                "type": {
+                    "description": "规则类型",
+                    "type": "string",
+                    "enum": [
+                        "whitelist",
+                        "blacklist"
+                    ],
+                    "example": "blacklist"
+                }
+            }
+        },
+        "dto.MicroRuleUpdateRequest": {
+            "description": "更新微规则的请求参数",
+            "type": "object",
+            "properties": {
+                "condition": {
+                    "description": "规则条件",
+                    "type": "object"
+                },
+                "name": {
+                    "description": "规则名称",
+                    "type": "string",
+                    "example": "SQL注入防护规则"
+                },
+                "priority": {
+                    "description": "优先级字段，数字越大优先级越高",
+                    "type": "integer",
+                    "example": 100
+                },
+                "status": {
+                    "description": "规则状态",
+                    "type": "string",
+                    "enum": [
+                        "enabled",
+                        "disabled"
+                    ],
+                    "example": "enabled"
+                },
+                "type": {
+                    "description": "规则类型",
+                    "type": "string",
+                    "enum": [
+                        "whitelist",
+                        "blacklist"
+                    ],
+                    "example": "blacklist"
+                }
+            }
+        },
+        "dto.OverviewStats": {
+            "description": "概览统计数据，包含各项关键指标",
+            "type": "object",
+            "properties": {
+                "attackIPCount": {
+                    "description": "攻击IP数量",
+                    "type": "integer",
+                    "example": 45
+                },
+                "blockCount": {
+                    "description": "安全统计",
+                    "type": "integer",
+                    "example": 123
+                },
+                "error4xx": {
+                    "description": "错误统计",
+                    "type": "integer",
+                    "example": 234
+                },
+                "error4xxRate": {
+                    "description": "4xx错误率(百分比)",
+                    "type": "number",
+                    "example": 0.23
+                },
+                "error5xx": {
+                    "description": "5xx错误数量",
+                    "type": "integer",
+                    "example": 45
+                },
+                "error5xxRate": {
+                    "description": "5xx错误率(百分比)",
+                    "type": "number",
+                    "example": 0.05
+                },
+                "inboundTraffic": {
+                    "description": "入站流量(字节)",
+                    "type": "integer",
+                    "example": 67890123
+                },
+                "maxQPS": {
+                    "description": "最大QPS",
+                    "type": "integer",
+                    "example": 150
+                },
+                "outboundTraffic": {
+                    "description": "出站流量(字节)",
+                    "type": "integer",
+                    "example": 12345678
+                },
+                "timeRange": {
+                    "description": "时间范围",
+                    "type": "string",
+                    "example": "24h"
+                },
+                "totalRequests": {
+                    "description": "流量统计",
+                    "type": "integer",
+                    "example": 123456
+                }
+            }
+        },
+        "dto.RealtimeQPSData": {
+            "description": "实时QPS数据点，包含时间戳和值",
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "description": "时间戳",
+                    "type": "string",
+                    "example": "2024-01-01T12:30:45Z"
+                },
+                "value": {
+                    "description": "QPS值",
+                    "type": "integer",
+                    "example": 120
+                }
+            }
+        },
+        "dto.RealtimeQPSResponse": {
+            "description": "实时QPS数据响应",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "QPS数据点列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RealtimeQPSData"
+                    }
+                }
+            }
+        },
+        "dto.ResetPasswordResponseData": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {
+                    "$ref": "#/definitions/model.User"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "操作成功"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "dto.RunnerControlRequest": {
+            "type": "object",
+            "required": [
+                "action"
+            ],
+            "properties": {
+                "action": {
+                    "description": "控制动作",
+                    "type": "string",
+                    "enum": [
+                        "start",
+                        "stop",
+                        "restart",
+                        "force_stop",
+                        "reload"
+                    ]
+                }
+            }
+        },
+        "dto.RunnerControlResponse": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "执行的动作",
+                    "type": "string",
+                    "example": "start"
+                },
+                "message": {
+                    "description": "操作消息",
+                    "type": "string",
+                    "example": "运行器已成功启动"
+                },
+                "state": {
+                    "description": "操作后的状态",
+                    "type": "string",
+                    "example": "running"
+                },
+                "success": {
+                    "description": "操作是否成功",
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "dto.RunnerStatusResponse": {
+            "type": "object",
+            "properties": {
+                "isRunning": {
+                    "description": "是否正在运行",
+                    "type": "boolean",
+                    "example": true
+                },
+                "state": {
+                    "description": "状态：running, stopped, error",
+                    "type": "string",
+                    "example": "running"
+                }
+            }
+        },
+        "dto.ServerDTO": {
+            "type": "object",
+            "required": [
+                "host",
+                "port"
+            ],
+            "properties": {
+                "host": {
+                    "description": "主机地址",
+                    "type": "string",
+                    "example": "backend.example.com"
+                },
+                "isSSL": {
+                    "description": "是否启用SSL",
+                    "type": "boolean",
+                    "example": false
+                },
+                "port": {
+                    "description": "端口",
+                    "type": "integer",
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "example": 80
+                }
+            }
+        },
+        "dto.SiteListResponse": {
+            "description": "站点列表响应",
+            "type": "object",
+            "properties": {
+                "items": {
+                    "description": "站点列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Site"
+                    }
+                },
+                "total": {
+                    "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.SiteResponse": {
+            "description": "站点信息响应",
+            "type": "object",
+            "properties": {
+                "activeStatus": {
+                    "description": "站点是否激活",
+                    "type": "boolean"
+                },
+                "backend": {
+                    "description": "后端服务器配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Backend"
+                        }
+                    ]
+                },
+                "certificate": {
+                    "description": "证书信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Certificate"
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "域名，如 a.com",
+                    "type": "string"
+                },
+                "enableHTTPS": {
+                    "description": "是否启用HTTPS",
+                    "type": "boolean"
+                },
+                "id": {
+                    "description": "站点ID",
+                    "type": "string"
+                },
+                "listenPort": {
+                    "description": "监听端口，如 9000",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "站点名称",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "wafEnabled": {
+                    "description": "是否启用WAF",
+                    "type": "boolean"
+                },
+                "wafMode": {
+                    "description": "WAF防护模式",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.WAFMode"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.TimeSeriesDataPoint": {
+            "description": "时间序列图表数据点",
+            "type": "object",
+            "properties": {
+                "timestamp": {
+                    "description": "时间戳，表示数据点的时间",
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                },
+                "value": {
+                    "description": "数值，表示该时间点的指标值",
+                    "type": "integer",
+                    "example": 128
+                }
+            }
+        },
+        "dto.TimeSeriesResponse": {
+            "description": "时间序列图表数据响应",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "数据点列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TimeSeriesDataPoint"
+                    }
+                },
+                "metric": {
+                    "description": "指标名称",
+                    "type": "string",
+                    "example": "requests"
+                },
+                "timeRange": {
+                    "description": "时间范围",
+                    "type": "string",
+                    "example": "24h"
+                }
+            }
+        },
+        "dto.TrafficDataPoint": {
+            "description": "流量时间序列图表数据点",
+            "type": "object",
+            "properties": {
+                "inboundTraffic": {
+                    "description": "入站流量(字节)",
+                    "type": "integer",
+                    "example": 1024000
+                },
+                "outboundTraffic": {
+                    "description": "出站流量(字节)",
+                    "type": "integer",
+                    "example": 2048000
+                },
+                "timestamp": {
+                    "description": "时间戳，表示数据点的时间",
+                    "type": "string",
+                    "example": "2024-01-01T12:00:00Z"
+                }
+            }
+        },
+        "dto.TrafficTimeSeriesResponse": {
+            "description": "流量时间序列图表数据响应",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "description": "流量数据点列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TrafficDataPoint"
+                    }
+                },
+                "timeRange": {
+                    "description": "时间范围",
+                    "type": "string",
+                    "example": "24h"
+                }
+            }
+        },
+        "dto.UpdateSiteRequest": {
+            "description": "更新站点的请求参数",
+            "type": "object",
+            "properties": {
+                "activeStatus": {
+                    "description": "站点状态",
+                    "type": "boolean",
+                    "example": true
+                },
+                "backend": {
+                    "description": "后端服务器配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.BackendDTO"
+                        }
+                    ]
+                },
+                "certificate": {
+                    "description": "证书信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.CertificateDTO"
+                        }
+                    ]
+                },
+                "domain": {
+                    "description": "域名",
+                    "type": "string",
+                    "example": "example.com"
+                },
+                "enableHTTPS": {
+                    "description": "是否启用HTTPS",
+                    "type": "boolean",
+                    "example": false
+                },
+                "listenPort": {
+                    "description": "监听端口",
+                    "type": "integer",
+                    "maximum": 65535,
+                    "minimum": 1,
+                    "example": 8080
+                },
+                "name": {
+                    "description": "站点名称",
+                    "type": "string",
+                    "example": "my-site"
+                },
+                "wafEnabled": {
+                    "description": "是否启用WAF",
+                    "type": "boolean",
+                    "example": false
+                },
+                "wafMode": {
+                    "description": "WAF模式",
+                    "type": "string",
+                    "enum": [
+                        "protection",
+                        "observation"
+                    ],
+                    "example": "observation"
+                }
+            }
+        },
+        "dto.UserCreateRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "role",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "user"
+                    ]
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
+                }
+            }
+        },
+        "dto.UserLoginRequest": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserPasswordResetRequest": {
+            "type": "object",
+            "required": [
+                "newPassword",
+                "oldPassword"
+            ],
+            "properties": {
+                "newPassword": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "oldPassword": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "needReset": {
+                    "type": "boolean"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "admin",
+                        "auditor",
+                        "configurator",
+                        "user"
+                    ]
+                },
+                "username": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
+                }
+            }
+        },
+        "model.APIResponse": {
+            "description": "API响应的标准格式",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "HTTP状态码",
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {
+                    "description": "响应数据"
+                },
+                "error": {
+                    "description": "错误信息(当success=false时)",
+                    "type": "string",
+                    "example": "参数错误"
+                },
+                "message": {
+                    "description": "响应消息",
+                    "type": "string",
+                    "example": "操作成功"
+                },
+                "requestId": {
+                    "description": "请求ID，用于跟踪",
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
+                },
+                "timestamp": {
+                    "description": "响应时间戳",
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.Backend": {
+            "type": "object",
+            "properties": {
+                "servers": {
+                    "description": "服务器列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Server"
+                    }
+                }
+            }
+        },
+        "model.Certificate": {
+            "type": "object",
+            "properties": {
+                "certName": {
+                    "description": "证书名称/别名",
+                    "type": "string"
+                },
+                "expireDate": {
+                    "description": "证书过期日期",
+                    "type": "string"
+                },
+                "fingerPrint": {
+                    "description": "证书指纹",
+                    "type": "string"
+                },
+                "issuerName": {
+                    "description": "颁发机构",
+                    "type": "string"
+                },
+                "privateKey": {
+                    "description": "私钥内容（PEM格式）",
+                    "type": "string"
+                },
+                "publicKey": {
+                    "description": "公钥内容（PEM格式）",
+                    "type": "string"
+                }
+            }
+        },
+        "model.CertificateStore": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "证书描述",
+                    "type": "string"
+                },
+                "domains": {
+                    "description": "证书绑定的域名列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "expireDate": {
+                    "description": "证书过期日期",
+                    "type": "string"
+                },
+                "fingerPrint": {
+                    "description": "证书指纹",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "证书ID",
+                    "type": "string"
+                },
+                "issuerName": {
+                    "description": "颁发机构",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "证书名称/别名",
+                    "type": "string"
+                },
+                "privateKey": {
+                    "description": "私钥内容（PEM格式）",
+                    "type": "string"
+                },
+                "publicKey": {
+                    "description": "公钥内容（PEM格式）",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "model.ErrResponse": {
+            "description": "错误的API响应标准格式",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "error": {
+                    "type": "string",
+                    "example": "参数错误"
+                },
+                "message": {
+                    "type": "string",
+                    "example": "请求参数错误"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.ErrResponseDontShowError": {
+            "description": "错误的API响应标准格式,不展示 error",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "message": {
+                    "type": "string",
+                    "example": "请求参数错误"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.IPGroup": {
+            "description": "IP地址组信息，包含组名和IP地址列表",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "组唯一标识符",
+                    "type": "string",
+                    "example": "60d21b4367d0d8992e89e964"
+                },
+                "items": {
+                    "description": "IP地址或CIDR列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "['192.168.1.1'",
+                        " '10.0.0.1/24']"
+                    ]
+                },
+                "name": {
+                    "description": "组名称",
+                    "type": "string",
+                    "example": "内部服务器"
+                }
+            }
+        },
+        "model.IPInfo": {
+            "description": "IP地址地理位置详细信息，包含城市、区域、国家和ASN等数据",
+            "type": "object",
+            "properties": {
+                "asn": {
+                    "type": "object",
+                    "properties": {
+                        "number": {
+                            "description": "ASN号码",
+                            "type": "integer",
+                            "example": 4134
+                        },
+                        "organization": {
+                            "description": "组织名称",
+                            "type": "string",
+                            "example": "China Telecom"
+                        }
+                    }
+                },
+                "city": {
+                    "type": "object",
+                    "properties": {
+                        "nameEn": {
+                            "description": "城市英文名称",
+                            "type": "string",
+                            "example": "Hangzhou"
+                        },
+                        "nameZh": {
+                            "description": "城市中文名称",
+                            "type": "string",
+                            "example": "杭州"
+                        }
+                    }
+                },
+                "continent": {
+                    "type": "object",
+                    "properties": {
+                        "nameEn": {
+                            "description": "大洲英文名称",
+                            "type": "string",
+                            "example": "Asia"
+                        },
+                        "nameZh": {
+                            "description": "大洲中文名称",
+                            "type": "string",
+                            "example": "亚洲"
+                        }
+                    }
+                },
+                "country": {
+                    "type": "object",
+                    "properties": {
+                        "isoCode": {
+                            "description": "国家ISO代码",
+                            "type": "string",
+                            "example": "CN"
+                        },
+                        "nameEn": {
+                            "description": "国家英文名称",
+                            "type": "string",
+                            "example": "China"
+                        },
+                        "nameZh": {
+                            "description": "国家中文名称",
+                            "type": "string",
+                            "example": "中国"
+                        }
+                    }
+                },
+                "location": {
+                    "type": "object",
+                    "properties": {
+                        "latitude": {
+                            "description": "纬度",
+                            "type": "number",
+                            "example": 30.2943
+                        },
+                        "longitude": {
+                            "description": "经度",
+                            "type": "number",
+                            "example": 120.1663
+                        },
+                        "timeZone": {
+                            "description": "时区",
+                            "type": "string",
+                            "example": "Asia/Shanghai"
+                        }
+                    }
+                },
+                "subdivision": {
+                    "type": "object",
+                    "properties": {
+                        "isoCode": {
+                            "description": "省/州代码",
+                            "type": "string",
+                            "example": "ZJ"
+                        },
+                        "nameEn": {
+                            "description": "省/州英文名称",
+                            "type": "string",
+                            "example": "Zhejiang"
+                        },
+                        "nameZh": {
+                            "description": "省/州中文名称",
+                            "type": "string",
+                            "example": "浙江"
+                        }
+                    }
+                }
+            }
+        },
+        "model.Log": {
+            "description": "详细的WAF规则匹配记录，包含规则触发的详细信息和原始日志",
+            "type": "object",
+            "properties": {
+                "accuracy": {
+                    "description": "规则匹配准确度(0-10)",
+                    "type": "integer",
+                    "example": 9
+                },
+                "logRaw": {
+                    "description": "原始日志数据",
+                    "type": "string",
+                    "example": "[2024-03-18 08:12:33] [error] ModSecurity: Access denied with code 403 (phase 1). Matched \"Operator 'Rx' with parameter '(?:scanner)' against variable 'REQUEST_HEADERS:User-Agent'\" [id \"10086\"] [msg \"恶意扫描器检测\"] [severity \"CRITICAL\"]"
+                },
+                "message": {
+                    "description": "日志消息",
+                    "type": "string",
+                    "example": "恶意扫描器检测"
+                },
+                "payload": {
+                    "description": "攻击载荷",
+                    "type": "string",
+                    "example": "Scanner/1.0"
+                },
+                "phase": {
+                    "description": "请求处理阶段",
+                    "type": "integer",
+                    "example": 1
+                },
+                "ruleId": {
+                    "description": "规则ID",
+                    "type": "integer",
+                    "example": 10086
+                },
+                "secLangRaw": {
+                    "description": "安全规则原始定义",
+                    "type": "string",
+                    "example": "SecRule REQUEST_HEADERS:User-Agent \"@rx (?:scanner)\" \"id:1008,phase:1,severity:'CRITICAL'\""
+                },
+                "secMark": {
+                    "description": "安全标记",
+                    "type": "string",
+                    "example": "web_scanner"
+                },
+                "severity": {
+                    "description": "严重级别(0-5)",
+                    "type": "integer",
+                    "example": 2
+                }
+            }
+        },
+        "model.Server": {
+            "type": "object",
+            "properties": {
+                "host": {
+                    "description": "主机地址，如 IP 或域名",
+                    "type": "string"
+                },
+                "isSSL": {
+                    "description": "是否启用SSL",
+                    "type": "boolean"
+                },
+                "port": {
+                    "description": "端口",
+                    "type": "integer"
+                }
+            }
+        },
+        "model.Site": {
+            "type": "object",
+            "properties": {
+                "activeStatus": {
+                    "description": "站点是否激活",
+                    "type": "boolean"
+                },
+                "backend": {
+                    "description": "后端服务器配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Backend"
+                        }
+                    ]
+                },
+                "certificate": {
+                    "description": "证书信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Certificate"
+                        }
+                    ]
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "域名，如 a.com",
+                    "type": "string"
+                },
+                "enableHTTPS": {
+                    "description": "是否启用HTTPS",
+                    "type": "boolean"
+                },
+                "id": {
+                    "description": "站点ID",
+                    "type": "string"
+                },
+                "listenPort": {
+                    "description": "监听端口，如 9000",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "站点名称",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "wafEnabled": {
+                    "description": "是否启用WAF",
+                    "type": "boolean"
+                },
+                "wafMode": {
+                    "description": "WAF防护模式",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.WAFMode"
+                        }
+                    ]
+                }
+            }
+        },
+        "model.SuccessResponse": {
+            "description": "成功的API响应标准格式",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "操作成功"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.SuccessResponseNoData": {
+            "description": "成功的API响应标准格式,没有 data",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "message": {
+                    "type": "string",
+                    "example": "操作成功"
+                },
+                "requestId": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastLogin": {
+                    "type": "string"
+                },
+                "needReset": {
+                    "description": "是否需要重置密码",
+                    "type": "boolean"
+                },
+                "permissions": {
+                    "description": "额外权限",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "role": {
+                    "description": "用户角色",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.WAFLog": {
+            "description": "Web应用防火墙安全事件完整记录，包含详细的攻击检测和防护信息",
+            "type": "object",
+            "properties": {
+                "accuracy": {
+                    "description": "规则匹配准确度(0-10)",
+                    "type": "integer",
+                    "example": 9
+                },
+                "clientIp": {
+                    "description": "来源IP地址",
+                    "type": "string",
+                    "example": "192.168.1.1"
+                },
+                "createdAt": {
+                    "description": "事件发生时间戳",
+                    "type": "string",
+                    "example": "2024-03-18T08:12:33Z"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "domain": {
+                    "description": "目标域名",
+                    "type": "string",
+                    "example": "api.example.com"
+                },
+                "dstIp": {
+                    "description": "目标IP地址",
+                    "type": "string",
+                    "example": "10.0.0.1"
+                },
+                "dstPort": {
+                    "description": "目标端口",
+                    "type": "integer",
+                    "example": 443
+                },
+                "hour": {
+                    "type": "integer"
+                },
+                "hourGroupSix": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "id": {
+                    "description": "日志唯一标识符",
+                    "type": "string"
+                },
+                "logs": {
+                    "description": "关联的日志条目",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Log"
+                    }
+                },
+                "message": {
+                    "description": "事件描述消息",
+                    "type": "string",
+                    "example": "恶意扫描器检测"
+                },
+                "minute": {
+                    "type": "integer"
+                },
+                "payload": {
+                    "description": "攻击载荷",
+                    "type": "string",
+                    "example": "Scanner/1.0"
+                },
+                "phase": {
+                    "description": "请求处理阶段",
+                    "type": "integer",
+                    "example": 1
+                },
+                "request": {
+                    "description": "原始HTTP请求",
+                    "type": "string",
+                    "example": "GET /api/v1/users HTTP/1.1\nHost: api.example.com\nUser-Agent: Scanner/1.0"
+                },
+                "requestId": {
+                    "description": "请求唯一标识",
+                    "type": "string",
+                    "example": "a1b2c3d4e5f6"
+                },
+                "response": {
+                    "description": "原始HTTP响应",
+                    "type": "string",
+                    "example": "HTTP/1.1 403 Forbidden\nContent-Type: text/html\nContent-Length: 146"
+                },
+                "ruleId": {
+                    "description": "触发的规则ID",
+                    "type": "integer",
+                    "example": 10086
+                },
+                "secLangRaw": {
+                    "description": "安全规则原始定义",
+                    "type": "string",
+                    "example": "SecRule REQUEST_HEADERS:User-Agent \"@rx (?:scanner)\" \"id:1008,phase:1,severity:'CRITICAL'\""
+                },
+                "secMark": {
+                    "description": "安全标记",
+                    "type": "string",
+                    "example": "web_scanner"
+                },
+                "serverIp": {
+                    "description": "目标IP地址",
+                    "type": "string",
+                    "example": "10.0.0.1"
+                },
+                "severity": {
+                    "description": "事件严重级别(0-5)",
+                    "type": "integer",
+                    "example": 2
+                },
+                "srcIp": {
+                    "description": "来源IP地址",
+                    "type": "string",
+                    "example": "192.168.1.1"
+                },
+                "srcIpInfo": {
+                    "description": "来源IP地理位置信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.IPInfo"
+                        }
+                    ]
+                },
+                "srcPort": {
+                    "description": "来源端口",
+                    "type": "integer",
+                    "example": 52134
+                },
+                "uri": {
+                    "description": "请求URI路径",
+                    "type": "string",
+                    "example": "/api/v1/users"
+                }
+            }
+        },
+        "model.WAFMode": {
+            "type": "string",
+            "enum": [
+                "protection",
+                "observation"
+            ],
+            "x-enum-comments": {
+                "WAFModeObservation": "观察模式",
+                "WAFModeProtection": "防护模式"
+            },
+            "x-enum-varnames": [
+                "WAFModeProtection",
+                "WAFModeObservation"
+            ]
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "使用 Bearer {token} 格式进行身份验证",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

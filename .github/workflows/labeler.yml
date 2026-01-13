@@ -1,0 +1,29 @@
+name: "🏷️ Pull Request Labeler"
+
+on:
+  # 当 PR 被打开、同步或重新打开时触发
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  labeler:
+    name: "Auto Label PR"
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: "📋 Apply Labels"
+        uses: actions/labeler@v5
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          configuration-path: .github/labeler.yml
+          sync-labels: true  # 移除不再匹配的标签
+
+      - name: "📊 Label Summary"
+        if: always()
+        run: |
+          echo "✅ Auto-labeling completed for PR #${{ github.event.number }}"
+          echo "🔗 PR URL: ${{ github.event.pull_request.html_url }}"

@@ -1,0 +1,274 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # 匹配 v1.0.0 格式的标签
+
+# 明确声明所需的最小权限
+permissions:
+  contents: write # 创建Release和访问仓库内容
+  packages: write # 推送到Docker Hub（可选，如果使用GitHub Package Registry）
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取所有历史记录用于生成 changelog
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 从 tag 中提取版本信息
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION_WITHOUT_V=${VERSION#v}" >> $GITHUB_OUTPUT
+          echo "提取的版本: $VERSION"
+
+      # 生成 Docker 元数据（使用标准化的方式）
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf
+          tags: |
+            # 版本标签
+            type=ref,event=tag
+            # 不带v前缀的版本
+            type=match,pattern=v(.*),group=1
+            # latest标签
+            type=raw,value=latest
+          labels: |
+            org.opencontainers.image.title=RuiQi WAF
+            org.opencontainers.image.description=Modern web application firewall management system
+            org.opencontainers.image.version=${{ steps.get_version.outputs.VERSION }}
+
+      # 构建并推送多平台镜像（移除可能有问题的arm/v7）
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VCS_REF=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+
+      # 改进的 changelog 生成
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "开始生成changelog..."
+
+          # 获取上一个 tag
+          PREV_TAG=$(git describe --abbrev=0 --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "未找到之前的tag，这是首次发布"
+            # 中文版本
+            CHANGELOG_CN="🎉 首次发布
+
+            ### ✨ 功能特性
+            - 全新的RuiQi WAF管理系统
+            - 基于HAProxy和OWASP Coraza WAF
+            - 提供完整的后端API用于管理配置和规则
+            - 支持流量检查和安全防护
+
+            ### 🏗️ 技术栈
+            - 多架构支持 (linux/amd64, linux/arm64)
+            - 容器化部署
+            - 现代化的Web应用防火墙"
+
+            # 英文版本
+            CHANGELOG_EN="🎉 Initial Release
+
+            ### ✨ Features
+            - Brand new RuiQi WAF management system
+            - Based on HAProxy and OWASP Coraza WAF
+            - Complete backend API for configuration and rule management
+            - Traffic inspection and security protection support
+
+            ### 🏗️ Tech Stack
+            - Multi-architecture support (linux/amd64, linux/arm64)
+            - Containerized deployment
+            - Modern web application firewall"
+          else
+            echo "上一个tag: $PREV_TAG"
+            echo "当前tag: ${{ steps.get_version.outputs.VERSION }}"
+            
+            # 生成变更日志，使用更简单的方式
+            CHANGES=$(git log $PREV_TAG..${{ steps.get_version.outputs.VERSION }} --pretty=format:"- %s (%h)" --no-merges | head -20)
+            
+            if [ -z "$CHANGES" ]; then
+              CHANGELOG_CN="本次发布包含错误修复和性能改进。"
+              CHANGELOG_EN="This release includes bug fixes and performance improvements."
+            else
+              CHANGELOG_CN="### 📝 更新内容
+
+            $CHANGES
+
+            ### 🔄 更多信息
+            查看完整的提交历史: [\`$PREV_TAG...${{ steps.get_version.outputs.VERSION }}\`](https://github.com/${{ github.repository }}/compare/$PREV_TAG...${{ steps.get_version.outputs.VERSION }})"
+
+              CHANGELOG_EN="### 📝 What's Changed
+
+            $CHANGES
+
+            ### 🔄 More Information
+            View full commit history: [\`$PREV_TAG...${{ steps.get_version.outputs.VERSION }}\`](https://github.com/${{ github.repository }}/compare/$PREV_TAG...${{ steps.get_version.outputs.VERSION }})"
+            fi
+          fi
+
+          # 使用 EOF 格式安全地设置多行输出
+          {
+            echo 'CHANGELOG_CN<<EOF'
+            echo "$CHANGELOG_CN"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+          {
+            echo 'CHANGELOG_EN<<EOF'
+            echo "$CHANGELOG_EN"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      # 创建 GitHub Release
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.get_version.outputs.VERSION }}
+          name: "RuiQi WAF ${{ steps.get_version.outputs.VERSION }}"
+          generateReleaseNotes: true
+          body: |
+            ## 🚀 RuiQi WAF ${{ steps.get_version.outputs.VERSION }} 发布
+
+            ### 中文版本
+
+            ### 📦 Docker 镜像
+
+            **快速开始:**
+            ```bash
+            # 拉取最新版本
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:${{ steps.get_version.outputs.VERSION }}
+
+            # 或使用 latest 标签
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:latest
+
+            # 或使用不带v前缀的版本
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:${{ steps.get_version.outputs.VERSION_WITHOUT_V }}
+            ```
+
+            **可用镜像标签:**
+            ${{ steps.meta.outputs.tags }}
+
+            ### 🏗️ 支持的平台
+            - `linux/amd64` - 适用于大多数服务器和开发环境
+            - `linux/arm64` - 适用于ARM64架构（如Apple Silicon、AWS Graviton等）
+
+            ### 📝 更新日志
+            ${{ steps.changelog.outputs.CHANGELOG_CN }}
+
+            ### 📚 文档和支持
+            - [项目文档](https://github.com/${{ github.repository }})
+            - [安装指南](https://github.com/${{ github.repository }}#installation)
+            - [问题反馈](https://github.com/${{ github.repository }}/issues)
+
+            ### 🔐 安全信息
+            - 镜像使用多阶段构建，减少攻击面
+            - 支持现代容器安全最佳实践
+            - 定期更新基础镜像以修复安全漏洞
+
+            ---
+
+            ### English Version
+
+            ### 📦 Docker Images
+
+            **Quick Start:**
+            ```bash
+            # Pull latest version
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:${{ steps.get_version.outputs.VERSION }}
+
+            # Or use latest tag
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:latest
+
+            # Or use version without v prefix
+            docker pull ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:${{ steps.get_version.outputs.VERSION_WITHOUT_V }}
+            ```
+
+            **Available Image Tags:**
+            ${{ steps.meta.outputs.tags }}
+
+            ### 🏗️ Supported Platforms
+            - `linux/amd64` - For most servers and development environments
+            - `linux/arm64` - For ARM64 architecture (Apple Silicon, AWS Graviton, etc.)
+
+            ### 📝 Changelog
+            ${{ steps.changelog.outputs.CHANGELOG_EN }}
+
+            ### 📚 Documentation and Support
+            - [Project Documentation](https://github.com/${{ github.repository }})
+            - [Installation Guide](https://github.com/${{ github.repository }}#installation)
+            - [Issue Tracking](https://github.com/${{ github.repository }}/issues)
+
+            ### 🔐 Security Information
+            - Images use multi-stage builds to reduce attack surface
+            - Supports modern container security best practices
+            - Base images are regularly updated to fix security vulnerabilities
+
+            ---
+
+            **Full Changelog:** [\`${{ steps.get_version.outputs.VERSION }}\`](https://github.com/${{ github.repository }}/releases/tag/${{ steps.get_version.outputs.VERSION }})
+          draft: false
+          prerelease: false
+          makeLatest: true
+          allowUpdates: false
+
+      # 添加发布后的通知
+      - name: Post-release summary
+        run: |
+          echo "## 🎉 Release Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 中文版本" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**版本:** ${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker镜像:** ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**发布页面:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**支持的平台:**" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/amd64" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### English Version" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Image:** ${{ vars.DOCKERHUB_USERNAME }}/ruiqi-waf:${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Release Page:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ steps.get_version.outputs.VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Supported Platforms:**" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/amd64" >> $GITHUB_STEP_SUMMARY
+          echo "- linux/arm64" >> $GITHUB_STEP_SUMMARY

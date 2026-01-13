@@ -1,0 +1,158 @@
+version: 2
+updates:
+  # ===========================================
+  # Go 依赖更新 - 保持适度更新策略
+  # ===========================================
+  - package-ecosystem: "gomod"
+    directories:
+      - "/server"
+      - "/pkg"
+      - "/coraza-spoa"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 8 # 略微降低限制
+    labels:
+      - "dependencies"
+      - "go"
+      - "backend"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    groups:
+      # Go 小版本和补丁更新 - 相对安全
+      go-minor-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+      # 安全更新 - 高优先级
+      go-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
+    ignore:
+      # 只忽略主版本更新，允许小版本和补丁
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ===========================================
+  # GitHub Actions 更新 - 保持现有策略
+  # ===========================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 4 # 略微降低
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+    groups:
+      github-actions-all:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+    ignore:
+      # 只忽略主版本更新
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ===========================================
+  # Docker 基础镜像更新 - 保守策略
+  # ===========================================
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 3 # 降低限制
+    labels:
+      - "dependencies"
+      - "docker"
+      - "infrastructure"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+
+    groups:
+      docker-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+
+    ignore:
+      # 忽略主版本更新
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+      # ===== 特定版本锁定 =====
+      # 锁定 HAProxy 版本 - 确保 WAF 功能稳定
+      - dependency-name: "haproxy"
+        versions: [">3.0.10"]
+
+      # 锁定 Golang 构建版本 - 确保后端构建环境一致性
+      - dependency-name: "golang"
+        versions: [">1.24.1"]
+
+      # 锁定基础镜像的主版本
+      - dependency-name: "node"
+        versions: [">22.0.0"] # 如果当前使用 Node 20.x，不自动升级到 22.x
+      - dependency-name: "alpine"
+        versions: [">3.20.0"] # 保持 Alpine 版本稳定
+
+
+  # ===========================================
+  # Dockerfile 多阶段构建的其他配置
+  # ===========================================
+
+  # 如果有其他 package managers (如 pip, maven 等)
+  # 可以在这里添加类似的保守配置
+
+  # 示例：如果项目中有 Python 依赖
+  # - package-ecosystem: "pip"
+  #   directory: "/scripts"  # 如果有 Python 脚本目录
+  #   schedule:
+  #     interval: "monthly"
+  #   open-pull-requests-limit: 2
+  #   labels:
+  #     - "dependencies"
+  #     - "python"
+  #     - "scripts"
+  #   ignore:
+  #     - dependency-name: "*"
+  #       update-types: ["version-update:semver-major", "version-update:semver-minor"]
+# ===========================================
+# 全局配置说明
+# ===========================================
+#
+# 🎯 策略总结：
+#
+# 前端 (npm): 不更新
+#
+# 后端 (Go): 适度更新
+# - 周度检查，最多 8 个 PR
+# - 允许小版本和补丁更新
+# - 只禁止主版本更新
+#
+# CI/CD: 保守更新
+# - GitHub Actions 允许小版本更新
+# - Docker 镜像保守更新，锁定关键版本
+#
+# 🔧 手动更新流程：
+#
+# 1. 前端关键依赖需要季度评估
+# 2. 在专门的分支中测试更新
+# 3. 充分测试后再合并
+# 4. 保持详细的更新日志

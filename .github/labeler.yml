@@ -1,0 +1,69 @@
+# 🎯 RuiQi WAF Management System - 简化版标签配置
+# 仅包含20个实用标签，避免过度复杂
+
+# ======== 🎨 前端相关 ========
+area/frontend:
+  - any: ["web/**/*"]
+  - any: ["**/*.tsx", "**/*.jsx", "**/*.vue"]
+  - any: ["**/*.css", "**/*.scss", "**/*.sass", "**/*.less"]
+
+# ======== 🔧 后端相关 ========
+area/backend:
+  - any: ["server/**/*"]
+  - any: ["**/*.go", "!**/*_test.go"] # Go文件但排除测试文件
+  - any: ["pkg/**/*"]
+
+# ======== 🛡️ 安全引擎 ========
+area/security:
+  - any: ["coraza-spoa/**/*"]
+  - any: ["**/security/**/*", "**/auth/**/*"]
+  - any: ["**/*waf*", "**/*coraza*"]
+
+# ======== 📚 文档相关 ========
+area/docs:
+  - any: ["**/*.md", "docs/**/*", "doc/**/*"]
+  - any: ["README*", "LICENSE*", "CHANGELOG*"]
+
+# ======== 🧪 测试相关 ========
+area/test:
+  - any: ["**/*_test.go", "**/test/**/*"]
+  - any: ["**/*.test.js", "**/*.spec.js"]
+  - any: ["**/*.test.tsx", "**/*.spec.tsx"]
+
+# ======== 🔧 配置文件 ========
+area/config:
+  - any: ["**/*.yaml", "**/*.yml", "**/*.json", "**/*.toml"]
+  - any: ["**/*.env*", "**/config/**/*"]
+  - any: ["Dockerfile*", "docker-compose*", ".dockerignore"]
+
+# ======== 🚀 CI/CD相关 ========
+area/ci:
+  - any: [".github/**/*"]
+  - any: ["scripts/**/*", "**/*.sh", "**/*.bat"]
+  - any: ["Makefile", "makefile"]
+
+# ======== 📦 依赖管理 ========
+area/deps:
+  - any: ["go.mod", "go.sum", "go.work"]
+  - any: ["package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"]
+# ============================================================================
+# 💡 手动标签说明 (这些标签已创建，需要手动添加到PR)
+# ============================================================================
+
+# 🏷️ 类型标签 (手动添加)
+# type/feat     - ✨ 新功能
+# type/fix      - 🐛 错误修复
+# type/docs     - 📚 文档更新
+# type/refactor - ♻️ 代码重构
+# type/test     - 🧪 测试相关
+# type/chore    - 🔧 杂项/构建
+
+# 🚨 优先级标签 (手动添加)
+# priority/high   - 🔥 高优先级
+# priority/medium - ⚡ 中等优先级
+# priority/low    - 🌱 低优先级
+
+# 🎯 状态标签 (手动添加)
+# status/needs-review   - 👀 需要代码审查
+# status/ready-to-merge - ✅ 准备合并
+# status/blocked        - 🚫 被阻塞

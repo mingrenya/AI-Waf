@@ -1,0 +1,145 @@
+name: 🔒 安全漏洞报告
+
+description: 报告 RuiQi WAF 中的安全漏洞（建议私密报告）
+
+title: "[安全] <标题>"
+labels: [security, critical, needs-triage]
+assignees: "HUAHUAI23"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ 安全公告
+        
+        **重要提示**：如果这是一个关键安全漏洞，请考虑使用 GitHub 的[私密漏洞报告](https://docs.github.com/zh/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability)而不是创建公开问题。
+        
+        对于关键漏洞，您也可以直接发邮件给维护者。
+
+  - type: checkboxes
+    attributes:
+      label: 提交前检查清单
+      description: 报告前请确认以下内容
+      options:
+        - label: 我已确认这是一个真实的安全漏洞
+          required: true
+        - label: 我理解此报告可能会被公开
+          required: true
+        - label: 我未在其他地方公开披露此漏洞
+          required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: 严重程度
+      description: 此漏洞有多严重？
+      options:
+        - 关键 - 远程代码执行，系统入侵
+        - 高 - 权限提升，数据泄露
+        - 中 - 信息泄露，拒绝服务
+        - 低 - 有限影响，需要特定条件
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 受影响的组件
+      description: 哪个组件受此漏洞影响？
+      options:
+        - HAProxy 配置
+        - Coraza WAF 引擎
+        - 后端 API
+        - 身份验证系统
+        - 前端应用
+        - Docker 配置
+        - 规则引擎
+        - 数据库访问
+        - 文件系统访问
+        - 网络配置
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 漏洞描述
+      description: 安全漏洞的详细描述
+      placeholder: |
+        请描述：
+        - 漏洞是什么？
+        - 如何被利用？
+        - 哪些系统/数据存在风险？
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 攻击向量
+      description: 此漏洞如何被利用？
+      placeholder: |
+        描述攻击向量：
+        - 是否需要身份验证？
+        - 是否需要网络访问？
+        - 是否需要用户交互？
+        - 是否需要特定条件？
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 概念验证
+      description: 重现或演示漏洞的步骤
+      placeholder: |
+        请提供：
+        1. 逐步重现步骤
+        2. 最小概念验证代码（如适用）
+        3. 期望与实际结果
+        
+        注意：请避免包含实际的漏洞利用代码
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 影响评估
+      description: 此漏洞的潜在影响是什么？
+      placeholder: |
+        潜在影响：
+        - 数据机密性泄露
+        - 数据完整性泄露
+        - 系统可用性影响
+        - 权限提升可能性
+        - 受影响的用户群体
+
+  - type: textarea
+    attributes:
+      label: 环境信息
+      description: 发现漏洞的环境
+      placeholder: |
+        - RuiQi WAF 版本：
+        - 部署类型：（Docker、本地等）
+        - 操作系统：
+        - 网络配置：
+        - 其他上下文：
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 建议缓解措施
+      description: 修复或缓解此漏洞的任何建议
+      placeholder: |
+        建议：
+        - 临时解决方案
+        - 建议修复
+        - 配置更改
+        - 防止类似问题的最佳实践
+
+  - type: textarea
+    attributes:
+      label: 其他信息
+      description: |
+        任何其他上下文、参考资料或支持材料
+        
+        您可以点击此区域附加文件或截图 

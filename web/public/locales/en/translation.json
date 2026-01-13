@@ -1,0 +1,646 @@
+{
+    "sidebar": {
+        "title": "RuiQi WAF",
+        "monitor": "Monitor",
+        "logs": "Logs",
+        "rules": "Rules",
+        "settings": "Settings",
+        "logout": "Logout"
+    },
+    "breadcrumb": {
+        "logs": {
+            "attack": "Attack events",
+            "protect": "Protection logs"
+        },
+        "monitor": {
+            "overview": "Monitor",
+            "dashboard": "Security Dashboard"
+        },
+        "rules": {
+            "system": "System rules",
+            "user": "Custom rules",
+            "ipGroup": "IP Group Management",
+            "flowControl": "Rate Limiting"
+        },
+        "settings": {
+            "settings": "Settings",
+            "siteManager": "Site Management",
+            "certManager": "Certificate Management"
+        }
+    },
+    "common": {
+        "loading": "Loading...",
+        "language": "Select a language",
+        "copied": "Copied",
+        "save": "Save",
+        "create": "Create",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "submitting": "Submitting..."
+    },
+    "error": {
+        "title": "An Error Occurred",
+        "code": "Error Code",
+        "appProblem": "The application encountered an unexpected problem",
+        "unexpected": "An unexpected error occurred",
+        "refresh": "Refresh Page",
+        "returnHome": "Return Home",
+        "loading": "Error loading data",
+        "message": "Error Message",
+        "details": "Error Details",
+        "requestId": "Request ID",
+        "cannotParse": "Cannot parse error details",
+        "viewDetails": "View Details",
+        "hideDetails": "Hide Details",
+        "retry": "Retry",
+        "network": {
+            "title": "Network Connection Error",
+            "description": "Cannot connect to the server. Please check your network connection."
+        },
+        "timeout": {
+            "title": "Request Timeout",
+            "description": "Server response time is too long. Please try again later."
+        },
+        "forbidden": {
+            "title": "Access Denied",
+            "description": "You don't have permission to access this resource."
+        },
+        "unauthorized": {
+            "title": "Unauthorized Access",
+            "description": "Your login status is invalid. Please log in again."
+        },
+        "server": {
+            "title": "Server Error",
+            "description": "The server is temporarily unable to process your request. Please try again later."
+        },
+        "client": {
+            "title": "Request Error",
+            "description": "The request parameters or format are incorrect."
+        },
+        "validation": {
+            "title": "Data Validation Failed",
+            "description": "The submitted data did not pass validation."
+        },
+        "unknown": {
+            "title": "Error Occurred",
+            "description": "An unknown error occurred while loading data."
+        }
+    },
+    "auth": {
+        "login": "Login",
+        "loginDescription": "Enter your username and password to login",
+        "username": "Username",
+        "usernamePlaceholder": "Enter username",
+        "password": "Password",
+        "passwordPlaceholder": "Enter password",
+        "loggingIn": "Logging in...",
+        "resetPassword": "Reset Password",
+        "firstLoginReset": "First login requires password reset",
+        "enterOldAndNewPassword": "Please enter your current password and new password",
+        "currentPassword": "Current Password",
+        "enterCurrentPassword": "Enter current password",
+        "newPassword": "New Password",
+        "enterNewPassword": "Enter new password",
+        "confirmNewPassword": "Confirm New Password",
+        "enterNewPasswordAgain": "Enter new password again",
+        "submitting": "Submitting...",
+        "passwordRequirement": "Password must be at least 6 characters"
+    },
+    "filter": "Filter",
+    "reset": "Reset",
+    "search": "Search",
+    "domain": "Domain",
+    "dstPort": "Destination port",
+    "srcIp": "Source IP",
+    "attackCount": "Number of attacks",
+    "firstAttackTime": "First attack time",
+    "lastAttackTime": "Recent attack time",
+    "status": "Attack status",
+    "attackEnded": "The attack has ended",
+    "noOngoingAttack": "No continuous attacks are currently available",
+    "ongoing": "The attack is in progress",
+    "attackDuration": "Duration",
+    "autoRefresh": "Polling",
+    "interval": "Interval",
+    "second": "Second",
+    "refresh": "Refresh",
+    "domainPlaceholder": "Enter the domain name",
+    "dstIp": "Target IP",
+    "srcPort": "Source port",
+    "portPlaceholder": "Input port",
+    "ipPlaceholder": "Enter IP",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "ruleId": "Rule ID",
+    "ruleIdPlaceholder": "Enter the rule ID",
+    "requestId": "Request ID",
+    "requestIdPlaceholder": "Enter the request ID",
+    "attackTarget": "Target",
+    "createdAt": "Creation time",
+    "detail": "Details",
+    "noResult": "No data",
+    "attackDetail": {
+        "title": "Attack Log Details",
+        "highRiskAttack": "High Risk Attack",
+        "overview": "Attack Detail",
+        "target": "Attack Target",
+        "message": "Attack Information",
+        "viewRuleDetail": "View Rule Details",
+        "attackTime": "Attack Time",
+        "detectedPayload": "Detected Payload",
+        "attackSource": "Attack Source",
+        "blockThisIp": "Block This IP",
+        "location": "Location",
+        "noLocationInfo": "No location information",
+        "targetInfo": "Target Information",
+        "technicalDetails": "Details",
+        "copyCurl": "Copy cURL",
+        "encoding": "Encoding",
+        "request": "Request",
+        "response": "Response",
+        "logs": "Logs",
+        "copyAll": "Copy All",
+        "noResponse": "No data"
+    },
+    "globalSetting": {
+        "title": "General Settings",
+        "description": "Some settings require restarting the engine to take effect, such as site changes and engine configurations",
+        "engine": {
+            "management": "Engine Management",
+            "setting": "Engine Settings",
+            "status": "Engine Status",
+            "currentStatus": "Current Status:",
+            "loading": "Loading...",
+            "running": "Running",
+            "stopped": "Stopped",
+            "processing": "Processing...",
+            "start": "Start",
+            "stop": "Stop",
+            "restart": "Restart",
+            "forceStop": "Force Stop",
+            "reload": "Hot Reload",
+            "operationSuccess": "Operation Successful",
+            "operationCompleted": "Engine control operation completed successfully",
+            "operationFailed": "Operation Failed",
+            "operationError": "An error occurred during engine control"
+        },
+        "config": {
+            "generalConfig": "General Configuration",
+            "engineThreads": "Engine Threads",
+            "threadsDescription": "Set HAProxy thread count, range 0-256, requires restart to take effect",
+            "threadsWarning": "When set to 0, the system will automatically assign threads based on CPU cores",
+            "responseCheck": "Response Inspection",
+            "responseCheckDescription": "Enable WAF inspection of response content, requires restart to take effect",
+            "debugMode": "Debug Mode",
+            "debugModeDescription": "Enable system debug mode, produces more detailed logs, requires restart to take effect",
+            "engineDirectives": "Engine Directives",
+            "engineDirectivesPlaceholder": "Enter engine directive configuration...",
+            "engineDirectivesDescription": "Configure WAF engine core directives using directive syntax, requires restart to take effect",
+            "haproxyConfigDir": "HAProxy Configuration Root Directory",
+            "haproxyConfigDirDescription": "Root directory where HAProxy configuration files are stored, requires restart to take effect",
+            "haproxyBinPath": "HAProxy Executable Path",
+            "haproxyBinPathDescription": "Path to the HAProxy binary executable file, requires restart to take effect",
+            "internationalization": "Internationalization",
+            "internationalizationDescription": "Set system interface language",
+            "theme": "Theme",
+            "themeDescription": "Toggle between light and dark theme modes",
+            "saving": "Saving...",
+            "saveSettings": "Save Settings",
+            "updateSuccess": "Update Successful",
+            "systemConfigUpdated": "System configuration updated successfully",
+            "updateFailed": "Update Failed",
+            "updateError": "An error occurred while updating configuration"
+        }
+    },
+    "certificate": {
+        "management": "Certificate Management",
+        "refresh": "Refresh",
+        "add": "Add Certificate",
+        "name": "Certificate Name",
+        "domains": "Domains",
+        "issuerAndExpiry": "Issuer & Expiration Date",
+        "issuer": "Issuer",
+        "expiryDate": "Expiration Date: ",
+        "expiringSoon": "Expiring Soon",
+        "expired": "Expired",
+        "edit": "Edit",
+        "delete": "Delete",
+        "dialog": {
+            "createTitle": "Create New Certificate",
+            "updateTitle": "Update Certificate",
+            "createDescription": "Please fill in certificate information and upload public and private key files, or paste the content directly. The system will automatically parse certificate information.",
+            "updateDescription": "Edit certificate information, changes will be automatically saved.",
+            "parseFailed": "Certificate parsing failed: ",
+            "unknownError": "Unknown error",
+            "fileReadFailed": "File reading failed: ",
+            "certName": "Certificate Name",
+            "description": "Description (Optional)",
+            "descriptionPlaceholder": "Enter certificate description",
+            "publicKeyFile": "Public Key File",
+            "uploadPublicKey": "Upload Public Key",
+            "publicKeyContent": "Public Key Content",
+            "publicKeyPlaceholder": "Enter PEM format public key content",
+            "privateKeyFile": "Private Key File",
+            "uploadPrivateKey": "Upload Private Key",
+            "privateKeyContent": "Private Key Content",
+            "privateKeyPlaceholder": "Enter PEM format private key content",
+            "orEnterContent": "or enter content directly",
+            "parsedInfo": "Certificate Parsed Information",
+            "issuer": "Issuer",
+            "expiryDate": "Expiration Date",
+            "fingerprint": "Fingerprint",
+            "domains": "Domains",
+            "submitting": "Submitting...",
+            "create": "Create",
+            "update": "Update"
+        },
+        "deleteDialog": {
+            "confirmTitle": "Confirm Deletion",
+            "confirmDescription": "Are you sure you want to delete this certificate? This action cannot be undone.",
+            "cancel": "Cancel",
+            "deleting": "Deleting...",
+            "delete": "Delete"
+        },
+        "toast": {
+            "createSuccess": "Created Successfully",
+            "certificateCreated": "Certificate has been created successfully",
+            "createFailed": "Creation Failed",
+            "createError": "An error occurred while creating the certificate",
+            "updateSuccess": "Updated Successfully",
+            "certificateUpdated": "Certificate has been updated successfully",
+            "updateFailed": "Update Failed",
+            "updateError": "An error occurred while updating the certificate",
+            "deleteSuccess": "Deleted Successfully",
+            "certificateDeleted": "Certificate has been deleted successfully",
+            "deleteFailed": "Deletion Failed",
+            "deleteError": "An error occurred while deleting the certificate"
+        }
+    },
+    "site": {
+        "management": "Site Management",
+        "refresh": "Refresh",
+        "add": "Add Site",
+        "edit": "Edit",
+        "delete": "Delete",
+        "name": "Site Name",
+        "domain": "Domain",
+        "listenPort": "Listen Port",
+        "backend": "Backend Servers",
+        "https": "HTTPS",
+        "status": "Site Status",
+        "wafStatus": "WAF Status",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "active": "Active",
+        "inactive": "Inactive",
+        "noData": "No site data",
+        "dialog": {
+            "createTitle": "Create New Site",
+            "updateTitle": "Update Site",
+            "createDescription": "Please fill in site information, including basic information, HTTPS settings, backend servers and WAF settings.",
+            "updateDescription": "Edit site information, changes will be automatically saved.",
+            "basicInfo": "Basic Information",
+            "siteName": "Site Name",
+            "siteNamePlaceholder": "Enter site name",
+            "domainPlaceholder": "Enter domain",
+            "siteStatus": "Site Status",
+            "siteActive": "Site is active",
+            "httpsSettings": "HTTPS Settings",
+            "enableHttps": "Enable HTTPS",
+            "httpsDescription": "Certificates need to be configured after enabling",
+            "selectCertificate": "Select Certificate",
+            "uploadNewCert": "Upload New Certificate",
+            "selectedCertInfo": "Selected Certificate Information",
+            "backendServers": "Backend Servers",
+            "addServer": "Add Server",
+            "server": "Server",
+            "hostAddress": "Host Address",
+            "hostPlaceholder": "e.g. 192.168.1.1 or backend.com",
+            "port": "Port",
+            "enableSsl": "Enable SSL",
+            "backendHttps": "Backend uses HTTPS",
+            "wafSettings": "WAF Settings",
+            "enableWaf": "Enable WAF",
+            "wafDescription": "Web Application Firewall",
+            "wafMode": "WAF Mode",
+            "selectWafMode": "Select WAF Mode",
+            "observationMode": "Observation Mode",
+            "observationDescription": "Only records without blocking",
+            "protectionMode": "Protection Mode",
+            "protectionDescription": "Records and blocks attacks",
+            "submitting": "Submitting...",
+            "createSite": "Create Site",
+            "updateSite": "Update Site"
+        },
+        "deleteDialog": {
+            "confirmTitle": "Confirm Deletion",
+            "confirmDescription": "Are you sure you want to delete this site? This action cannot be undone and may affect services currently using this site.",
+            "cancel": "Cancel",
+            "deleting": "Deleting...",
+            "delete": "Delete"
+        },
+        "toast": {
+            "createSuccess": "Created Successfully",
+            "siteCreated": "Site has been created successfully",
+            "createFailed": "Creation Failed",
+            "createError": "An error occurred while creating the site",
+            "updateSuccess": "Updated Successfully",
+            "siteUpdated": "Site has been updated successfully",
+            "updateFailed": "Update Failed",
+            "updateError": "An error occurred while updating the site",
+            "deleteSuccess": "Deleted Successfully",
+            "siteDeleted": "Site has been deleted successfully",
+            "deleteFailed": "Deletion Failed",
+            "deleteError": "An error occurred while deleting the site"
+        },
+        "view": {
+            "cardView": "Card View",
+            "tableView": "Table View"
+        },
+        "card": {
+            "upstreamServers": "Upstream Servers:",
+            "certInfo": "Certificate Information:"
+        }
+    },
+    "table": {
+        "selected": "{{selected}} of {{total}} row(s) selected.",
+        "rowsPerPage": "Rows per page",
+        "pageInfo": "Page {{current}} of {{total}}",
+        "firstPage": "Go to first page",
+        "previousPage": "Go to previous page",
+        "nextPage": "Go to next page",
+        "lastPage": "Go to last page"
+    },
+    "ipGroup": {
+        "title": "IP Group Management",
+        "createButton": "Create IP Group",
+        "table": {
+            "name": "Group Name",
+            "ipAddresses": "IP Addresses",
+            "actions": "Actions"
+        },
+        "form": {
+            "name": "Group Name",
+            "namePlaceholder": "Enter group name",
+            "ipAddresses": "IP Addresses",
+            "ipAddressPlaceholder": "Enter IP address or CIDR (e.g. 192.168.1.1 or 10.0.0.0/24)",
+            "noIpAddresses": "No IP addresses added"
+        },
+        "dialog": {
+            "createTitle": "Create IP Group",
+            "editTitle": "Edit IP Group",
+            "createDescription": "Create a new IP address group for rule matching",
+            "editDescription": "Edit the selected IP address group and its members"
+        },
+        "deleteDialog": {
+            "title": "Delete IP Group",
+            "description": "Are you sure you want to delete the IP group {{name}}? This action cannot be undone."
+        },
+        "validation": {
+            "nameRequired": "Group name is required",
+            "nameMaxLength": "Group name cannot exceed 50 characters",
+            "ipItemRequired": "IP address is required",
+            "ipItemInvalid": "Invalid IP address or CIDR format",
+            "ipItemDuplicate": "This IP address is already added",
+            "itemsRequired": "At least one IP address is required"
+        },
+        "toast": {
+            "createSuccess": "IP Group Created",
+            "ipGroupCreated": "IP Group has been created successfully",
+            "createFailed": "Creation Failed",
+            "createError": "An error occurred while creating the IP group",
+            "updateSuccess": "IP Group Updated",
+            "ipGroupUpdated": "IP Group has been updated successfully",
+            "updateFailed": "Update Failed",
+            "updateError": "An error occurred while updating the IP group",
+            "deleteSuccess": "IP Group Deleted",
+            "ipGroupDeleted": "IP Group has been deleted successfully",
+            "deleteFailed": "Deletion Failed",
+            "deleteError": "An error occurred while deleting the IP group",
+            "blockSuccess": "IP Blocked",
+            "ipBlocked": "IP address {{ip}} has been added to blacklist",
+            "blockFailed": "Block Failed",
+            "blockError": "An error occurred while blocking the IP address"
+        }
+    },
+    "microRule": {
+        "title": "Custom Rules Management",
+        "refresh": "Refresh",
+        "add": "Add Rule",
+        "table": {
+            "name": "Rule Name",
+            "type": "Rule Type",
+            "status": "Status",
+            "priority": "Priority",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "form": {
+            "name": "Rule Name",
+            "namePlaceholder": "Enter rule name",
+            "type": "Rule Type",
+            "selectType": "Select rule type",
+            "whitelist": "Whitelist",
+            "blacklist": "Blacklist",
+            "status": "Status",
+            "selectStatus": "Select status",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "priority": "Priority",
+            "priorityPlaceholder": "Enter priority (0-9999)",
+            "condition": "Rule Condition"
+        },
+        "condition": {
+            "conditionType": "Condition Type",
+            "selectConditionType": "Select condition type",
+            "simpleCondition": "Simple Condition",
+            "compositeCondition": "Composite Condition",
+            "target": "Match Target",
+            "selectTarget": "Select match target",
+            "sourceIp": "Source IP",
+            "url": "URL",
+            "path": "Path",
+            "matchType": "Match Type",
+            "selectMatchType": "Select match type",
+            "matchValue": "Match Value",
+            "enterMatchValue": "Enter match value",
+            "operator": "Logical Operator",
+            "selectOperator": "Select logical operator",
+            "and": "AND",
+            "or": "OR",
+            "conditionGroup": "Condition Group",
+            "addSimpleCondition": "Add Condition",
+            "addCompositeCondition": "Add Condition Group",
+            "addNestedCondition": "Add Nested Condition"
+        },
+        "matchTypes": {
+            "equal": "Equal",
+            "not_equal": "Not Equal",
+            "fuzzy": "Fuzzy Match",
+            "in_cidr": "In CIDR Range",
+            "not_in_cidr": "Not In CIDR Range",
+            "in_ipgroup": "In IP Group",
+            "not_in_ipgroup": "Not In IP Group",
+            "include": "Include",
+            "contains": "Contains",
+            "not_contains": "Not Contains",
+            "prefix_keyword": "Starts With",
+            "regex": "Regular Expression"
+        },
+        "dialog": {
+            "createTitle": "Create New Rule",
+            "updateTitle": "Update Rule",
+            "createDescription": "Create a custom WAF rule to protect your site",
+            "updateDescription": "Edit rule information, changes will be automatically saved"
+        },
+        "deleteDialog": {
+            "confirmTitle": "Confirm Deletion",
+            "confirmDescription": "Are you sure you want to delete this rule? This action cannot be undone and may affect your security settings.",
+            "cancel": "Cancel",
+            "deleting": "Deleting...",
+            "delete": "Delete"
+        },
+        "toast": {
+            "createSuccess": "Created Successfully",
+            "microRuleCreated": "Rule has been created successfully",
+            "createFailed": "Creation Failed",
+            "createError": "An error occurred while creating the rule",
+            "updateSuccess": "Updated Successfully",
+            "microRuleUpdated": "Rule has been updated successfully",
+            "updateFailed": "Update Failed",
+            "updateError": "An error occurred while updating the rule",
+            "deleteSuccess": "Deleted Successfully",
+            "microRuleDeleted": "Rule has been deleted successfully",
+            "deleteFailed": "Deletion Failed",
+            "deleteError": "An error occurred while deleting the rule"
+        }
+    },
+    "stats": {
+        "title": "Statistics",
+        "overview": "Core Metrics",
+        "timeRange": {
+            "24h": "24 Hours",
+            "7d": "7 Days",
+            "30d": "30 Days"
+        },
+        "totalRequests": "Total Requests",
+        "inboundTraffic": "Inbound Traffic",
+        "outboundTraffic": "Outbound Traffic",
+        "maxQPS": "Max QPS",
+        "4xxErrors": "4xx Errors",
+        "5xxErrors": "5xx Errors",
+        "blockCount": "Block Count",
+        "attackIPCount": "Attack IP Count",
+        "realtimeQPS": "Realtime QPS",
+        "trafficTrend": "Traffic Trend",
+        "requestsAndBlocks": "Requests & Blocks Trend",
+        "requests": "Requests",
+        "blocks": "Blocks"
+    },
+    "flowControl": {
+        "blockIpList": "IP Blocklist",
+        "title": "Flow Control",
+        "pageTitle": "Flow Control Management",
+        "pageDescription": "Manage IP-based access frequency limits and blocked IP list",
+        "configSettings": "Flow Control Settings",
+        "refresh": "Refresh",
+        "cleanup": "Cleanup Expired Records",
+        "cleaning": "Cleaning...",
+        "filters": "Filters",
+        "filterByIP": "Filter by IP Address",
+        "filterByReason": "Filter by Block Reason",
+        "clearFilters": "Clear",
+        "expired": "Expired",
+        "untilUnblock": "until unblock",
+        "hours": " hours ",
+        "minutes": " minutes ",
+        "seconds": " seconds",
+        "table": {
+            "ip": "IP Address",
+            "reason": "Block Reason",
+            "requestUri": "Request Path",
+            "blockedAt": "Blocked At",
+            "status": "Status"
+        },
+        "status": {
+            "placeholder": "Status",
+            "all": "All",
+            "active": "Active",
+            "expired": "Expired"
+        },
+        "reason": {
+            "all": "All Reasons",
+            "highFrequencyVisit": "High Frequency Visit",
+            "highFrequencyAttack": "High Frequency Attack",
+            "highFrequencyError": "High Frequency Error"
+        },
+        "pagination": {
+            "info": "Page {{current}} of {{total}}, {{count}} records total",
+            "previous": "Previous",
+            "next": "Next"
+        },
+        "dialog": {
+            "title": "Flow Control Configuration",
+            "description": "Configure IP-based access frequency, attack frequency and error frequency limits to protect the system from malicious attacks"
+        },
+        "visitLimit": {
+            "title": "Visit Frequency Limit",
+            "description": "Limit the number of visits from a single IP within a specified time window to prevent high-frequency access"
+        },
+        "attackLimit": {
+            "title": "Attack Frequency Limit",
+            "description": "Limit the number of attacks from a single IP within a specified time window to prevent malicious attacks"
+        },
+        "errorLimit": {
+            "title": "Error Frequency Limit",
+            "description": "Limit the number of error responses from a single IP within a specified time window to prevent malicious probing"
+        },
+        "enabled": "Enable Limit",
+        "enabledDescription": "Enable this limit rule",
+        "threshold": "Trigger Threshold",
+        "thresholdDescription": "Maximum number of requests within the statistical time window",
+        "attackThresholdDescription": "Maximum number of attacks within the statistical time window",
+        "errorThresholdDescription": "Maximum number of errors within the statistical time window",
+        "statDuration": "Statistical Time Window",
+        "statDurationDescription": "Length of statistical time window (seconds)",
+        "blockDuration": "Block Duration",
+        "blockDurationDescription": "Block duration after triggering the limit (seconds)",
+        "burstCount": "Burst Count",
+        "burstCountDescription": "Number of burst requests allowed",
+        "paramsCapacity": "Cache Capacity",
+        "paramsCapacityDescription": "Maximum number of IPs to cache",
+        "updating": "Updating...",
+        "updateConfig": "Update Configuration",
+        "toast": {
+            "updateSuccess": "Update Successful",
+            "configUpdated": "Flow control configuration updated successfully",
+            "updateFailed": "Update Failed",
+            "updateError": "Error occurred while updating configuration",
+            "cleanupSuccess": "Cleanup Successful",
+            "cleanupMessage": "{{count}} expired records cleaned up",
+            "cleanupFailed": "Cleanup Failed",
+            "cleanupError": "Error occurred while cleaning up expired records"
+        }
+    },
+    "securityDashboard": {
+        "title": "Security Protection Dashboard",
+        "stats": {
+            "blockCount24h": "Blocks in 24h",
+            "attackIPCount24h": "Attack IPs in 24h",
+            "totalRequests24h": "Total Requests in 24h"
+        },
+        "attackIPList": {
+            "title": "Attack IPs in 24h",
+            "noData": "No attack IP data",
+            "attackCount": "times"
+        },
+        "realtimeAttacks": {
+            "title": "Realtime Attacks",
+            "noData": "No realtime attack data"
+        },
+        "qpsChart": {
+            "title": "Realtime QPS Monitor",
+            "tooltip": "{{time}}: {{value}} QPS"
+        }
+    }
+}

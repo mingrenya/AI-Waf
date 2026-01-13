@@ -1,0 +1,27 @@
+# 构建产物
+ruiqi-waf
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# 测试二进制文件
+*.test
+
+# 输出目录
+/dist/
+/build/
+
+# 嵌入的前端资源（构建时从web/dist复制）
+# 忽略 dist 目录下的所有文件，但保留目录结构
+public/dist/*
+# 但不忽略 .gitkeep 文件
+!public/dist/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+
+# 日志文件
+*.log 

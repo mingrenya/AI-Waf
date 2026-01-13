@@ -1,0 +1,145 @@
+name: 🔒 Security Vulnerability Report
+
+description: Report a security vulnerability in RuiQi WAF (Private reporting recommended)
+
+title: "[Security] <title>"
+labels: [security, critical, needs-triage]
+assignees: "HUAHUAI23"
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ Security Advisory
+        
+        **IMPORTANT**: If this is a critical security vulnerability, please consider using GitHub's [private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability) instead of creating a public issue.
+        
+        For critical vulnerabilities, you can also email directly to the maintainer.
+
+  - type: checkboxes
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following before reporting
+      options:
+        - label: I have confirmed this is a genuine security vulnerability
+          required: true
+        - label: I understand this report may be made public
+          required: true
+        - label: I have not disclosed this vulnerability publicly elsewhere
+          required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity Level
+      description: How severe is this vulnerability?
+      options:
+        - Critical - Remote code execution, system compromise
+        - High - Privilege escalation, data exposure
+        - Medium - Information disclosure, DoS
+        - Low - Limited impact, requires specific conditions
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which component is affected by this vulnerability?
+      options:
+        - HAProxy Configuration
+        - Coraza WAF Engine
+        - Backend API
+        - Authentication System
+        - Frontend Application
+        - Docker Configuration
+        - Rule Engine
+        - Database Access
+        - File System Access
+        - Network Configuration
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Vulnerability Description
+      description: Detailed description of the security vulnerability
+      placeholder: |
+        Please describe:
+        - What is the vulnerability?
+        - How can it be exploited?
+        - What systems/data are at risk?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Attack Vector
+      description: How can this vulnerability be exploited?
+      placeholder: |
+        Describe the attack vector:
+        - Authentication required?
+        - Network access needed?
+        - User interaction required?
+        - Specific conditions needed?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Proof of Concept
+      description: Steps to reproduce or demonstrate the vulnerability
+      placeholder: |
+        Please provide:
+        1. Step-by-step reproduction steps
+        2. Minimal proof of concept code (if applicable)
+        3. Expected vs actual results
+        
+        Note: Please avoid including actual exploit code
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Impact Assessment
+      description: What is the potential impact of this vulnerability?
+      placeholder: |
+        Potential impacts:
+        - Data confidentiality compromise
+        - Data integrity compromise  
+        - System availability impact
+        - Privilege escalation possibilities
+        - Affected user base
+
+  - type: textarea
+    attributes:
+      label: Environment Information
+      description: Environment where the vulnerability was discovered
+      placeholder: |
+        - RuiQi WAF Version:
+        - Deployment type: (Docker, Local, etc.)
+        - Operating System:
+        - Network configuration:
+        - Additional context:
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Suggested Mitigation
+      description: Any suggestions for fixing or mitigating this vulnerability
+      placeholder: |
+        Suggestions:
+        - Immediate workarounds
+        - Proposed fixes
+        - Configuration changes
+        - Best practices to prevent similar issues
+
+  - type: textarea
+    attributes:
+      label: Additional Information
+      description: |
+        Any additional context, references, or supporting material
+        
+        You can attach files or screenshots by clicking this area 

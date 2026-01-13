@@ -1,0 +1,373 @@
+name: Docker Build and Push
+
+# 🔒 工作流级权限控制
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+on:
+  # PR 提交或更新时触发（用于构建检查）
+  pull_request:
+    branches: [main, master, develop]
+    types: [opened, synchronize, reopened]
+
+  # 专门用于 PR 评论的触发器（支持 fork 仓库）
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches: [main, master, develop]
+
+  # 合并到主分支时触发
+  push:
+    branches: [main, master]
+
+  # 支持手动触发
+  workflow_dispatch:
+
+env:
+  # 使用 vars 而不是 secrets 来存储用户名（推荐做法）
+  DOCKER_IMAGE: ${{ vars.DOCKERHUB_USERNAME && vars.DOCKERHUB_USERNAME != '' && vars.DOCKERHUB_USERNAME || 'defaultuser' }}/ruiqi-waf
+
+jobs:
+  # 主要的构建检查 job（使用 pull_request，安全执行外部代码）
+  docker-build:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    # 只在 pull_request 和 push 事件时运行，不在 pull_request_target 时运行
+    if: github.event_name != 'pull_request_target'
+
+    outputs:
+      build-status: ${{ steps.set-status.outputs.build_status }}
+      build-result: ${{ steps.set-status.outputs.build_result }}
+      image-tags: ${{ steps.meta.outputs.tags }}
+      build-time: ${{ steps.set-status.outputs.build_time }}
+      commit-sha: ${{ steps.set-status.outputs.commit_sha }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 智能设置：PR只需要QEMU用于ARM64，推送时才设置
+      - name: Set up QEMU
+        if: github.event_name == 'push'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 仅推送时登录Docker Hub
+      - name: Login to Docker Hub
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 总是登录GitHub Container Registry（更快）
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 生成标签
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.DOCKER_IMAGE }}
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=pr
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      # 创建多平台Dockerfile（仅在需要时）
+      - name: Prepare multi-platform Dockerfile
+        if: github.event_name == 'push'
+        run: |
+          sed 's/GOOS=linux/GOOS=$TARGETOS/g; s/GOARCH=amd64/GOARCH=$TARGETARCH/g' Dockerfile > Dockerfile.multiarch
+
+      # PR阶段：仅构建AMD64进行快速验证
+      - name: Build Docker image (PR - AMD64 only)
+        if: github.event_name == 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=pr-amd64
+          cache-to: type=gha,mode=max,scope=pr-amd64
+          # PR阶段优化：禁用不必要的功能
+          provenance: false
+          sbom: false
+        continue-on-error: true
+
+      # 推送阶段：完整多平台构建
+      - name: Build and push (Multi-platform)
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.multiarch
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: |
+            type=gha,scope=build-amd64
+            type=gha,scope=build-arm64
+          cache-to: type=gha,mode=max,scope=build-multiplatform
+          # 生产构建：启用完整安全功能
+          provenance: true
+          sbom: true
+
+      # 📤 设置输出状态
+      - name: Set job outputs
+        id: set-status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "build_status=success" >> $GITHUB_OUTPUT
+            echo "build_result=passed" >> $GITHUB_OUTPUT
+          else
+            echo "build_status=failure" >> $GITHUB_OUTPUT
+            echo "build_result=failed" >> $GITHUB_OUTPUT
+          fi
+          echo "build_time=$(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+          echo "commit_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      # 生成详细构建报告
+      - name: Generate Docker build summary
+        if: always()
+        run: |
+          echo "## 🚀 Docker Build Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # 构建状态
+          echo "### 📋 Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ job.status }}" = "success" ]; then
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "| Docker Build | ✅ Passed | AMD64 architecture verification successful |" >> $GITHUB_STEP_SUMMARY
+              echo "| Platform | 📱 Single | linux/amd64 (PR optimization) |" >> $GITHUB_STEP_SUMMARY
+              echo "| Cache | 🚀 Optimized | GitHub Actions cache enabled |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| Docker Build | ✅ Passed | Multi-platform build successful |" >> $GITHUB_STEP_SUMMARY
+              echo "| Platform | 🌐 Multi | linux/amd64, linux/arm64 |" >> $GITHUB_STEP_SUMMARY
+              echo "| Registry Push | ✅ Completed | Docker Hub + GitHub Container Registry |" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "| Docker Build | ❌ Failed | Please check build logs |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Build Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **Event Type**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit SHA**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Time**: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # 🔒 安全的 PR 评论 job（使用 pull_request_target，但不 checkout 外部代码）
+  pr-comment:
+    name: PR Comment Handler
+    runs-on: ubuntu-latest
+    # 只在 pull_request_target 事件时运行
+    if: github.event_name == 'pull_request_target'
+
+    steps:
+      # 🔒 重要：不 checkout 任何代码，特别是 PR 代码！
+      # 🔒 只使用 GitHub API 获取工作流运行结果
+
+      - name: Wait for main build to complete
+        uses: actions/github-script@v7
+        id: wait-for-build
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const headSha = context.payload.pull_request.head.sha;
+
+            console.log(`等待 commit ${headSha} 的构建完成...`);
+
+            // 等待最多 15 分钟（Docker 构建可能较长）
+            const maxWaitTime = 15 * 60 * 1000; // 15 minutes
+            const startTime = Date.now();
+
+            while (Date.now() - startTime < maxWaitTime) {
+              try {
+                // 获取 commit 的所有 check runs
+                const { data: checkRuns } = await github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref: headSha,
+                });
+                
+                // 查找我们的Docker构建工作流
+                const dockerCheck = checkRuns.check_runs.find(run => 
+                  run.name === 'Docker Build Check'
+                );
+                
+                if (dockerCheck) {
+                  console.log(`发现构建: ${dockerCheck.name}, 状态: ${dockerCheck.status}`);
+                  
+                  if (dockerCheck.status === 'completed') {
+                    console.log(`构建完成，结论: ${dockerCheck.conclusion}`);
+                    return {
+                      completed: true,
+                      conclusion: dockerCheck.conclusion,
+                      details_url: dockerCheck.details_url
+                    };
+                  }
+                }
+                
+                // 等待 30 秒后重试
+                await new Promise(resolve => setTimeout(resolve, 30000));
+              } catch (error) {
+                console.log(`获取构建状态时出错: ${error.message}`);
+                await new Promise(resolve => setTimeout(resolve, 30000));
+              }
+            }
+
+            // 超时情况
+            console.log('等待超时，使用默认值');
+            return {
+              completed: false,
+              conclusion: 'timed_out',
+              details_url: null
+            };
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const buildResult = ${{ steps.wait-for-build.outputs.result }};
+            const prNumber = context.payload.pull_request.number;
+            const buildTime = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+
+            let emoji, statusEn, statusCn, conclusion;
+
+            if (!buildResult.completed) {
+              emoji = '⏰';
+              statusEn = 'In Progress';
+              statusCn = '进行中';
+              conclusion = 'pending';
+            } else {
+              switch(buildResult.conclusion) {
+                case 'success':
+                  emoji = '✅';
+                  statusEn = 'Success';
+                  statusCn = '成功';
+                  conclusion = 'success';
+                  break;
+                case 'failure':
+                  emoji = '❌';
+                  statusEn = 'Failed';
+                  statusCn = '失败';
+                  conclusion = 'failure';
+                  break;
+                default:
+                  emoji = '⚠️';
+                  statusEn = 'Unknown';
+                  statusCn = '未知';
+                  conclusion = 'neutral';
+              }
+            }
+
+            // 构建中文报告
+            let chineseReport = `### 中文报告\n\n`;
+
+            if (!buildResult.completed) {
+              chineseReport += `**⏰ 状态:** Docker 构建正在进行中，请稍候查看结果。`;
+            } else if (buildResult.conclusion === 'success') {
+              chineseReport += `**🎉 结果:** Docker 构建验证通过！镜像构建成功。\n\n`;
+              chineseReport += `**🏗️ 构建详情:**\n`;
+              chineseReport += `- ✅ 验证平台: \`linux/amd64\`\n`;
+              chineseReport += `- ✅ 构建状态: ${statusCn}\n`;
+              chineseReport += `- ✅ 缓存优化: GitHub Actions 缓存已启用\n`;
+              chineseReport += `- ✅ 提交: \`${context.payload.pull_request.head.sha}\`\n`;
+              chineseReport += `- ✅ 构建时间: ${buildTime}\n\n`;
+              chineseReport += `**💡 优化说明:** PR 阶段仅构建 AMD64 以提高速度，完整的多平台构建将在合并后进行。`;
+            } else if (buildResult.conclusion === 'failure') {
+              chineseReport += `**⚠️ 需要关注:** Docker 构建失败，请查看详细日志。\n\n`;
+              chineseReport += `**🔧 常见解决方案:**\n`;
+              chineseReport += `- 检查 Dockerfile 语法\n`;
+              chineseReport += `- 确认依赖包版本\n`;
+              chineseReport += `- 验证构建上下文路径\n\n`;
+              chineseReport += `点击下方链接查看详细构建日志。`;
+            } else {
+              chineseReport += `**ℹ️ 状态:** 构建状态异常，请检查工作流配置。`;
+            }
+
+            // 构建英文报告
+            let englishReport = `### English Report\n\n`;
+
+            if (!buildResult.completed) {
+              englishReport += `**⏰ Status:** Docker build is in progress, please wait for results.`;
+            } else if (buildResult.conclusion === 'success') {
+              englishReport += `**🎉 Result:** Docker build verification passed! Image build successful.\n\n`;
+              englishReport += `**🏗️ Build Details:**\n`;
+              englishReport += `- ✅ Verification Platform: \`linux/amd64\`\n`;
+              englishReport += `- ✅ Build Status: ${statusEn}\n`;
+              englishReport += `- ✅ Cache Optimization: GitHub Actions cache enabled\n`;
+              englishReport += `- ✅ Commit: \`${context.payload.pull_request.head.sha}\`\n`;
+              englishReport += `- ✅ Build Time: ${buildTime}\n\n`;
+              englishReport += `**💡 Optimization Note:** PR stage only builds AMD64 to improve speed, complete multi-platform build will be performed after merge.`;
+            } else if (buildResult.conclusion === 'failure') {
+              englishReport += `**⚠️ Attention Required:** Docker build failed, please check detailed logs.\n\n`;
+              englishReport += `**🔧 Common Solutions:**\n`;
+              englishReport += `- Check Dockerfile syntax\n`;
+              englishReport += `- Verify dependency versions\n`;
+              englishReport += `- Validate build context path\n\n`;
+              englishReport += `Click the link below to view detailed build logs.`;
+            } else {
+              englishReport += `**ℹ️ Status:** Build status is abnormal, please check workflow configuration.`;
+            }
+
+            // 组合最终内容
+            let body = `## 🚀 Docker Quick Build ${statusEn} ${emoji}\n\n`;
+            body += `**PR #${prNumber}** AMD64 platform verification completed (optimized for faster verification)\n\n`;
+            body += `${chineseReport}\n\n---\n\n${englishReport}`;
+
+            // 如果有详细链接，添加到报告中
+            if (buildResult.details_url) {
+              body += `\n\n**🔗 查看详细信息 / View Details:** [点击查看完整构建结果 / Click here to see full build results](${buildResult.details_url})`;
+            }
+
+            // 查找并更新现有评论
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+            });
+
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🚀 Docker Quick Build')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+              console.log('已更新现有的 PR 评论');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: body
+              });
+              console.log('已创建新的 PR 评论');
+            }

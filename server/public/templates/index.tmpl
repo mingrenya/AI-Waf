@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>RuiQi WAF</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* 渐变背景 - 与web主页一致 */
+      .background {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(147, 112, 219, 0.95) 0%,
+          rgba(138, 100, 208, 0.9) 50%,
+          rgba(123, 79, 214, 0.95) 100%
+        );
+        background-size: 200% 200%;
+      }
+
+      /* 装饰性模糊元素 */
+      .blur-elements {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .blur-1 {
+        position: absolute;
+        width: 80%;
+        height: 80%;
+        top: 10%;
+        left: 10%;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+        filter: blur(24px);
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .blur-2 {
+        position: absolute;
+        width: 40%;
+        height: 40%;
+        top: 5%;
+        right: 15%;
+        background-color: rgba(233, 213, 255, 0.2);
+        border-radius: 9999px;
+        filter: blur(24px);
+        animation: float-reverse 9s ease-in-out infinite;
+      }
+
+      .blur-3 {
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        bottom: 5%;
+        left: 15%;
+        background-color: rgba(243, 232, 255, 0.2);
+        border-radius: 9999px;
+        filter: blur(24px);
+        animation: pulse-glow 4s ease-in-out infinite;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 40px rgba(147, 112, 219, 0.1);
+        max-width: 500px;
+        width: 100%;
+        animation: fadeIn 0.8s ease-out;
+        position: relative;
+        z-index: 10;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes float {
+        0%, 100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(-20px) scale(1.05);
+        }
+      }
+
+      @keyframes float-reverse {
+        0%, 100% {
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          transform: translateY(20px) scale(1.05);
+        }
+      }
+
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 0.6;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.8;
+          transform: scale(1.1);
+        }
+      }
+
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      h1 {
+        color: #2d3748;
+        margin-bottom: 20px;
+        font-size: 2.2rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #8a64d0, #9f7aea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .status-icon {
+        font-size: 3.5rem;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+      }
+
+      .countdown {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #8a64d0;
+        margin: 25px 0;
+        padding: 15px;
+        background: linear-gradient(135deg, rgba(138, 100, 208, 0.1), rgba(147, 112, 219, 0.1));
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(138, 100, 208, 0.2);
+      }
+
+      .countdown.warning {
+        color: #e53e3e;
+        background: linear-gradient(135deg, rgba(229, 62, 62, 0.1), rgba(245, 101, 101, 0.1));
+        border-color: rgba(229, 62, 62, 0.2);
+        animation: pulse 0.5s infinite;
+      }
+
+      .redirect-info {
+        margin: 25px 0;
+        color: #4a5568;
+        font-size: 1rem;
+      }
+
+      .url-display {
+        color: #8a64d0;
+        text-decoration: none;
+        font-weight: 500;
+        word-break: break-all;
+        transition: color 0.3s ease;
+      }
+
+      .url-display:hover {
+        color: #9f7aea;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #8a64d0, #9f7aea);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        margin: 15px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        box-shadow: 0 4px 15px rgba(138, 100, 208, 0.3);
+        border: none;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        background: linear-gradient(135deg, #9f7aea, #b794f6);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(138, 100, 208, 0.4);
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(138, 100, 208, 0.2);
+        border-radius: 3px;
+        margin: 25px 0;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #e0c3fc 0%, #8ec5fc 100%);
+        border-radius: 3px;
+        transition: width 1s ease-out;
+        box-shadow: 0 0 10px rgba(224, 195, 252, 0.5);
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 25px 20px;
+          margin: 10px;
+          border-radius: 15px;
+        }
+
+        h1 {
+          font-size: 1.8rem;
+        }
+
+        .countdown {
+          font-size: 1.8rem;
+          padding: 12px;
+        }
+
+        .status-icon {
+          font-size: 3rem;
+        }
+
+        .btn {
+          padding: 12px 24px;
+          font-size: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background"></div>
+    <div class="blur-elements">
+      <div class="blur-1"></div>
+      <div class="blur-2"></div>
+      <div class="blur-3"></div>
+    </div>
+    
+    <div class="container">
+      <div class="status-icon">✅</div>
+      <h1>RuiQi WAF is Running!</h1>
+
+      <div class="redirect-info">
+        <p>Web功能已禁用，正在跳转到项目主页：</p>
+        <a href="{{.URL}}" class="url-display" target="_self">{{.URL}}</a>
+      </div>
+
+      <div class="countdown" id="countdown">{{.INITIAL_COUNTDOWN}}</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+      </div>
+
+      <div>
+        <a href="{{.URL}}" class="btn" target="_self">立即访问</a>
+      </div>
+    </div>
+
+    <script>
+      const INITIAL_COUNTDOWN = {{.INITIAL_COUNTDOWN}};
+
+      let countdown = INITIAL_COUNTDOWN;
+      let isActive = true;
+
+      const countdownElement = document.getElementById("countdown");
+      const progressBar = document.getElementById("progressBar");
+
+      progressBar.style.width = "100%";
+
+      const timer = setInterval(() => {
+        if (!isActive) return;
+
+        countdown--;
+        countdownElement.textContent = countdown;
+
+        const progress = (countdown / INITIAL_COUNTDOWN) * 100;
+        progressBar.style.width = progress + "%";
+
+        if (countdown <= 3) {
+          countdownElement.classList.add("warning");
+        }
+
+        if (countdown <= 0) {
+          clearInterval(timer);
+          countdownElement.textContent = "正在跳转...";
+          progressBar.style.width = "0%";
+
+          setTimeout(() => {
+            window.location.href = "{{.URL}}";
+          }, 500);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

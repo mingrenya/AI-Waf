@@ -1,0 +1,135 @@
+name: 🐞 错误报告
+
+description: 报告错误以帮助改进 RuiQi WAF
+
+title: "[错误] <标题>"
+labels: [bug, needs-triage]
+assignees: "HUAHUAI23"
+
+body:
+  - type: checkboxes
+    attributes:
+      label: 提交前检查清单
+      description: 请在提交前确认以下项目
+      options:
+        - label: 我已搜索现有问题并确认这不是重复报告
+          required: true
+        - label: 我已阅读文档，此问题未被涵盖
+          required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: 部署类型
+      description: 您如何运行 RuiQi WAF？
+      options:
+        - Docker Compose
+        - 独立 Docker
+        - 本地开发
+        - Sealos 模板
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: 受影响的组件
+      description: 哪个组件出现了问题？
+      options:
+        - 前端界面
+        - 后端 API
+        - HAProxy 集成
+        - Coraza WAF 引擎
+        - 微引擎
+        - 地理分析
+        - 速率限制
+        - 身份验证
+        - 数据库
+        - Docker 构建
+        - 文档
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 错误描述
+      description: 清晰简洁地描述错误是什么
+      placeholder: 描述错误...
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 复现步骤
+      description: 详细的复现步骤
+      placeholder: |
+        1. 访问 '...'
+        2. 点击 '...'
+        3. 配置 '...'
+        4. 看到错误
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 期望行为
+      description: 您期望发生什么
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 环境信息
+      description: 请提供您的环境详细信息
+      placeholder: |
+        - 操作系统: (例如 Ubuntu 22.04, Windows 11, macOS 14)
+        - Go 版本: (例如 1.24.1)
+        - Node.js 版本: (如适用)
+        - HAProxy 版本: (例如 3.0)
+        - MongoDB 版本: (例如 6.0)
+        - 浏览器: (如为前端问题)
+        - Docker 版本: (如使用 Docker)
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: 日志和错误信息
+      description: |
+        相关日志、错误信息或堆栈跟踪
+        
+        提示：您可以点击此区域并拖拽文件来附加文件
+      placeholder: |
+        请在此粘贴日志...
+        
+        对于 WAF 相关问题，请包含：
+        - HAProxy 日志
+        - Coraza SPOA 日志
+        - 应用程序日志
+
+  - type: textarea
+    attributes:
+      label: WAF 配置
+      description: 如果这与 WAF 规则或配置相关，请提供相关详细信息
+      placeholder: |
+        - 使用的规则集
+        - 自定义规则（如有）
+        - HAProxy 配置片段
+        - 流量模式
+
+  - type: textarea
+    attributes:
+      label: 其他上下文
+      description: |
+        关于问题的任何其他上下文
+        
+        截图、网络跟踪或其他相关信息 

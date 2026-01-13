@@ -1,0 +1,27 @@
+# 自动分配审查者配置
+addReviewers: true
+addAssignees: false
+
+# 默认审查者
+reviewers:
+  - HUAHUAI23 # 项目维护者
+
+# 基于标签的审查者分配
+labelAssignees:
+  area/backend:
+    - backend-team-member
+  area/frontend:
+    - frontend-team-member
+  area/security:
+    - security-team-member
+  area/waf:
+    - waf-specialist
+
+# 审查者数量
+numberOfReviewers: 1
+numberOfAssignees: 0
+
+# 跳过关键词
+skipKeywords:
+  - wip
+  - draft

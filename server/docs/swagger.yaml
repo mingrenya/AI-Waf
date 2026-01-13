@@ -1,0 +1,3648 @@
+basePath: /api/v1
+definitions:
+  dto.AddIPToBlacklistRequest:
+    description: 添加IP地址或CIDR到系统默认黑名单的请求
+    properties:
+      ip:
+        description: IP地址或CIDR
+        example: 192.168.1.1
+        type: string
+    required:
+    - ip
+    type: object
+  dto.AppConfigDTO:
+    properties:
+      directives:
+        description: 指令配置
+        type: string
+      logFile:
+        description: 日志文件
+        type: string
+      logFormat:
+        description: 日志格式
+        type: string
+      logLevel:
+        description: 日志级别
+        type: string
+      name:
+        description: 应用名称
+        type: string
+      transactionTTL:
+        description: 事务超时时间(毫秒)
+        example: 60000
+        type: integer
+    type: object
+  dto.AppConfigPatchDTO:
+    properties:
+      directives:
+        description: 指令配置
+        type: string
+      logFile:
+        description: 日志文件
+        example: /dev/stdout
+        type: string
+      logFormat:
+        description: 日志格式
+        example: console
+        type: string
+      logLevel:
+        description: 日志级别
+        example: info
+        type: string
+      name:
+        description: 应用名称
+        example: coraza
+        type: string
+      transactionTTL:
+        description: 事务超时时间(毫秒)
+        example: 60000
+        type: integer
+    type: object
+  dto.AttackEventAggregateResult:
+    description: 攻击事件的聚合统计结果，提供IP、域名、端口维度的攻击信息汇总，包含攻击次数、首次和最近攻击时间、持续时间等关键指标
+    properties:
+      count:
+        description: 攻击总次数，同一来源的攻击计数
+        example: 15
+        type: integer
+      domain:
+        description: 域名，被攻击的站点
+        example: example.com
+        type: string
+      dstPort:
+        description: 目标端口号，被攻击的服务端口
+        example: 443
+        type: integer
+      durationInMinutes:
+        description: 攻击持续时间(分钟)，从首次到最近攻击的时间跨度
+        example: 18.2
+        type: number
+      firstAttackTime:
+        description: 首次攻击时间，该IP首次发起攻击的时间点
+        example: "2024-03-18T08:12:33Z"
+        type: string
+      isOngoing:
+        description: 是否正在进行中，标识攻击是否仍在持续
+        example: true
+        type: boolean
+      lastAttackTime:
+        description: 最近攻击时间，该IP最后一次攻击的时间点
+        example: "2024-03-18T08:30:45Z"
+        type: string
+      srcIp:
+        description: 来源IP地址，攻击者地址
+        example: 192.168.1.100
+        type: string
+      srcIpInfo:
+        allOf:
+        - $ref: '#/definitions/model.IPInfo'
+        description: 来源IP地址，攻击者地址
+    type: object
+  dto.AttackEventResponse:
+    description: 攻击事件查询的分页响应结构体，包含聚合结果列表及分页元数据，用于前端展示和翻页控制
+    properties:
+      currentPage:
+        description: 当前页码，从1开始计数
+        example: 1
+        type: integer
+      pageSize:
+        description: 每页大小，当前设置的每页记录数
+        example: 10
+        type: integer
+      results:
+        description: 聚合结果列表，当前页的攻击事件记录
+        items:
+          $ref: '#/definitions/dto.AttackEventAggregateResult'
+        type: array
+      totalCount:
+        description: 总记录数，符合条件的攻击事件总数
+        example: 35
+        type: integer
+      totalPages:
+        description: 总页数，根据总记录数和每页大小计算
+        example: 4
+        type: integer
+    type: object
+  dto.AttackLogResponse:
+    description: 攻击日志查询的分页响应结构体，返回详细的WAF日志记录及分页信息，便于安全分析和事件追踪
+    properties:
+      currentPage:
+        description: 当前页码，从1开始计数
+        example: 1
+        type: integer
+      pageSize:
+        description: 每页大小，当前设置的每页记录数
+        example: 10
+        type: integer
+      results:
+        description: 日志记录列表，当前页的WAF攻击日志详情
+        items:
+          $ref: '#/definitions/model.WAFLog'
+        type: array
+      totalCount:
+        description: 总记录数，符合查询条件的日志总数
+        example: 128
+        type: integer
+      totalPages:
+        description: 总页数，根据总记录数和每页大小计算
+        example: 13
+        type: integer
+    type: object
+  dto.BackendDTO:
+    properties:
+      servers:
+        description: 服务器列表，至少需要一个服务器
+        items:
+          $ref: '#/definitions/dto.ServerDTO'
+        minItems: 1
+        type: array
+    required:
+    - servers
+    type: object
+  dto.BlockedIPCleanupResponse:
+    description: 清理过期封禁IP记录的响应数据
+    properties:
+      deletedCount:
+        description: 删除的记录数量
+        example: 25
+        type: integer
+      message:
+        description: 操作结果消息
+        example: 已成功清理过期的封禁IP记录
+        type: string
+    type: object
+  dto.BlockedIPHourlyStats:
+    description: 按小时的封禁统计
+    properties:
+      count:
+        description: 该小时的封禁数量
+        example: 10
+        type: integer
+      hour:
+        description: 小时时间点
+        example: "2023-12-01T10:00:00Z"
+        type: string
+    type: object
+  dto.BlockedIPListResponse:
+    description: 封禁IP分页列表响应
+    properties:
+      items:
+        description: IP列表
+        items:
+          $ref: '#/definitions/dto.BlockedIPResponse'
+        type: array
+      page:
+        description: 当前页码
+        example: 1
+        type: integer
+      pages:
+        description: 总页数
+        example: 10
+        type: integer
+      size:
+        description: 每页数量
+        example: 10
+        type: integer
+      total:
+        description: 总数量
+        example: 100
+        type: integer
+    type: object
+  dto.BlockedIPResponse:
+    description: 封禁IP详细信息
+    properties:
+      blockedAt:
+        description: 封禁开始时间
+        example: "2023-12-01T10:00:00Z"
+        type: string
+      blockedUntil:
+        description: 封禁结束时间
+        example: "2023-12-01T11:00:00Z"
+        type: string
+      ip:
+        description: 被封禁的IP地址
+        example: 192.168.1.1
+        type: string
+      isActive:
+        description: 是否仍在封禁中
+        example: true
+        type: boolean
+      reason:
+        description: 封禁原因
+        example: high_frequency_attack
+        type: string
+      remainingTTL:
+        description: 剩余封禁时间（秒）
+        example: 3600
+        type: integer
+      requestUri:
+        description: 请求URI
+        example: /api/v1/login
+        type: string
+    type: object
+  dto.BlockedIPStatsResponse:
+    description: 封禁IP统计信息
+    properties:
+      activeBlocked:
+        description: 当前生效的封禁数量
+        example: 50
+        type: integer
+      expiredBlocked:
+        description: 已过期的封禁数量
+        example: 950
+        type: integer
+      last24HourStats:
+        description: 最近24小时统计
+        items:
+          $ref: '#/definitions/dto.BlockedIPHourlyStats'
+        type: array
+      reasonStats:
+        additionalProperties:
+          type: integer
+        description: 按原因统计
+        type: object
+      totalBlocked:
+        description: 总封禁数量
+        example: 1000
+        type: integer
+    type: object
+  dto.CertificateCreateRequest:
+    description: 创建证书的请求参数
+    properties:
+      description:
+        description: 证书描述
+        example: 用于example.com的证书
+        type: string
+      domains:
+        description: 证书绑定的域名列表
+        example:
+        - '["example.com"]'
+        items:
+          type: string
+        type: array
+      expireDate:
+        description: 证书过期日期
+        example: "2023-12-31T23:59:59Z"
+        type: string
+      fingerPrint:
+        description: 证书指纹
+        example: AA:BB:CC:DD:...
+        type: string
+      issuerName:
+        description: 颁发机构
+        example: Let's Encrypt
+        type: string
+      name:
+        description: 证书名称/别名
+        example: example-cert
+        type: string
+      privateKey:
+        description: 私钥内容（PEM格式）
+        type: string
+      publicKey:
+        description: 公钥内容（PEM格式）
+        type: string
+    required:
+    - privateKey
+    - publicKey
+    type: object
+  dto.CertificateDTO:
+    properties:
+      certName:
+        description: 证书名称
+        example: my-cert
+        type: string
+      expireDate:
+        description: 过期时间
+        type: string
+      fingerPrint:
+        description: 证书指纹
+        type: string
+      issuerName:
+        description: 颁发机构
+        example: Let's Encrypt
+        type: string
+      privateKey:
+        description: 私钥内容
+        type: string
+      publicKey:
+        description: 公钥内容
+        type: string
+    required:
+    - certName
+    - expireDate
+    - fingerPrint
+    - issuerName
+    - privateKey
+    - publicKey
+    type: object
+  dto.CertificateListResponse:
+    description: 证书列表响应
+    properties:
+      items:
+        description: 证书列表
+        items:
+          $ref: '#/definitions/model.CertificateStore'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  dto.CertificateUpdateRequest:
+    description: 更新证书的请求参数
+    properties:
+      description:
+        description: 证书描述
+        example: 用于example.com的证书
+        type: string
+      domains:
+        description: 证书绑定的域名列表
+        example:
+        - '["example.com"]'
+        items:
+          type: string
+        type: array
+      expireDate:
+        description: 证书过期日期
+        example: "2023-12-31T23:59:59Z"
+        type: string
+      fingerPrint:
+        description: 证书指纹
+        example: AA:BB:CC:DD:...
+        type: string
+      issuerName:
+        description: 颁发机构
+        example: Let's Encrypt
+        type: string
+      name:
+        description: 证书名称/别名
+        example: example-cert
+        type: string
+      privateKey:
+        description: 私钥内容（PEM格式）
+        type: string
+      publicKey:
+        description: 公钥内容（PEM格式）
+        type: string
+    type: object
+  dto.CombinedTimeSeriesResponse:
+    description: 同时包含请求数和拦截数的时间序列数据
+    properties:
+      blocks:
+        allOf:
+        - $ref: '#/definitions/dto.TimeSeriesResponse'
+        description: 拦截数时间序列
+      requests:
+        allOf:
+        - $ref: '#/definitions/dto.TimeSeriesResponse'
+        description: 请求数时间序列
+      timeRange:
+        description: 时间范围
+        example: 24h
+        type: string
+    type: object
+  dto.ConfigPatchRequest:
+    description: 用于部分更新配置的请求参数
+    properties:
+      engine:
+        allOf:
+        - $ref: '#/definitions/dto.EnginePatchDTO'
+        description: 引擎配置
+      haproxy:
+        allOf:
+        - $ref: '#/definitions/dto.HaproxyPatchDTO'
+        description: HAProxy配置
+      isDebug:
+        description: 是否开启调试模式
+        example: false
+        type: boolean
+      isK8s:
+        description: 是否在K8s环境
+        example: false
+        type: boolean
+      isResponseCheck:
+        description: 是否检查响应
+        example: false
+        type: boolean
+      name:
+        description: 配置名称
+        example: AppConfig
+        type: string
+    type: object
+  dto.ConfigResponse:
+    description: 配置响应
+    properties:
+      createdAt:
+        description: 创建时间
+        type: string
+      engine:
+        allOf:
+        - $ref: '#/definitions/dto.EngineDTO'
+        description: 引擎配置
+      haproxy:
+        allOf:
+        - $ref: '#/definitions/dto.HaproxyDTO'
+        description: HAProxy配置
+      id:
+        description: 配置ID
+        type: string
+      isDebug:
+        description: 是否开启调试模式
+        type: boolean
+      isK8s:
+        description: 是否在K8s环境
+        type: boolean
+      isResponseCheck:
+        description: 是否检查响应
+        type: boolean
+      name:
+        description: 配置名称
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+    type: object
+  dto.CreateSiteRequest:
+    description: 创建站点的请求参数
+    properties:
+      activeStatus:
+        description: 站点状态
+        example: true
+        type: boolean
+      backend:
+        allOf:
+        - $ref: '#/definitions/dto.BackendDTO'
+        description: 后端服务器配置
+      certificate:
+        allOf:
+        - $ref: '#/definitions/dto.CertificateDTO'
+        description: 证书信息
+      domain:
+        description: 域名
+        example: example.com
+        type: string
+      enableHTTPS:
+        description: 是否启用HTTPS
+        example: false
+        type: boolean
+      listenPort:
+        description: 监听端口
+        example: 8080
+        maximum: 65535
+        minimum: 1
+        type: integer
+      name:
+        description: 站点名称
+        example: my-site
+        type: string
+      wafEnabled:
+        description: 是否启用WAF
+        example: false
+        type: boolean
+      wafMode:
+        description: WAF模式
+        enum:
+        - protection
+        - observation
+        example: observation
+        type: string
+    required:
+    - backend
+    - domain
+    - listenPort
+    - name
+    type: object
+  dto.EngineDTO:
+    properties:
+      appConfig:
+        description: 应用配置列表
+        items:
+          $ref: '#/definitions/dto.AppConfigDTO'
+        type: array
+      asnDBPath:
+        description: ASN数据库路径
+        type: string
+      bind:
+        description: 引擎绑定地址
+        type: string
+      cityDBPath:
+        description: 城市数据库路径
+        type: string
+      flowController:
+        allOf:
+        - $ref: '#/definitions/dto.FlowControllerDTO'
+        description: 流量控制配置
+      useBuiltinRules:
+        description: 是否使用内置规则
+        type: boolean
+    type: object
+  dto.EnginePatchDTO:
+    properties:
+      appConfig:
+        description: 应用配置列表
+        items:
+          $ref: '#/definitions/dto.AppConfigPatchDTO'
+        type: array
+      asnDBPath:
+        description: ASN数据库路径
+        example: /opt/geoip/GeoLite2-ASN.mmdb
+        type: string
+      bind:
+        description: 引擎绑定地址
+        example: 127.0.0.1:2342
+        type: string
+      cityDBPath:
+        description: 城市数据库路径
+        example: /opt/geoip/GeoLite2-City.mmdb
+        type: string
+      flowController:
+        allOf:
+        - $ref: '#/definitions/dto.FlowControllerPatchDTO'
+        description: 流量控制配置
+      useBuiltinRules:
+        description: 是否使用内置规则
+        example: true
+        type: boolean
+    type: object
+  dto.FlowControllerDTO:
+    properties:
+      attackLimit:
+        allOf:
+        - $ref: '#/definitions/dto.LimitConfigDTO'
+        description: 攻击频率限制配置
+      errorLimit:
+        allOf:
+        - $ref: '#/definitions/dto.LimitConfigDTO'
+        description: 错误频率限制配置
+      visitLimit:
+        allOf:
+        - $ref: '#/definitions/dto.LimitConfigDTO'
+        description: 访问频率限制配置
+    type: object
+  dto.FlowControllerPatchDTO:
+    properties:
+      attackLimit:
+        allOf:
+        - $ref: '#/definitions/dto.LimitConfigPatchDTO'
+        description: 攻击频率限制配置
+      errorLimit:
+        allOf:
+        - $ref: '#/definitions/dto.LimitConfigPatchDTO'
+        description: 错误频率限制配置
+      visitLimit:
+        allOf:
+        - $ref: '#/definitions/dto.LimitConfigPatchDTO'
+        description: 访问频率限制配置
+    type: object
+  dto.GetUserInfoResponseData:
+    properties:
+      id:
+        example: "1234567890"
+        type: string
+      needReset:
+        example: false
+        type: boolean
+      role:
+        example: admin
+        type: string
+      username:
+        example: user123
+        type: string
+    type: object
+  dto.HaproxyDTO:
+    properties:
+      backupsNumber:
+        description: 备份数量
+        type: integer
+      configBaseDir:
+        description: 配置文件根目录
+        type: string
+      haproxyBin:
+        description: HAProxy二进制文件路径
+        type: string
+      spoeAgentAddr:
+        description: SPOE代理地址
+        type: string
+      spoeAgentPort:
+        description: SPOE代理端口
+        type: integer
+      thread:
+        description: 线程数
+        type: integer
+    type: object
+  dto.HaproxyPatchDTO:
+    properties:
+      backupsNumber:
+        description: 备份数量
+        example: 5
+        type: integer
+      configBaseDir:
+        description: 配置文件根目录
+        example: /RuiQi
+        type: string
+      haproxyBin:
+        description: HAProxy二进制文件路径
+        example: haproxy
+        type: string
+      spoeAgentAddr:
+        description: SPOE代理地址
+        example: 127.0.0.1
+        type: string
+      spoeAgentPort:
+        description: SPOE代理端口
+        example: 2342
+        type: integer
+      thread:
+        description: 线程数
+        example: 4
+        maximum: 256
+        minimum: 0
+        type: integer
+    type: object
+  dto.IPGroupCreateRequest:
+    description: 创建IP组的请求参数
+    properties:
+      items:
+        description: IP地址或CIDR列表
+        example:
+        - '["192.168.1.1"]'
+        items:
+          type: string
+        type: array
+      name:
+        description: IP组名称
+        example: 内部服务器
+        type: string
+    required:
+    - items
+    - name
+    type: object
+  dto.IPGroupListResponse:
+    description: IP组列表响应
+    properties:
+      items:
+        description: IP组列表
+        items:
+          $ref: '#/definitions/model.IPGroup'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  dto.IPGroupUpdateRequest:
+    description: 更新IP组的请求参数
+    properties:
+      items:
+        description: IP地址或CIDR列表
+        example:
+        - '["192.168.1.1"]'
+        items:
+          type: string
+        type: array
+      name:
+        description: IP组名称
+        example: 内部服务器
+        type: string
+    type: object
+  dto.LimitConfigDTO:
+    properties:
+      blockDuration:
+        description: 封禁时长（秒）
+        type: integer
+      burstCount:
+        description: 允许的突发请求数
+        type: integer
+      enabled:
+        description: 是否启用
+        type: boolean
+      paramsCapacity:
+        description: 缓存容量
+        type: integer
+      statDuration:
+        description: 统计时间窗口（秒）
+        type: integer
+      threshold:
+        description: 阈值
+        type: integer
+    type: object
+  dto.LimitConfigPatchDTO:
+    properties:
+      blockDuration:
+        description: 封禁时长（秒）
+        example: 600
+        type: integer
+      burstCount:
+        description: 允许的突发请求数
+        example: 10
+        type: integer
+      enabled:
+        description: 是否启用
+        example: true
+        type: boolean
+      paramsCapacity:
+        description: 缓存容量
+        example: 10000
+        type: integer
+      statDuration:
+        description: 统计时间窗口（秒）
+        example: 60
+        type: integer
+      threshold:
+        description: 阈值
+        example: 100
+        type: integer
+    type: object
+  dto.LoginResponseData:
+    properties:
+      token:
+        description: JWT token
+        example: eyJhbGciOiJIUzI1NiIs...
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/model.User'
+        description: 用户信息
+    type: object
+  dto.MicroRuleCreateRequest:
+    description: 创建微规则的请求参数
+    properties:
+      condition:
+        description: 规则条件
+        type: object
+      name:
+        description: 规则名称
+        example: SQL注入防护规则
+        type: string
+      priority:
+        description: 优先级字段，数字越大优先级越高
+        example: 100
+        type: integer
+      status:
+        description: 规则状态
+        enum:
+        - enabled
+        - disabled
+        example: enabled
+        type: string
+      type:
+        description: 规则类型
+        enum:
+        - whitelist
+        - blacklist
+        example: blacklist
+        type: string
+    required:
+    - condition
+    - name
+    - priority
+    - status
+    - type
+    type: object
+  dto.MicroRuleListResponse:
+    description: 微规则列表响应
+    properties:
+      items:
+        description: 微规则列表
+        items:
+          $ref: '#/definitions/dto.MicroRuleResponse'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  dto.MicroRuleResponse:
+    description: 微规则响应参数
+    properties:
+      condition:
+        description: 规则条件
+        type: object
+      id:
+        example: 60a763d0f03239868b50e810
+        type: string
+      name:
+        description: 规则名称
+        example: SQL注入防护规则
+        type: string
+      priority:
+        description: 优先级字段，数字越大优先级越高
+        example: 100
+        type: integer
+      status:
+        description: 规则状态
+        enum:
+        - enabled
+        - disabled
+        example: enabled
+        type: string
+      type:
+        description: 规则类型
+        enum:
+        - whitelist
+        - blacklist
+        example: blacklist
+        type: string
+    type: object
+  dto.MicroRuleUpdateRequest:
+    description: 更新微规则的请求参数
+    properties:
+      condition:
+        description: 规则条件
+        type: object
+      name:
+        description: 规则名称
+        example: SQL注入防护规则
+        type: string
+      priority:
+        description: 优先级字段，数字越大优先级越高
+        example: 100
+        type: integer
+      status:
+        description: 规则状态
+        enum:
+        - enabled
+        - disabled
+        example: enabled
+        type: string
+      type:
+        description: 规则类型
+        enum:
+        - whitelist
+        - blacklist
+        example: blacklist
+        type: string
+    type: object
+  dto.OverviewStats:
+    description: 概览统计数据，包含各项关键指标
+    properties:
+      attackIPCount:
+        description: 攻击IP数量
+        example: 45
+        type: integer
+      blockCount:
+        description: 安全统计
+        example: 123
+        type: integer
+      error4xx:
+        description: 错误统计
+        example: 234
+        type: integer
+      error4xxRate:
+        description: 4xx错误率(百分比)
+        example: 0.23
+        type: number
+      error5xx:
+        description: 5xx错误数量
+        example: 45
+        type: integer
+      error5xxRate:
+        description: 5xx错误率(百分比)
+        example: 0.05
+        type: number
+      inboundTraffic:
+        description: 入站流量(字节)
+        example: 67890123
+        type: integer
+      maxQPS:
+        description: 最大QPS
+        example: 150
+        type: integer
+      outboundTraffic:
+        description: 出站流量(字节)
+        example: 12345678
+        type: integer
+      timeRange:
+        description: 时间范围
+        example: 24h
+        type: string
+      totalRequests:
+        description: 流量统计
+        example: 123456
+        type: integer
+    type: object
+  dto.RealtimeQPSData:
+    description: 实时QPS数据点，包含时间戳和值
+    properties:
+      timestamp:
+        description: 时间戳
+        example: "2024-01-01T12:30:45Z"
+        type: string
+      value:
+        description: QPS值
+        example: 120
+        type: integer
+    type: object
+  dto.RealtimeQPSResponse:
+    description: 实时QPS数据响应
+    properties:
+      data:
+        description: QPS数据点列表
+        items:
+          $ref: '#/definitions/dto.RealtimeQPSData'
+        type: array
+    type: object
+  dto.ResetPasswordResponseData:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data:
+        $ref: '#/definitions/model.User'
+      message:
+        example: 操作成功
+        type: string
+      requestId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      success:
+        example: true
+        type: boolean
+      timestamp:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  dto.RunnerControlRequest:
+    properties:
+      action:
+        description: 控制动作
+        enum:
+        - start
+        - stop
+        - restart
+        - force_stop
+        - reload
+        type: string
+    required:
+    - action
+    type: object
+  dto.RunnerControlResponse:
+    properties:
+      action:
+        description: 执行的动作
+        example: start
+        type: string
+      message:
+        description: 操作消息
+        example: 运行器已成功启动
+        type: string
+      state:
+        description: 操作后的状态
+        example: running
+        type: string
+      success:
+        description: 操作是否成功
+        example: true
+        type: boolean
+    type: object
+  dto.RunnerStatusResponse:
+    properties:
+      isRunning:
+        description: 是否正在运行
+        example: true
+        type: boolean
+      state:
+        description: 状态：running, stopped, error
+        example: running
+        type: string
+    type: object
+  dto.ServerDTO:
+    properties:
+      host:
+        description: 主机地址
+        example: backend.example.com
+        type: string
+      isSSL:
+        description: 是否启用SSL
+        example: false
+        type: boolean
+      port:
+        description: 端口
+        example: 80
+        maximum: 65535
+        minimum: 1
+        type: integer
+    required:
+    - host
+    - port
+    type: object
+  dto.SiteListResponse:
+    description: 站点列表响应
+    properties:
+      items:
+        description: 站点列表
+        items:
+          $ref: '#/definitions/model.Site'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  dto.SiteResponse:
+    description: 站点信息响应
+    properties:
+      activeStatus:
+        description: 站点是否激活
+        type: boolean
+      backend:
+        allOf:
+        - $ref: '#/definitions/model.Backend'
+        description: 后端服务器配置
+      certificate:
+        allOf:
+        - $ref: '#/definitions/model.Certificate'
+        description: 证书信息
+      createdAt:
+        type: string
+      domain:
+        description: 域名，如 a.com
+        type: string
+      enableHTTPS:
+        description: 是否启用HTTPS
+        type: boolean
+      id:
+        description: 站点ID
+        type: string
+      listenPort:
+        description: 监听端口，如 9000
+        type: integer
+      name:
+        description: 站点名称
+        type: string
+      updatedAt:
+        type: string
+      wafEnabled:
+        description: 是否启用WAF
+        type: boolean
+      wafMode:
+        allOf:
+        - $ref: '#/definitions/model.WAFMode'
+        description: WAF防护模式
+    type: object
+  dto.TimeSeriesDataPoint:
+    description: 时间序列图表数据点
+    properties:
+      timestamp:
+        description: 时间戳，表示数据点的时间
+        example: "2024-01-01T12:00:00Z"
+        type: string
+      value:
+        description: 数值，表示该时间点的指标值
+        example: 128
+        type: integer
+    type: object
+  dto.TimeSeriesResponse:
+    description: 时间序列图表数据响应
+    properties:
+      data:
+        description: 数据点列表
+        items:
+          $ref: '#/definitions/dto.TimeSeriesDataPoint'
+        type: array
+      metric:
+        description: 指标名称
+        example: requests
+        type: string
+      timeRange:
+        description: 时间范围
+        example: 24h
+        type: string
+    type: object
+  dto.TrafficDataPoint:
+    description: 流量时间序列图表数据点
+    properties:
+      inboundTraffic:
+        description: 入站流量(字节)
+        example: 1024000
+        type: integer
+      outboundTraffic:
+        description: 出站流量(字节)
+        example: 2048000
+        type: integer
+      timestamp:
+        description: 时间戳，表示数据点的时间
+        example: "2024-01-01T12:00:00Z"
+        type: string
+    type: object
+  dto.TrafficTimeSeriesResponse:
+    description: 流量时间序列图表数据响应
+    properties:
+      data:
+        description: 流量数据点列表
+        items:
+          $ref: '#/definitions/dto.TrafficDataPoint'
+        type: array
+      timeRange:
+        description: 时间范围
+        example: 24h
+        type: string
+    type: object
+  dto.UpdateSiteRequest:
+    description: 更新站点的请求参数
+    properties:
+      activeStatus:
+        description: 站点状态
+        example: true
+        type: boolean
+      backend:
+        allOf:
+        - $ref: '#/definitions/dto.BackendDTO'
+        description: 后端服务器配置
+      certificate:
+        allOf:
+        - $ref: '#/definitions/dto.CertificateDTO'
+        description: 证书信息
+      domain:
+        description: 域名
+        example: example.com
+        type: string
+      enableHTTPS:
+        description: 是否启用HTTPS
+        example: false
+        type: boolean
+      listenPort:
+        description: 监听端口
+        example: 8080
+        maximum: 65535
+        minimum: 1
+        type: integer
+      name:
+        description: 站点名称
+        example: my-site
+        type: string
+      wafEnabled:
+        description: 是否启用WAF
+        example: false
+        type: boolean
+      wafMode:
+        description: WAF模式
+        enum:
+        - protection
+        - observation
+        example: observation
+        type: string
+    type: object
+  dto.UserCreateRequest:
+    properties:
+      password:
+        minLength: 6
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        type: string
+      username:
+        maxLength: 20
+        minLength: 3
+        type: string
+    required:
+    - password
+    - role
+    - username
+    type: object
+  dto.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.UserPasswordResetRequest:
+    properties:
+      newPassword:
+        minLength: 6
+        type: string
+      oldPassword:
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  dto.UserUpdateRequest:
+    properties:
+      needReset:
+        type: boolean
+      password:
+        minLength: 6
+        type: string
+      role:
+        enum:
+        - admin
+        - auditor
+        - configurator
+        - user
+        type: string
+      username:
+        maxLength: 20
+        minLength: 3
+        type: string
+    type: object
+  model.APIResponse:
+    description: API响应的标准格式
+    properties:
+      code:
+        description: HTTP状态码
+        example: 200
+        type: integer
+      data:
+        description: 响应数据
+      error:
+        description: 错误信息(当success=false时)
+        example: 参数错误
+        type: string
+      message:
+        description: 响应消息
+        example: 操作成功
+        type: string
+      requestId:
+        description: 请求ID，用于跟踪
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+      timestamp:
+        description: 响应时间戳
+        example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.Backend:
+    properties:
+      servers:
+        description: 服务器列表
+        items:
+          $ref: '#/definitions/model.Server'
+        type: array
+    type: object
+  model.Certificate:
+    properties:
+      certName:
+        description: 证书名称/别名
+        type: string
+      expireDate:
+        description: 证书过期日期
+        type: string
+      fingerPrint:
+        description: 证书指纹
+        type: string
+      issuerName:
+        description: 颁发机构
+        type: string
+      privateKey:
+        description: 私钥内容（PEM格式）
+        type: string
+      publicKey:
+        description: 公钥内容（PEM格式）
+        type: string
+    type: object
+  model.CertificateStore:
+    properties:
+      createdAt:
+        description: 创建时间
+        type: string
+      description:
+        description: 证书描述
+        type: string
+      domains:
+        description: 证书绑定的域名列表
+        items:
+          type: string
+        type: array
+      expireDate:
+        description: 证书过期日期
+        type: string
+      fingerPrint:
+        description: 证书指纹
+        type: string
+      id:
+        description: 证书ID
+        type: string
+      issuerName:
+        description: 颁发机构
+        type: string
+      name:
+        description: 证书名称/别名
+        type: string
+      privateKey:
+        description: 私钥内容（PEM格式）
+        type: string
+      publicKey:
+        description: 公钥内容（PEM格式）
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+    type: object
+  model.ErrResponse:
+    description: 错误的API响应标准格式
+    properties:
+      code:
+        example: 400
+        type: integer
+      error:
+        example: 参数错误
+        type: string
+      message:
+        example: 请求参数错误
+        type: string
+      requestId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      success:
+        example: false
+        type: boolean
+      timestamp:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.ErrResponseDontShowError:
+    description: 错误的API响应标准格式,不展示 error
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: 请求参数错误
+        type: string
+      requestId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      success:
+        example: false
+        type: boolean
+      timestamp:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.IPGroup:
+    description: IP地址组信息，包含组名和IP地址列表
+    properties:
+      id:
+        description: 组唯一标识符
+        example: 60d21b4367d0d8992e89e964
+        type: string
+      items:
+        description: IP地址或CIDR列表
+        example:
+        - '[''192.168.1.1'''
+        - ' ''10.0.0.1/24'']'
+        items:
+          type: string
+        type: array
+      name:
+        description: 组名称
+        example: 内部服务器
+        type: string
+    type: object
+  model.IPInfo:
+    description: IP地址地理位置详细信息，包含城市、区域、国家和ASN等数据
+    properties:
+      asn:
+        properties:
+          number:
+            description: ASN号码
+            example: 4134
+            type: integer
+          organization:
+            description: 组织名称
+            example: China Telecom
+            type: string
+        type: object
+      city:
+        properties:
+          nameEn:
+            description: 城市英文名称
+            example: Hangzhou
+            type: string
+          nameZh:
+            description: 城市中文名称
+            example: 杭州
+            type: string
+        type: object
+      continent:
+        properties:
+          nameEn:
+            description: 大洲英文名称
+            example: Asia
+            type: string
+          nameZh:
+            description: 大洲中文名称
+            example: 亚洲
+            type: string
+        type: object
+      country:
+        properties:
+          isoCode:
+            description: 国家ISO代码
+            example: CN
+            type: string
+          nameEn:
+            description: 国家英文名称
+            example: China
+            type: string
+          nameZh:
+            description: 国家中文名称
+            example: 中国
+            type: string
+        type: object
+      location:
+        properties:
+          latitude:
+            description: 纬度
+            example: 30.2943
+            type: number
+          longitude:
+            description: 经度
+            example: 120.1663
+            type: number
+          timeZone:
+            description: 时区
+            example: Asia/Shanghai
+            type: string
+        type: object
+      subdivision:
+        properties:
+          isoCode:
+            description: 省/州代码
+            example: ZJ
+            type: string
+          nameEn:
+            description: 省/州英文名称
+            example: Zhejiang
+            type: string
+          nameZh:
+            description: 省/州中文名称
+            example: 浙江
+            type: string
+        type: object
+    type: object
+  model.Log:
+    description: 详细的WAF规则匹配记录，包含规则触发的详细信息和原始日志
+    properties:
+      accuracy:
+        description: 规则匹配准确度(0-10)
+        example: 9
+        type: integer
+      logRaw:
+        description: 原始日志数据
+        example: '[2024-03-18 08:12:33] [error] ModSecurity: Access denied with code
+          403 (phase 1). Matched "Operator ''Rx'' with parameter ''(?:scanner)'' against
+          variable ''REQUEST_HEADERS:User-Agent''" [id "10086"] [msg "恶意扫描器检测"] [severity
+          "CRITICAL"]'
+        type: string
+      message:
+        description: 日志消息
+        example: 恶意扫描器检测
+        type: string
+      payload:
+        description: 攻击载荷
+        example: Scanner/1.0
+        type: string
+      phase:
+        description: 请求处理阶段
+        example: 1
+        type: integer
+      ruleId:
+        description: 规则ID
+        example: 10086
+        type: integer
+      secLangRaw:
+        description: 安全规则原始定义
+        example: SecRule REQUEST_HEADERS:User-Agent "@rx (?:scanner)" "id:1008,phase:1,severity:'CRITICAL'"
+        type: string
+      secMark:
+        description: 安全标记
+        example: web_scanner
+        type: string
+      severity:
+        description: 严重级别(0-5)
+        example: 2
+        type: integer
+    type: object
+  model.Server:
+    properties:
+      host:
+        description: 主机地址，如 IP 或域名
+        type: string
+      isSSL:
+        description: 是否启用SSL
+        type: boolean
+      port:
+        description: 端口
+        type: integer
+    type: object
+  model.Site:
+    properties:
+      activeStatus:
+        description: 站点是否激活
+        type: boolean
+      backend:
+        allOf:
+        - $ref: '#/definitions/model.Backend'
+        description: 后端服务器配置
+      certificate:
+        allOf:
+        - $ref: '#/definitions/model.Certificate'
+        description: 证书信息
+      createdAt:
+        type: string
+      domain:
+        description: 域名，如 a.com
+        type: string
+      enableHTTPS:
+        description: 是否启用HTTPS
+        type: boolean
+      id:
+        description: 站点ID
+        type: string
+      listenPort:
+        description: 监听端口，如 9000
+        type: integer
+      name:
+        description: 站点名称
+        type: string
+      updatedAt:
+        type: string
+      wafEnabled:
+        description: 是否启用WAF
+        type: boolean
+      wafMode:
+        allOf:
+        - $ref: '#/definitions/model.WAFMode'
+        description: WAF防护模式
+    type: object
+  model.SuccessResponse:
+    description: 成功的API响应标准格式
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+      message:
+        example: 操作成功
+        type: string
+      requestId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      success:
+        example: true
+        type: boolean
+      timestamp:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.SuccessResponseNoData:
+    description: 成功的API响应标准格式,没有 data
+    properties:
+      code:
+        example: 200
+        type: integer
+      message:
+        example: 操作成功
+        type: string
+      requestId:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      success:
+        example: true
+        type: boolean
+      timestamp:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.User:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: string
+      lastLogin:
+        type: string
+      needReset:
+        description: 是否需要重置密码
+        type: boolean
+      permissions:
+        description: 额外权限
+        items:
+          type: string
+        type: array
+      role:
+        description: 用户角色
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+  model.WAFLog:
+    description: Web应用防火墙安全事件完整记录，包含详细的攻击检测和防护信息
+    properties:
+      accuracy:
+        description: 规则匹配准确度(0-10)
+        example: 9
+        type: integer
+      clientIp:
+        description: 来源IP地址
+        example: 192.168.1.1
+        type: string
+      createdAt:
+        description: 事件发生时间戳
+        example: "2024-03-18T08:12:33Z"
+        type: string
+      date:
+        type: string
+      domain:
+        description: 目标域名
+        example: api.example.com
+        type: string
+      dstIp:
+        description: 目标IP地址
+        example: 10.0.0.1
+        type: string
+      dstPort:
+        description: 目标端口
+        example: 443
+        type: integer
+      hour:
+        type: integer
+      hourGroupSix:
+        example: 0
+        type: integer
+      id:
+        description: 日志唯一标识符
+        type: string
+      logs:
+        description: 关联的日志条目
+        items:
+          $ref: '#/definitions/model.Log'
+        type: array
+      message:
+        description: 事件描述消息
+        example: 恶意扫描器检测
+        type: string
+      minute:
+        type: integer
+      payload:
+        description: 攻击载荷
+        example: Scanner/1.0
+        type: string
+      phase:
+        description: 请求处理阶段
+        example: 1
+        type: integer
+      request:
+        description: 原始HTTP请求
+        example: |-
+          GET /api/v1/users HTTP/1.1
+          Host: api.example.com
+          User-Agent: Scanner/1.0
+        type: string
+      requestId:
+        description: 请求唯一标识
+        example: a1b2c3d4e5f6
+        type: string
+      response:
+        description: 原始HTTP响应
+        example: |-
+          HTTP/1.1 403 Forbidden
+          Content-Type: text/html
+          Content-Length: 146
+        type: string
+      ruleId:
+        description: 触发的规则ID
+        example: 10086
+        type: integer
+      secLangRaw:
+        description: 安全规则原始定义
+        example: SecRule REQUEST_HEADERS:User-Agent "@rx (?:scanner)" "id:1008,phase:1,severity:'CRITICAL'"
+        type: string
+      secMark:
+        description: 安全标记
+        example: web_scanner
+        type: string
+      serverIp:
+        description: 目标IP地址
+        example: 10.0.0.1
+        type: string
+      severity:
+        description: 事件严重级别(0-5)
+        example: 2
+        type: integer
+      srcIp:
+        description: 来源IP地址
+        example: 192.168.1.1
+        type: string
+      srcIpInfo:
+        allOf:
+        - $ref: '#/definitions/model.IPInfo'
+        description: 来源IP地理位置信息
+      srcPort:
+        description: 来源端口
+        example: 52134
+        type: integer
+      uri:
+        description: 请求URI路径
+        example: /api/v1/users
+        type: string
+    type: object
+  model.WAFMode:
+    enum:
+    - protection
+    - observation
+    type: string
+    x-enum-comments:
+      WAFModeObservation: 观察模式
+      WAFModeProtection: 防护模式
+    x-enum-varnames:
+    - WAFModeProtection
+    - WAFModeObservation
+host: localhost:2333
+info:
+  contact:
+    email: huahua1319873800@outlook.com
+    name: API Support
+    url: https://github.com/HUAHUAI23/RuiQi
+  description: RuiQi 应用防火墙管理系统 API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: https://github.com/HUAHUAI23/RuiQi
+  title: RuiQi-WAF API
+  version: "1.0"
+paths:
+  /api/runner/control:
+    post:
+      consumes:
+      - application/json
+      description: 执行启动、停止、重启、强制停止或热重载操作
+      parameters:
+      - description: 运行器控制请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RunnerControlRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RunnerControlResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 控制后台运行器
+      tags:
+      - 运行器管理
+  /api/runner/status:
+    get:
+      description: 获取WAF后台运行器的运行状态
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取运行器状态成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RunnerStatusResponse'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取后台运行器状态
+      tags:
+      - 运行器管理
+  /api/v1/blocked-ips:
+    get:
+      description: 获取被封禁的IP地址列表，支持分页、过滤和排序
+      parameters:
+      - default: 1
+        description: 页码，从1开始
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量，最大100
+        in: query
+        maximum: 100
+        minimum: 1
+        name: size
+        type: integer
+      - description: IP地址过滤，支持模糊匹配
+        example: 192.168.1.1
+        in: query
+        name: ip
+        type: string
+      - description: 封禁原因过滤
+        example: high_frequency_attack
+        in: query
+        name: reason
+        type: string
+      - default: all
+        description: 状态过滤：active-生效中，expired-已过期，all-全部
+        enum:
+        - active
+        - expired
+        - all
+        in: query
+        name: status
+        type: string
+      - default: blocked_at
+        description: 排序字段
+        enum:
+        - blocked_at
+        - blocked_until
+        - ip
+        in: query
+        name: sortBy
+        type: string
+      - default: desc
+        description: 排序方向：asc-升序，desc-降序
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sortDir
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取封禁IP列表成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BlockedIPListResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取封禁IP列表
+      tags:
+      - 封禁IP管理
+  /api/v1/blocked-ips/cleanup:
+    delete:
+      description: 删除已过期的封禁IP记录，释放存储空间
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 清理完成
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BlockedIPCleanupResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 清理过期的封禁IP记录
+      tags:
+      - 封禁IP管理
+  /api/v1/blocked-ips/stats:
+    get:
+      description: 获取封禁IP的统计信息，包括总数、生效数、过期数、按原因统计和按小时统计
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取统计信息成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BlockedIPStatsResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取封禁IP统计信息
+      tags:
+      - 封禁IP管理
+  /api/v1/certificates:
+    get:
+      description: 获取所有SSL/TLS证书列表，支持分页
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取证书列表成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CertificateListResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取证书列表
+      tags:
+      - 证书管理
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的SSL/TLS证书
+      parameters:
+      - description: 证书信息
+        in: body
+        name: certificate
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CertificateCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 证书创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.CertificateStore'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 证书名称已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建新证书
+      tags:
+      - 证书管理
+  /api/v1/certificates/{id}:
+    delete:
+      description: 删除指定的SSL/TLS证书
+      parameters:
+      - description: 证书ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 证书删除成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 证书不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除证书
+      tags:
+      - 证书管理
+    get:
+      description: 根据ID获取证书详情
+      parameters:
+      - description: 证书ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取证书详情成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.CertificateStore'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 证书不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取单个证书
+      tags:
+      - 证书管理
+    put:
+      consumes:
+      - application/json
+      description: 更新指定证书的信息
+      parameters:
+      - description: 证书ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 证书更新信息
+        in: body
+        name: certificate
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CertificateUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 证书更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.CertificateStore'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 证书不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 证书名称已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新证书
+      tags:
+      - 证书管理
+  /api/v1/config:
+    get:
+      description: 获取当前系统配置信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取配置成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ConfigResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 配置不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取系统配置
+      tags:
+      - 配置管理
+    patch:
+      consumes:
+      - application/json
+      description: 使用补丁方式更新系统配置
+      parameters:
+      - description: 配置更新信息
+        in: body
+        name: config
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ConfigPatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 配置更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ConfigResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 配置不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新系统配置
+      tags:
+      - 配置管理
+  /api/v1/ip-groups:
+    get:
+      description: 获取所有IP组列表，支持分页
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取IP组列表成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.IPGroupListResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取IP组列表
+      tags:
+      - IP组管理
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的IP地址组，用于后续IP规则匹配
+      parameters:
+      - description: IP组信息
+        in: body
+        name: ipGroup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.IPGroupCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: IP组创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.IPGroup'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: IP组名称已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建IP组
+      tags:
+      - IP组管理
+  /api/v1/ip-groups/{id}:
+    delete:
+      description: 删除指定的IP组，系统默认IP组不允许删除
+      parameters:
+      - description: IP组ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: IP组删除成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: 无效的ID格式
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止删除系统默认IP组
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: IP组不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除IP组
+      tags:
+      - IP组管理
+    get:
+      description: 根据ID获取IP组详情
+      parameters:
+      - description: IP组ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取IP组详情成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.IPGroup'
+              type: object
+        "400":
+          description: 无效的ID格式
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: IP组不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取单个IP组
+      tags:
+      - IP组管理
+    put:
+      consumes:
+      - application/json
+      description: 更新指定IP组的信息
+      parameters:
+      - description: IP组ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: IP组更新信息
+        in: body
+        name: ipGroup
+        required: true
+        schema:
+          $ref: '#/definitions/dto.IPGroupUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: IP组更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.IPGroup'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止操作系统默认IP组
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: IP组不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: IP组名称已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新IP组
+      tags:
+      - IP组管理
+  /api/v1/ip-groups/blacklist/add:
+    post:
+      consumes:
+      - application/json
+      description: 将指定的IP地址或CIDR添加到系统默认黑名单组中
+      parameters:
+      - description: IP地址或CIDR
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddIPToBlacklistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: IP添加成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 系统默认黑名单不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 添加IP到黑名单
+      tags:
+      - IP组管理
+  /api/v1/micro-rules:
+    get:
+      description: 获取所有WAF微规则列表，支持分页
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取微规则列表成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MicroRuleListResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取微规则列表
+      tags:
+      - 规则管理
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的WAF微规则，用于匹配和过滤请求
+      parameters:
+      - description: 微规则信息
+        in: body
+        name: rule
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MicroRuleCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 微规则创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MicroRuleResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 微规则名称已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建微规则
+      tags:
+      - 规则管理
+  /api/v1/micro-rules/{id}:
+    delete:
+      description: 删除指定的微规则，系统默认规则不允许删除
+      parameters:
+      - description: 微规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 微规则删除成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: 无效的ID格式
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止删除系统默认规则
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 微规则不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除微规则
+      tags:
+      - 规则管理
+    get:
+      description: 根据ID获取微规则详情
+      parameters:
+      - description: 微规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取微规则详情成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MicroRuleResponse'
+              type: object
+        "400":
+          description: 无效的ID格式
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 微规则不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取单个微规则
+      tags:
+      - 规则管理
+    put:
+      consumes:
+      - application/json
+      description: 更新指定微规则的信息，系统默认规则不允许修改
+      parameters:
+      - description: 微规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 微规则更新信息
+        in: body
+        name: rule
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MicroRuleUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 微规则更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MicroRuleResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止修改系统默认规则
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 微规则不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 微规则名称已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新微规则
+      tags:
+      - 规则管理
+  /api/v1/site:
+    get:
+      description: 获取所有站点配置列表
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取站点列表成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SiteListResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取站点列表
+      tags:
+      - 站点管理
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的站点配置
+      parameters:
+      - description: 站点信息
+        in: body
+        name: site
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateSiteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 站点创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SiteResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 域名和端口组合已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建新站点
+      tags:
+      - 站点管理
+  /api/v1/site/{id}:
+    delete:
+      description: 删除指定的站点配置
+      parameters:
+      - description: 站点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 站点删除成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 站点不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除站点
+      tags:
+      - 站点管理
+    get:
+      description: 根据ID获取站点详情
+      parameters:
+      - description: 站点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取站点详情成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SiteResponse'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 站点不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取单个站点
+      tags:
+      - 站点管理
+    put:
+      consumes:
+      - application/json
+      description: 更新指定站点的配置
+      parameters:
+      - description: 站点ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 站点更新信息
+        in: body
+        name: site
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateSiteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 站点更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SiteResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "404":
+          description: 站点不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 域名和端口组合已被其他站点使用
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新站点
+      tags:
+      - 站点管理
+  /api/v1/stats/combined-time-series:
+    get:
+      description: 同时获取请求数和拦截数的时间序列数据，用于图表展示
+      parameters:
+      - default: 24h
+        description: 时间范围：24h(24小时)、7d(7天)、30d(30天)
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        in: query
+        name: timeRange
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取组合时间序列数据成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.CombinedTimeSeriesResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取组合时间序列数据
+      tags:
+      - 统计信息
+  /api/v1/stats/overview:
+    get:
+      description: 获取指定时间范围内的统计概览数据，包括请求数、流量、错误率等
+      parameters:
+      - default: 24h
+        description: 时间范围：24h(24小时)、7d(7天)、30d(30天)
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        in: query
+        name: timeRange
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取统计概览成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.OverviewStats'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取统计概览数据
+      tags:
+      - 统计信息
+  /api/v1/stats/realtime-qps:
+    get:
+      description: 获取最近的实时QPS数据点
+      parameters:
+      - default: 30
+        description: 返回的数据点数量，默认30个点，最大60个点
+        in: query
+        maximum: 60
+        minimum: 1
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取实时QPS数据成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.RealtimeQPSResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取实时QPS数据
+      tags:
+      - 统计信息
+  /api/v1/stats/time-series:
+    get:
+      description: 获取指定时间范围和指标类型的时间序列数据，用于图表展示
+      parameters:
+      - default: 24h
+        description: 时间范围：24h(24小时)、7d(7天)、30d(30天)
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        in: query
+        name: timeRange
+        required: true
+        type: string
+      - default: requests
+        description: 指标类型：requests(请求数)、blocks(拦截数)
+        enum:
+        - requests
+        - blocks
+        in: query
+        name: metric
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取时间序列数据成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TimeSeriesResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取时间序列数据
+      tags:
+      - 统计信息
+  /api/v1/stats/traffic-time-series:
+    get:
+      description: 获取指定时间范围的入站和出站流量时间序列数据，用于图表展示
+      parameters:
+      - default: 24h
+        description: 时间范围：24h(24小时)、7d(7天)、30d(30天)
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        in: query
+        name: timeRange
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取流量时间序列数据成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TrafficTimeSeriesResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取流量时间序列数据
+      tags:
+      - 统计信息
+  /api/v1/waf/logs:
+    get:
+      consumes:
+      - application/json
+      description: 查询详细的WAF攻击日志记录，提供多条件筛选和分页功能，支持按规则ID、IP、域名、端口和时间范围过滤
+      parameters:
+      - description: 规则ID，触发攻击检测的WAF规则标识
+        in: query
+        name: ruleId
+        type: integer
+      - description: 来源IP地址，攻击者地址
+        in: query
+        name: srcIp
+        type: string
+      - description: 目标IP地址，被攻击的服务器地址
+        in: query
+        name: dstIp
+        type: string
+      - description: 域名，被攻击的站点域名
+        in: query
+        name: domain
+        type: string
+      - description: 来源端口号，发起攻击的端口
+        in: query
+        name: srcPort
+        type: integer
+      - description: 目标端口号，被攻击的服务端口
+        in: query
+        name: dstPort
+        type: integer
+      - description: 请求ID，唯一标识HTTP请求的ID
+        in: query
+        name: requestId
+        type: string
+      - description: '查询起始时间 (ISO8601格式，如: 2024-03-17T00:00:00Z)'
+        in: query
+        name: startTime
+        type: string
+      - description: '查询结束时间 (ISO8601格式，如: 2024-03-18T23:59:59Z)'
+        in: query
+        name: endTime
+        type: string
+      - description: '当前页码，从1开始计数 (默认: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: '每页记录数，最大100条 (默认: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AttackLogResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      summary: 获取详细攻击日志
+      tags:
+      - WAF安全日志
+  /api/v1/waf/logs/events:
+    get:
+      consumes:
+      - application/json
+      description: 按来源IP、目标端口和域名聚合的攻击事件统计，支持多维度筛选和分页
+      parameters:
+      - description: 来源IP地址，攻击者地址
+        in: query
+        name: srcIp
+        type: string
+      - description: 目标IP地址，被攻击的服务器地址
+        in: query
+        name: dstIp
+        type: string
+      - description: 域名，被攻击的站点域名
+        in: query
+        name: domain
+        type: string
+      - description: 来源端口号，发起攻击的端口
+        in: query
+        name: srcPort
+        type: integer
+      - description: 目标端口号，被攻击的服务端口
+        in: query
+        name: dstPort
+        type: integer
+      - description: '查询起始时间 (ISO8601格式，如: 2024-03-17T00:00:00Z)'
+        in: query
+        name: startTime
+        type: string
+      - description: '查询结束时间 (ISO8601格式，如: 2024-03-18T23:59:59Z)'
+        in: query
+        name: endTime
+        type: string
+      - description: '当前页码，从1开始计数 (默认: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: '每页记录数，最大100条 (默认: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AttackEventResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      summary: 获取聚合攻击事件
+      tags:
+      - WAF安全日志
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录并获取JWT令牌
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LoginResponseData'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 用户名或密码错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      summary: 用户登录
+      tags:
+      - 认证
+  /auth/me:
+    get:
+      description: 获取当前登录用户的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取用户信息成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.GetUserInfoResponseData'
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取当前用户信息
+      tags:
+      - 认证
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 用户重置自己的密码
+      parameters:
+      - description: 密码重置信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserPasswordResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 密码重置成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: 请求参数错误或原密码错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 重置密码
+      tags:
+      - 认证
+  /stats:
+    get:
+      description: 获取HAProxy原始的统计信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取统计数据成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取HAProxy原始统计数据
+      tags:
+      - 统计信息
+  /users:
+    get:
+      description: 获取系统中所有用户的列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取用户列表成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.User'
+                  type: array
+              type: object
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取所有用户
+      tags:
+      - 用户管理
+    post:
+      consumes:
+      - application/json
+      description: 管理员创建新用户
+      parameters:
+      - description: 用户创建信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户创建成功
+          schema:
+            $ref: '#/definitions/dto.ResetPasswordResponseData'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "409":
+          description: 用户名已存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建新用户
+      tags:
+      - 用户管理
+  /users/{id}:
+    delete:
+      description: 管理员删除指定用户
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户删除成功
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: 用户不存在
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: 删除用户
+      tags:
+      - 用户管理
+    put:
+      consumes:
+      - application/json
+      description: 管理员更新指定用户的信息
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 用户更新信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户更新成功
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "404":
+          description: 用户不存在
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      security:
+      - BearerAuth: []
+      summary: 更新用户信息
+      tags:
+      - 用户管理
+securityDefinitions:
+  BearerAuth:
+    description: 使用 Bearer {token} 格式进行身份验证
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

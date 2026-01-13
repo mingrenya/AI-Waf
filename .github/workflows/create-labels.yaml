@@ -1,0 +1,141 @@
+name: "🏷️ Initialize Repository Labels"
+
+on:
+  workflow_dispatch: # 手动触发
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-labels:
+    name: "Create Essential Labels"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "🏷️ Create and Report Labels"
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // 🎯 简化标签体系 - 仅20个实用标签
+            const labels = [
+              // ======== 核心领域标签 (8个) ========
+              { name: 'area/frontend', color: '28a745', description: '前端代码 (web/, *.tsx, *.vue, *.css)' },
+              { name: 'area/backend', color: 'd73a4a', description: '后端代码 (server/, *.go)' },
+              { name: 'area/docs', color: '0366d6', description: '文档更新 (*.md, docs/)' },
+              { name: 'area/config', color: '1f883d', description: '配置文件 (*.yml, *.json, docker)' },
+              { name: 'area/ci', color: '6f42c1', description: 'CI/CD相关 (.github/, scripts/)' },
+              { name: 'area/test', color: 'ff6b35', description: '测试代码 (*_test.go, *.test.*)' },
+              { name: 'area/security', color: 'f39c12', description: 'WAF引擎和安全 (coraza-spoa/, security/)' },
+              { name: 'area/deps', color: 'e1e4e8', description: '依赖管理 (go.mod, package.json)' },
+              
+              // ======== 类型标签 (6个) ========
+              { name: 'type/feat', color: '28a745', description: '✨ 新功能' },
+              { name: 'type/fix', color: 'd73a4a', description: '🐛 错误修复' },
+              { name: 'type/docs', color: '0366d6', description: '📚 文档更新' },
+              { name: 'type/refactor', color: '6f42c1', description: '♻️ 代码重构' },
+              { name: 'type/test', color: 'ff6b35', description: '🧪 测试相关' },
+              { name: 'type/chore', color: 'e1e4e8', description: '🔧 杂项/构建' },
+              
+              // ======== 优先级标签 (3个) ========
+              { name: 'priority/high', color: 'd93f0b', description: '🔥 高优先级' },
+              { name: 'priority/medium', color: 'fbca04', description: '⚡ 中等优先级' },
+              { name: 'priority/low', color: '0e8a16', description: '🌱 低优先级' },
+              
+              // ======== 状态标签 (3个) ========
+              { name: 'status/needs-review', color: 'ff9500', description: '👀 需要代码审查' },
+              { name: 'status/ready-to-merge', color: '28a745', description: '✅ 准备合并' },
+              { name: 'status/blocked', color: 'd73a4a', description: '🚫 被阻塞' }
+            ];
+
+            console.log(`🎯 创建简化标签体系 (${labels.length} 个标签)`);
+            let created = 0;
+            let updated = 0;
+            let failed = 0;
+
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label.name,
+                  color: label.color,
+                  description: label.description
+                });
+                console.log(`✅ 创建标签: ${label.name}`);
+                created++;
+              } catch (error) {
+                if (error.status === 422) {
+                  try {
+                    await github.rest.issues.updateLabel({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      name: label.name,
+                      color: label.color,
+                      description: label.description
+                    });
+                    console.log(`🔄 更新标签: ${label.name}`);
+                    updated++;
+                  } catch (updateError) {
+                    console.log(`❌ 更新标签失败: ${label.name}`);
+                    failed++;
+                  }
+                } else {
+                  console.log(`❌ 创建标签失败: ${label.name}`);
+                  failed++;
+                }
+              }
+            }
+
+            console.log(`\n🎉 完成！新建:${created} | 更新:${updated} | 失败:${failed}`);
+
+            // 🔧 修复：直接在脚本中生成摘要，避免步骤间传递变量
+            await core.summary
+              .addHeading('🏷️ 简化标签体系创建完成', 2)
+              .addRaw('✅ **已创建精简实用的标签体系 (仅20个标签)！**\n\n')
+              .addHeading('📈 统计结果', 3)
+              .addTable([
+                [
+                  { data: '项目', header: true },
+                  { data: '数量', header: true }
+                ],
+                ['🆕 新建标签', `**${created}**`],
+                ['🔄 更新标签', `**${updated}**`],
+                ['❌ 失败标签', `**${failed}**`],
+                ['📊 总计', `**${labels.length}** 个标签`]
+              ])
+              .addHeading('🎯 标签分类', 3)
+              .addTable([
+                [
+                  { data: '类别', header: true },
+                  { data: '数量', header: true },
+                  { data: '说明', header: true }
+                ],
+                ['📁 **领域标签**', '8个', '自动根据文件路径添加'],
+                ['🏷️ **类型标签**', '6个', '手动添加(feat/fix/docs等)'],
+                ['🚨 **优先级**', '3个', '手动添加(high/medium/low)'],
+                ['🎯 **状态**', '3个', '手动添加(review/ready/blocked)']
+              ])
+              .addHeading('🚀 接下来的操作', 3)
+              .addList([
+                `🔍 访问 [标签页面](https://github.com/${context.repo.owner}/${context.repo.repo}/labels) 查看新标签`,
+                '🧪 修改 `web/` 或 `server/` 目录文件并创建PR测试自动标签',
+                '✋ 手动为PR添加 `type/`、`priority/`、`status/` 标签'
+              ])
+              .addHeading('💡 标签使用指南', 3)
+              .addRaw('**🤖 自动标签**: 根据文件路径自动添加\n')
+              .addList([
+                '修改 `web/` → `area/frontend`',
+                '修改 `server/` → `area/backend`',
+                '修改 `*.md` → `area/docs`'
+              ])
+              .addRaw('\n**✋ 手动标签**: 建议添加\n')
+              .addList([
+                '**类型**: `type/feat`, `type/fix`, `type/docs`',
+                '**优先级**: `priority/high`, `priority/medium`, `priority/low`',
+                '**状态**: `status/needs-review`, `status/ready-to-merge`'
+              ])
+              .write();
+
+            console.log('📊 摘要报告已生成');
+            return '🎉 标签创建完成！';
