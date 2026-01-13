@@ -54,7 +54,7 @@ export default function LoginPage() {
                 <span>Made with</span>
                 <Heart className="h-3 w-3 text-red-500 fill-red-500" />
                 <span>by</span>
-                <a href="https://github.com/HUAHUAI23/RuiQi" target="_blank" rel="noopener noreferrer" className="text-white/70 dark:text-white dark:text-shadow-glow-white">RuiQi WAF team</a>
+                <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" className="text-white/70 dark:text-white dark:text-shadow-glow-white">MRYa WAF team</a>
             </div>
         </div>
     )

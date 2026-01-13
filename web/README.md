@@ -1,6 +1,6 @@
-# RuiQi WAF Frontend
+# MRYa WAF Frontend
 
-A modern web application interface for RuiQi Web Application Firewall (WAF) system built with React, TypeScript, and Vite.
+A modern web application interface for MRYa Web Application Firewall (WAF) system built with React, TypeScript, and Vite.
 
 ## Features
 
@@ -77,7 +77,7 @@ A modern web application interface for RuiQi Web Application Firewall (WAF) syst
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/HUAHUAI23/RuiQi.git
+   git clone https://github.com/mingrenya/AI-Waf.git
    cd web
    ```
 
@@ -122,4 +122,4 @@ A modern web application interface for RuiQi Web Application Firewall (WAF) syst
 
 ## License
 
-Copyright © 2025 RuiQi WAF. All rights reserved.
+Copyright © 2025 MRYa WAF. All rights reserved.

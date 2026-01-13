@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
-	"github.com/HUAHUAI23/RuiQi/server/config"
+	"github.com/mingrenya/AI-Waf/pkg/model"
+	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"

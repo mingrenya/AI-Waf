@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
-	"github.com/HUAHUAI23/RuiQi/server/dto"
-	"github.com/HUAHUAI23/RuiQi/server/repository"
+	"github.com/mingrenya/AI-Waf/pkg/model"
+	"github.com/mingrenya/AI-Waf/server/dto"
+	"github.com/mingrenya/AI-Waf/server/repository"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )

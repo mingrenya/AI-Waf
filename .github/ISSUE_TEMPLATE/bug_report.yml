@@ -1,6 +1,6 @@
 name: 🐞 Bug Report
 
-description: Report a bug to help improve RuiQi WAF
+description: Report a bug to help improve MRYa WAF
 
 title: "[Bug] <title>"
 labels: [bug, needs-triage]
@@ -21,7 +21,7 @@ body:
     id: deployment
     attributes:
       label: Deployment Type
-      description: How are you running RuiQi WAF?
+      description: How are you running MRYa WAF?
       options:
         - Docker Compose
         - Standalone Docker

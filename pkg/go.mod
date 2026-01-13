@@ -1,4 +1,4 @@
-module github.com/HUAHUAI23/RuiQi/pkg
+module github.com/mingrenya/AI-Waf/pkg
 
 go 1.24.1
 

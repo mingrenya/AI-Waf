@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 )
 
 // BlockedIPListRequest 封禁IP列表请求参数

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/HUAHUAI23/RuiQi/server/dto"
-	"github.com/HUAHUAI23/RuiQi/server/model"
-	"github.com/HUAHUAI23/RuiQi/server/service"
-	"github.com/HUAHUAI23/RuiQi/server/utils/response"
+	"github.com/mingrenya/AI-Waf/server/dto"
+	"github.com/mingrenya/AI-Waf/server/model"
+	"github.com/mingrenya/AI-Waf/server/service"
+	"github.com/mingrenya/AI-Waf/server/utils/response"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )

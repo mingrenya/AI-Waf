@@ -1,6 +1,6 @@
 name: 🔒 Security Vulnerability Report
 
-description: Report a security vulnerability in RuiQi WAF (Private reporting recommended)
+description: Report a security vulnerability in MRYa WAF (Private reporting recommended)
 
 title: "[Security] <title>"
 labels: [security, critical, needs-triage]
@@ -117,7 +117,7 @@ body:
       label: Environment Information
       description: Environment where the vulnerability was discovered
       placeholder: |
-        - RuiQi WAF Version:
+        - MRYa WAF Version:
         - Deployment type: (Docker, Local, etc.)
         - Operating System:
         - Network configuration:

@@ -18,8 +18,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/model"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/model"
 	client_native "github.com/haproxytech/client-native/v6"
 	"github.com/haproxytech/client-native/v6/configuration"
 	cfg_opt "github.com/haproxytech/client-native/v6/configuration/options"

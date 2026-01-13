@@ -7,34 +7,34 @@ blank_issues_enabled: false
 contact_links:
   # English Section
   - name: 📚 Documentation
-    url: https://github.com/HUAHUAI23/RuiQi/blob/main/README.md
+    url: https://github.com/mingrenya/AI-Waf/blob/main/README.md
     about: Check the documentation for setup guides and API reference
   
   - name: 💬 Discussions  
-    url: https://github.com/HUAHUAI23/RuiQi/discussions
+    url: https://github.com/mingrenya/AI-Waf/discussions
     about: Ask questions and discuss features with the community
   
   - name: 🔐 Private Security Report
-    url: https://github.com/HUAHUAI23/RuiQi/security/advisories/new
+    url: https://github.com/mingrenya/AI-Waf/security/advisories/new
     about: Report security vulnerabilities privately
   
-  - name: 🌐 Try RuiQi WAF
+  - name: 🌐 Try MRYa WAF
     url: https://usw.sealos.io/?openapp=system-template%3FtemplateName%3DRuiqi-Waf
-    about: Deploy and try RuiQi WAF in 30 seconds
+    about: Deploy and try MRYa WAF in 30 seconds
   
   # Chinese Section / 中文区域
   - name: 📚 文档
-    url: https://github.com/HUAHUAI23/RuiQi/blob/main/README.md
+    url: https://github.com/mingrenya/AI-Waf/blob/main/README.md
     about: 查看文档获取设置指南和API参考
   
   - name: 💬 讨论区
-    url: https://github.com/HUAHUAI23/RuiQi/discussions
+    url: https://github.com/mingrenya/AI-Waf/discussions
     about: 向社区提问和讨论功能
   
   - name: 🔐 私密安全报告
-    url: https://github.com/HUAHUAI23/RuiQi/security/advisories/new
+    url: https://github.com/mingrenya/AI-Waf/security/advisories/new
     about: 私密报告安全漏洞
   
-  - name: 🌐 试用 RuiQi WAF
+  - name: 🌐 试用 MRYa WAF
     url: https://usw.sealos.io/?openapp=system-template%3FtemplateName%3DRuiqi-Waf
-    about: 30秒内部署和试用 RuiQi WAF
+    about: 30秒内部署和试用 MRYa WAF

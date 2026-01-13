@@ -5,7 +5,7 @@ import (
 	"net"
 	"sync"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/oschwald/geoip2-golang"
 	"github.com/rs/zerolog"
 )

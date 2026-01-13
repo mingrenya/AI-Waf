@@ -113,7 +113,7 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
                     <img src="/logo.svg" alt="logo" />
                 </div>
                 <div className="font-bold text-xl mt-2">
-                    <span className="text-[#E8DFFF] dark:text-[#F0EBFF] text-shadow-glow-purple transition-all duration-300">RuiQi</span>
+                    <span className="text-[#E8DFFF] dark:text-[#F0EBFF] text-shadow-glow-purple transition-all duration-300">MRYa</span>
                     <span className="text-[#8ED4FF] dark:text-[#A5DEFF] text-shadow-glow-blue transition-all duration-300"> WAF</span>
                 </div>
             </div>
@@ -161,7 +161,7 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
             <div className="py-4 relative z-10">
                 <div className="flex items-center gap-4 px-6">
                     <a
-                        href="https://github.com/HUAHUAI23/RuiQi"
+                        href="https://github.com/mingrenya/AI-Waf"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
@@ -170,7 +170,7 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
                         <Globe className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
                     </a>
                     <a
-                        href="https://deepwiki.com/HUAHUAI23/RuiQi"
+                        href="https://deepwiki.com/HUAHUAI23/MRYa"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
@@ -179,7 +179,7 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
                         <BookOpen className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
                     </a>
                     <a
-                        href="https://github.com/HUAHUAI23/RuiQi"
+                        href="https://github.com/mingrenya/AI-Waf"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
@@ -226,7 +226,7 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
                     <span>Made with</span>
                     <Heart className="h-3 w-3 text-red-500 fill-red-500" />
                     <span>by</span>
-                    <a href="https://github.com/HUAHUAI23/RuiQi" target="_blank" rel="noopener noreferrer" className="text-white/60 dark:text-white dark:text-shadow-glow-white">RuiQi WAF team</a>
+                    <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" className="text-white/60 dark:text-white dark:text-shadow-glow-white">MRYa WAF team</a>
                 </div>
             </div>
         </div >

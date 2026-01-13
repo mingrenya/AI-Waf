@@ -181,7 +181,7 @@ export const SecurityDashboardLayout: React.FC = () => {
                 <div className="flex items-center justify-between h-full px-6">
                     <div className="flex items-center ml-2">
                         <div className="font-bold text-2xl gap-2 flex">
-                            <span className="text-[#E8DFFF] dark:text-[#F0EBFF] text-shadow-glow-purple transition-all duration-300">RuiQi WAF</span>
+                            <span className="text-[#E8DFFF] dark:text-[#F0EBFF] text-shadow-glow-purple transition-all duration-300">MRYa WAF</span>
                             <span className="text-[#8ED4FF] dark:text-[#A5DEFF] text-shadow-glow-blue transition-all duration-300">{t('securityDashboard.title')}</span>
                         </div>
                     </div>

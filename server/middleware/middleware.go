@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/model"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

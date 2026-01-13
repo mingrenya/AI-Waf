@@ -9,10 +9,10 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "termsOfService": "https://github.com/HUAHUAI23/RuiQi",
+        "termsOfService": "https://github.com/mingrenya/AI-Waf",
         "contact": {
             "name": "API Support",
-            "url": "https://github.com/HUAHUAI23/RuiQi",
+            "url": "https://github.com/mingrenya/AI-Waf",
             "email": "huahua1319873800@outlook.com"
         },
         "license": {
@@ -3952,7 +3952,7 @@ const docTemplate = `{
                 "configBaseDir": {
                     "description": "配置文件根目录",
                     "type": "string",
-                    "example": "/RuiQi"
+                    "example": "/MRYa"
                 },
                 "haproxyBin": {
                     "description": "HAProxy二进制文件路径",
@@ -5488,8 +5488,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:2333",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "RuiQi-WAF API",
-	Description:      "RuiQi 应用防火墙管理系统 API",
+	Title:            "MRYa-WAF API",
+	Description:      "MRYa 应用防火墙管理系统 API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

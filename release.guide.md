@@ -1,4 +1,4 @@
-# RuiQi WAF 项目发版完整指南
+# MRYa WAF 项目发版完整指南
 
 ## 🎯 发版前准备
 
@@ -69,7 +69,7 @@ gh auth login
 
 # 创建release（会自动创建标签）
 gh release create v1.2.0 \
-  --title "RuiQi WAF v1.2.0" \
+  --title "MRYa WAF v1.2.0" \
   --notes "发布说明内容" \
   --latest
 ```
@@ -175,11 +175,11 @@ git push origin v1.1.1
 ### 在GitHub界面查看：
 
 1. **Actions页面** - 查看工作流运行状态
-   - 访问 `https://github.com/your-username/RuiQi/actions`
+   - 访问 `https://github.com/your-username/MRYa/actions`
    - 找到对应的Release工作流
 
 2. **Releases页面** - 查看发布结果
-   - 访问 `https://github.com/your-username/RuiQi/releases`
+   - 访问 `https://github.com/your-username/MRYa/releases`
 
 3. **Docker Hub** - 确认镜像推送
    - 访问您的Docker Hub仓库页面

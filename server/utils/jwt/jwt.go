@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/server/model"
+	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -46,7 +46,7 @@ func GenerateToken(user model.User, expiration time.Duration) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "RuiQi",
+			Issuer:    "MRYa",
 			Subject:   user.ID.Hex(),
 		},
 	}

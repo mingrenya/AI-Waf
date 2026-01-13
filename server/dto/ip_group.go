@@ -2,7 +2,7 @@
 package dto
 
 import (
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 )
 
 // IPGroupCreateRequest IP组创建请求

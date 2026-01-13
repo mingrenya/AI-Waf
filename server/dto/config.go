@@ -37,7 +37,7 @@ type AppConfigPatchDTO struct {
 
 // HaproxyPatchDTO HAProxy配置补丁DTO
 type HaproxyPatchDTO struct {
-	ConfigBaseDir *string `json:"configBaseDir,omitempty" binding:"omitempty" example:"/RuiQi"`    // 配置文件根目录
+	ConfigBaseDir *string `json:"configBaseDir,omitempty" binding:"omitempty" example:"/MRYa"`    // 配置文件根目录
 	HaproxyBin    *string `json:"haproxyBin,omitempty" binding:"omitempty" example:"haproxy"`      // HAProxy二进制文件路径
 	BackupsNumber *int    `json:"backupsNumber,omitempty" binding:"omitempty" example:"5"`         // 备份数量
 	SpoeAgentAddr *string `json:"spoeAgentAddr,omitempty" binding:"omitempty" example:"127.0.0.1"` // SPOE代理地址

@@ -1,12 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "RuiQi 应用防火墙管理系统 API",
-        "title": "RuiQi-WAF API",
-        "termsOfService": "https://github.com/HUAHUAI23/RuiQi",
+        "description": "MRYa 应用防火墙管理系统 API",
+        "title": "MRYa-WAF API",
+        "termsOfService": "https://github.com/HUAHUAI23/MRYa",
         "contact": {
             "name": "API Support",
-            "url": "https://github.com/HUAHUAI23/RuiQi",
+            "url": "https://github.com/HUAHUAI23/MRYa",
             "email": "huahua1319873800@outlook.com"
         },
         "license": {
@@ -3946,7 +3946,7 @@
                 "configBaseDir": {
                     "description": "配置文件根目录",
                     "type": "string",
-                    "example": "/RuiQi"
+                    "example": "/MRYa"
                 },
                 "haproxyBin": {
                     "description": "HAProxy二进制文件路径",

@@ -1,7 +1,7 @@
-# RuiQi WAF
+# MRYa WAF
 
 <div align="center">
-<a href="https://deepwiki.com/HUAHUAI23/RuiQi"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" width="160" height="30"></a>
+<a href="https://deepwiki.com/mingrenya/AI-Waf"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" width="160" height="30"></a>
   <img src="https://img.shields.io/badge/Go-1.24.1-00ADD8?style=flat&logo=go" alt="Go Version" width="140" height="30">
   <img src="https://img.shields.io/badge/HAProxy-3.0-green?style=flat&logo=haproxy" alt="HAProxy" width="140" height="30">
   <img src="https://img.shields.io/badge/OWASP-Coraza-blue?style=flat" alt="Coraza WAF" width="140" height="30">
@@ -22,24 +22,24 @@ run the application in less than 30 seconds,default username: **admin**,default 
 
 https://github.com/user-attachments/assets/f74000d7-d229-4d00-843b-1ba28caeb13d
 
-## 📸 RuiQi WAF Interface Showcase
+## 📸 MRYa WAF Interface Showcase
 
 <div align="center">
   <table cellspacing="0" cellpadding="10" style="border-collapse: separate; border-spacing: 15px; background-color: #f8f9fa;">
     <tr>
       <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="RuiQi WAF Dashboard" src="./doc/image/waf-1.png" style="border-radius: 6px; max-width: 100%;">
+        <img width="767" alt="MRYa WAF Dashboard" src="./doc/image/waf-1.png" style="border-radius: 6px; max-width: 100%;">
       </td>
       <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="RuiQi WAF Rule Management" src="./doc/image/waf-2.png" style="border-radius: 6px; max-width: 100%;">
+        <img width="767" alt="MRYa WAF Rule Management" src="./doc/image/waf-2.png" style="border-radius: 6px; max-width: 100%;">
       </td>
     </tr>
     <tr>
       <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="RuiQi WAF Analytics" src="./doc/image/waf-3.png" style="border-radius: 6px; max-width: 100%;">
+        <img width="767" alt="MRYa WAF Analytics" src="./doc/image/waf-3.png" style="border-radius: 6px; max-width: 100%;">
       </td>
       <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="RuiQi WAF Security Config" src="./doc/image/waf-4.png" style="border-radius: 6px; max-width: 100%;">
+        <img width="767" alt="MRYa WAF Security Config" src="./doc/image/waf-4.png" style="border-radius: 6px; max-width: 100%;">
       </td>
     </tr>
   </table>
@@ -185,8 +185,8 @@ graph TD
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/HUAHUAI23/RuiQi.git
-cd RuiQi
+git clone https://github.com/mingrenya/AI-Waf.git
+cd MRYa
 ```
 
 2. Setup the frontend development environment:
@@ -227,20 +227,20 @@ The development server will start with:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/HUAHUAI23/RuiQi.git
-cd RuiQi
+git clone https://github.com/mingrenya/AI-Waf.git
+cd MRYa
 ```
 
 2. Build the Docker image:
 
 ```bash
-docker build -t ruiqi-waf:latest .
+docker build -t mrya-waf:latest .
 ```
 
 3. Run as a standalone container:
 
 ```bash
-docker run -p 2333:2333 -p 8080:8080 -p 443:443 -p 80:80 -p 9443:9443 -p 8404:8404 ruiqi-waf:latest
+docker run -p 2333:2333 -p 8080:8080 -p 443:443 -p 80:80 -p 9443:9443 -p 8404:8404 mrya-waf:latest
 ```
 
 4. Alternatively, use Docker Compose for a complete deployment with MongoDB:

@@ -8,8 +8,8 @@ import (
 	"slices"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
-	"github.com/HUAHUAI23/RuiQi/server/constant"
+	"github.com/mingrenya/AI-Waf/pkg/model"
+	"github.com/mingrenya/AI-Waf/server/constant"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"

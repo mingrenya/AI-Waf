@@ -13,10 +13,10 @@ import (
 	"runtime/pprof"
 	"syscall"
 
-	config "github.com/HUAHUAI23/RuiQi/coraza-spoa/config"
-	"github.com/HUAHUAI23/RuiQi/coraza-spoa/internal"
-	mongodb "github.com/HUAHUAI23/RuiQi/pkg/database/mongo"
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
+	config "github.com/mingrenya/AI-Waf/coraza-spoa/config"
+	"github.com/mingrenya/AI-Waf/coraza-spoa/internal"
+	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 )
 
 func main() {

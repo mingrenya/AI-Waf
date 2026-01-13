@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/model"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"

@@ -55,7 +55,7 @@ jobs:
             # latest标签
             type=raw,value=latest
           labels: |
-            org.opencontainers.image.title=RuiQi WAF
+            org.opencontainers.image.title=MRYa WAF
             org.opencontainers.image.description=Modern web application firewall management system
             org.opencontainers.image.version=${{ steps.get_version.outputs.VERSION }}
 
@@ -89,7 +89,7 @@ jobs:
             CHANGELOG_CN="🎉 首次发布
 
             ### ✨ 功能特性
-            - 全新的RuiQi WAF管理系统
+            - 全新的MRYa WAF管理系统
             - 基于HAProxy和OWASP Coraza WAF
             - 提供完整的后端API用于管理配置和规则
             - 支持流量检查和安全防护
@@ -103,7 +103,7 @@ jobs:
             CHANGELOG_EN="🎉 Initial Release
 
             ### ✨ Features
-            - Brand new RuiQi WAF management system
+            - Brand new MRYa WAF management system
             - Based on HAProxy and OWASP Coraza WAF
             - Complete backend API for configuration and rule management
             - Traffic inspection and security protection support
@@ -157,10 +157,10 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_version.outputs.VERSION }}
-          name: "RuiQi WAF ${{ steps.get_version.outputs.VERSION }}"
+          name: "MRYa WAF ${{ steps.get_version.outputs.VERSION }}"
           generateReleaseNotes: true
           body: |
-            ## 🚀 RuiQi WAF ${{ steps.get_version.outputs.VERSION }} 发布
+            ## 🚀 MRYa WAF ${{ steps.get_version.outputs.VERSION }} 发布
 
             ### 中文版本
 

@@ -4,11 +4,11 @@ package controller
 import (
 	"errors"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/dto"
-	"github.com/HUAHUAI23/RuiQi/server/service"
-	"github.com/HUAHUAI23/RuiQi/server/utils/response"
+	"github.com/mingrenya/AI-Waf/pkg/model"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/dto"
+	"github.com/mingrenya/AI-Waf/server/service"
+	"github.com/mingrenya/AI-Waf/server/utils/response"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )

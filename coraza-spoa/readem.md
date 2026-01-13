@@ -25,7 +25,7 @@ Read file: coraza-spoa/internal/application.go
 现在让我们运行测试来验证优化的效果：
 
 ```bash
-cd /home/devbox/project/RuiQi/coraza-spoa && go test -bench=BenchmarkGetHeaderValue -benchmem -v ./internal/
+cd /home/devbox/project/MRYa/coraza-spoa && go test -bench=BenchmarkGetHeaderValue -benchmem -v ./internal/
 ```
 
 性能测试结果非常显著！让我整理一下结果：
@@ -82,7 +82,7 @@ cd /home/devbox/project/RuiQi/coraza-spoa && go test -bench=BenchmarkGetHeaderVa
 
 
 ```bash
-cd /home/devbox/project/RuiQi/coraza-spoa && go test -bench=BenchmarkGetRealClientIPOptimization -benchmem -v ./internal/
+cd /home/devbox/project/MRYa/coraza-spoa && go test -bench=BenchmarkGetRealClientIPOptimization -benchmem -v ./internal/
 ```
 太好了！这次的优化效果非常显著！让我分析一下结果：
 

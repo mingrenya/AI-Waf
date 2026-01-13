@@ -1,6 +1,6 @@
 name: 🔒 安全漏洞报告
 
-description: 报告 RuiQi WAF 中的安全漏洞（建议私密报告）
+description: 报告 MRYa WAF 中的安全漏洞（建议私密报告）
 
 title: "[安全] <标题>"
 labels: [security, critical, needs-triage]
@@ -117,7 +117,7 @@ body:
       label: 环境信息
       description: 发现漏洞的环境
       placeholder: |
-        - RuiQi WAF 版本：
+        - MRYa WAF 版本：
         - 部署类型：（Docker、本地等）
         - 操作系统：
         - 网络配置：

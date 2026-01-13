@@ -1,6 +1,6 @@
 name: 🐞 错误报告
 
-description: 报告错误以帮助改进 RuiQi WAF
+description: 报告错误以帮助改进 MRYa WAF
 
 title: "[错误] <标题>"
 labels: [bug, needs-triage]
@@ -21,7 +21,7 @@ body:
     id: deployment
     attributes:
       label: 部署类型
-      description: 您如何运行 RuiQi WAF？
+      description: 您如何运行 MRYa WAF？
       options:
         - Docker Compose
         - 独立 Docker

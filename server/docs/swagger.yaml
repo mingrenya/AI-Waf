@@ -638,7 +638,7 @@ definitions:
         type: integer
       configBaseDir:
         description: 配置文件根目录
-        example: /RuiQi
+        example: /MRYa
         type: string
       haproxyBin:
         description: HAProxy二进制文件路径
@@ -1764,13 +1764,13 @@ info:
   contact:
     email: huahua1319873800@outlook.com
     name: API Support
-    url: https://github.com/HUAHUAI23/RuiQi
-  description: RuiQi 应用防火墙管理系统 API
+    url: https://github.com/mingrenya/AI-Waf
+  description: MRYa 应用防火墙管理系统 API
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: https://github.com/HUAHUAI23/RuiQi
-  title: RuiQi-WAF API
+  termsOfService: https://github.com/mingrenya/AI-Waf
+  title: MRYa-WAF API
   version: "1.0"
 paths:
   /api/runner/control:

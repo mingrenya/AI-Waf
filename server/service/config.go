@@ -5,10 +5,10 @@ import (
 	"context"
 	"errors"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/dto"
-	"github.com/HUAHUAI23/RuiQi/server/repository"
+	"github.com/mingrenya/AI-Waf/pkg/model"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/dto"
+	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/rs/zerolog"
 )
 

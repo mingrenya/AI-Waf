@@ -13,8 +13,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
-	flowcontroller "github.com/HUAHUAI23/RuiQi/coraza-spoa/internal/flow-controller"
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
+	flowcontroller "github.com/mingrenya/AI-Waf/coraza-spoa/internal/flow-controller"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 	coreruleset "github.com/corazawaf/coraza-coreruleset"
 	"github.com/corazawaf/coraza/v3"
 	"github.com/corazawaf/coraza/v3/debuglog"

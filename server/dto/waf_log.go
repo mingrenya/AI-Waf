@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 )
 
 // AttackEventRequset 攻击事件查询请求

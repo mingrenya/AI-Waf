@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	mongodb "github.com/HUAHUAI23/RuiQi/pkg/database/mongo"
+	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
 	"github.com/haproxytech/client-native/v6/models"
 
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/model"
-	"github.com/HUAHUAI23/RuiQi/server/repository"
-	"github.com/HUAHUAI23/RuiQi/server/service/daemon/engine"
-	"github.com/HUAHUAI23/RuiQi/server/service/daemon/haproxy"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/model"
+	"github.com/mingrenya/AI-Waf/server/repository"
+	"github.com/mingrenya/AI-Waf/server/service/daemon/engine"
+	"github.com/mingrenya/AI-Waf/server/service/daemon/haproxy"
 	"github.com/rs/zerolog"
 )
 

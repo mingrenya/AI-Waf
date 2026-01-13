@@ -15,11 +15,11 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
-	cfg "github.com/HUAHUAI23/RuiQi/coraza-spoa/config"
-	"github.com/HUAHUAI23/RuiQi/coraza-spoa/internal"
-	mongodb "github.com/HUAHUAI23/RuiQi/pkg/database/mongo"
-	"github.com/HUAHUAI23/RuiQi/pkg/model"
-	"github.com/HUAHUAI23/RuiQi/pkg/utils/network"
+	cfg "github.com/mingrenya/AI-Waf/coraza-spoa/config"
+	"github.com/mingrenya/AI-Waf/coraza-spoa/internal"
+	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
+	"github.com/mingrenya/AI-Waf/pkg/model"
+	"github.com/mingrenya/AI-Waf/pkg/utils/network"
 )
 
 var globalLogger = zerolog.New(os.Stderr).With().Timestamp().Logger()

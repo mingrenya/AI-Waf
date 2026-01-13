@@ -1,9 +1,9 @@
-module github.com/HUAHUAI23/RuiQi/coraza-spoa
+module github.com/mingrenya/AI-Waf/coraza-spoa
 
 go 1.24.1
 
 require (
-	github.com/HUAHUAI23/RuiQi/pkg v0.0.0-20250308163638-ae40316258d8
+	github.com/mingrenya/AI-Waf/pkg v0.0.0-20250308163638-ae40316258d8
 	github.com/alibaba/sentinel-golang v1.0.4
 	github.com/corazawaf/coraza-coreruleset v0.0.0-20240226094324-415b1017abdc
 	github.com/corazawaf/coraza/v3 v3.3.3
@@ -58,4 +58,4 @@ require (
 	rsc.io/binaryregexp v0.2.0 // indirect
 )
 
-replace github.com/HUAHUAI23/RuiQi/pkg => ../pkg
+replace github.com/mingrenya/AI-Waf/pkg => ../pkg

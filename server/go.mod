@@ -1,10 +1,10 @@
-module github.com/HUAHUAI23/RuiQi/server
+module github.com/mingrenya/AI-Waf/server
 
 go 1.24.1
 
 require (
-	github.com/HUAHUAI23/RuiQi/coraza-spoa v0.0.0-20250308163638-ae40316258d8
-	github.com/HUAHUAI23/RuiQi/pkg v0.0.0-20250308163638-ae40316258d8
+	github.com/mingrenya/AI-Waf/coraza-spoa v0.0.0-20250308163638-ae40316258d8
+	github.com/mingrenya/AI-Waf/pkg v0.0.0-20250308163638-ae40316258d8
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-co-op/gocron/v2 v2.16.2
 	github.com/go-playground/validator/v10 v10.26.0
@@ -108,6 +108,6 @@ require (
 	rsc.io/binaryregexp v0.2.0 // indirect
 )
 
-replace github.com/HUAHUAI23/RuiQi/coraza-spoa => ../coraza-spoa
+replace github.com/mingrenya/AI-Waf/coraza-spoa => ../coraza-spoa
 
-replace github.com/HUAHUAI23/RuiQi/pkg => ../pkg
+replace github.com/mingrenya/AI-Waf/pkg => ../pkg

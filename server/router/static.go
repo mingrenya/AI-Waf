@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/public"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/public"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +26,7 @@ func SetStaticFileRouter(router *gin.Engine) {
 		logger.Info().Msg("Web功能已禁用")
 		router.GET("/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "index.tmpl", gin.H{
-				"URL":               "https://github.com/HUAHUAI23/RuiQi",
+				"URL":               "https://github.com/mingrenya/AI-Waf",
 				"INITIAL_COUNTDOWN": 15,
 			})
 		})

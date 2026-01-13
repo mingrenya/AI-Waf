@@ -1,11 +1,11 @@
 package router
 
 import (
-	"github.com/HUAHUAI23/RuiQi/server/controller"
-	"github.com/HUAHUAI23/RuiQi/server/middleware"
-	"github.com/HUAHUAI23/RuiQi/server/model"
-	"github.com/HUAHUAI23/RuiQi/server/repository"
-	"github.com/HUAHUAI23/RuiQi/server/service"
+	"github.com/mingrenya/AI-Waf/server/controller"
+	"github.com/mingrenya/AI-Waf/server/middleware"
+	"github.com/mingrenya/AI-Waf/server/model"
+	"github.com/mingrenya/AI-Waf/server/repository"
+	"github.com/mingrenya/AI-Waf/server/service"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/mongo"

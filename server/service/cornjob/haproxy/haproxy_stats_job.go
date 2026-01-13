@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	"github.com/HUAHUAI23/RuiQi/server/service/daemon"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/service/daemon"
 	"github.com/go-co-op/gocron/v2"
 	"github.com/rs/zerolog"
 )

@@ -14,22 +14,22 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	mongodb "github.com/HUAHUAI23/RuiQi/pkg/database/mongo"
-	"github.com/HUAHUAI23/RuiQi/server/config"
-	_ "github.com/HUAHUAI23/RuiQi/server/docs" // 导入 swagger 文档
-	"github.com/HUAHUAI23/RuiQi/server/router"
-	haproxyStats "github.com/HUAHUAI23/RuiQi/server/service/cornjob/haproxy"
-	"github.com/HUAHUAI23/RuiQi/server/service/daemon"
-	"github.com/HUAHUAI23/RuiQi/server/validator"
+	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
+	"github.com/mingrenya/AI-Waf/server/config"
+	_ "github.com/mingrenya/AI-Waf/server/docs" // 导入 swagger 文档
+	"github.com/mingrenya/AI-Waf/server/router"
+	haproxyStats "github.com/mingrenya/AI-Waf/server/service/cornjob/haproxy"
+	"github.com/mingrenya/AI-Waf/server/service/daemon"
+	"github.com/mingrenya/AI-Waf/server/validator"
 )
 
-//	@title			RuiQi-WAF API
+//	@title			MRYa-WAF API
 //	@version		1.0
-//	@description	RuiQi 应用防火墙管理系统 API
-//	@termsOfService	https://github.com/HUAHUAI23/RuiQi
+//	@description	MRYa 应用防火墙管理系统 API
+//	@termsOfService	https://github.com/mingrenya/AI-Waf
 
 //	@contact.name	API Support
-//	@contact.url	https://github.com/HUAHUAI23/RuiQi
+//	@contact.url	https://github.com/mingrenya/AI-Waf
 //	@contact.email	huahua1319873800@outlook.com
 
 //	@license.name	Apache 2.0
@@ -134,7 +134,7 @@ func main() {
 		<!DOCTYPE html>
 		<html>
 		<head>
-			<title>RuiQi-WAF API Reference</title>
+			<title>MRYa-WAF API Reference</title>
 			<meta charset="utf-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
 			<style>
@@ -161,8 +161,8 @@ func main() {
 
 	// 获取Redoc处理器
 	doc := redoc.Redoc{
-		Title:       "RuiQi-WAF API",
-		Description: "RuiQi 应用防火墙管理系统 API",
+		Title:       "MRYa-WAF API",
+		Description: "MRYa 应用防火墙管理系统 API",
 		SpecFile:    "./docs/swagger.json",
 		SpecPath:    "/swagger.json",
 		DocsPath:    "/redoc",
