@@ -316,7 +316,7 @@ export function SiteGrid({ onEdit, onDelete }: SiteGridProps) {
                                     scale: 1,
                                     y: 0,
                                     transition: {
-                                        type: "spring",
+                                        type: "spring" as const,
                                         damping: 20,
                                         stiffness: 250
                                     }

@@ -7,5 +7,6 @@ export const useAttackEvents = (query: AttackEventQuery) => {
         queryKey: ['attackEvents', query],
         queryFn: () => logApi.getAttackEvents(query),
         placeholderData: (previousData) => previousData,
+        refetchOnMount: 'always',
     })
 }

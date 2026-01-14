@@ -13,14 +13,14 @@ const backendSchema = z.object({
     servers: z.array(serverSchema).min(1, "至少需要一个服务器")
 })
 
-// 证书验证模式（可选）
+// 证书验证模式（可选）- 用于表单提交
 const certificateSchema = z.object({
-    certName: z.string().optional(),
-    expireDate: z.string().optional(),
-    fingerPrint: z.string().optional(),
-    issuerName: z.string().optional(),
-    privateKey: z.string().optional(),
-    publicKey: z.string().optional()
+    certName: z.string(),
+    expireDate: z.string(),
+    fingerPrint: z.string(),
+    issuerName: z.string(),
+    privateKey: z.string(),
+    publicKey: z.string()
 }).optional()
 
 // 站点表单验证模式

@@ -5,7 +5,7 @@ export const spinIconAnimation: HTMLMotionProps<"div"> = {
     whileHover: {
         scale: 1.05,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10
         }
@@ -17,7 +17,7 @@ export const spinIconAnimation: HTMLMotionProps<"div"> = {
             duration: 0.5,
             ease: "easeInOut",
             scale: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 500,
                 damping: 15
             }
@@ -26,7 +26,7 @@ export const spinIconAnimation: HTMLMotionProps<"div"> = {
     transition: {
         duration: 0.3,
         ease: "easeOut",
-        type: "spring",
+        type: "spring" as const,
     }
 }
 
@@ -44,7 +44,7 @@ export const continuousSpinAnimation: HTMLMotionProps<"div"> = {
     whileTap: {
         scale: 0.95,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10
         }
@@ -67,7 +67,7 @@ export const continuousShakeAnimation: HTMLMotionProps<"div"> = {
         scale: 0.95,
         x: 0,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10,
             duration: 0.1
@@ -92,7 +92,7 @@ export const continuousPulseAnimation: HTMLMotionProps<"div"> = {
         scale: 0.95,
         opacity: 1,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10,
             duration: 0.1
@@ -105,7 +105,7 @@ export const shakeIconAnimation: HTMLMotionProps<"div"> = {
     whileHover: {
         scale: 1.05,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10
         }
@@ -118,7 +118,7 @@ export const shakeIconAnimation: HTMLMotionProps<"div"> = {
             times: [0, 0.25, 0.5, 0.75, 0.85, 0.92, 1],
             ease: "easeOut",
             scale: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 500,
                 damping: 15,
                 duration: 0.1
@@ -126,7 +126,7 @@ export const shakeIconAnimation: HTMLMotionProps<"div"> = {
         }
     },
     transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 350,
         damping: 15
     }
@@ -138,7 +138,7 @@ export const bounceIconAnimation: HTMLMotionProps<"div"> = {
         scale: 1.05,
         y: -2,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10
         }
@@ -151,7 +151,7 @@ export const bounceIconAnimation: HTMLMotionProps<"div"> = {
             times: [0, 0.3, 0.6, 0.8, 1],
             ease: "easeOut",
             scale: {
-                type: "spring",
+                type: "spring" as const,
                 stiffness: 500,
                 damping: 15,
                 duration: 0.1
@@ -159,7 +159,7 @@ export const bounceIconAnimation: HTMLMotionProps<"div"> = {
         }
     },
     transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 400,
         damping: 12
     }
@@ -170,7 +170,7 @@ export const pulseIconAnimation: HTMLMotionProps<"div"> = {
     whileHover: {
         scale: 1.05,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10
         }
@@ -184,7 +184,7 @@ export const pulseIconAnimation: HTMLMotionProps<"div"> = {
         }
     },
     transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 380,
         damping: 15
     }
@@ -196,7 +196,7 @@ export const glowIconAnimation: HTMLMotionProps<"div"> = {
         scale: 1.08,
         filter: "drop-shadow(0 0 3px rgba(255, 255, 255, 0.7))",
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10
         }
@@ -205,14 +205,14 @@ export const glowIconAnimation: HTMLMotionProps<"div"> = {
         scale: 0.92,
         filter: "drop-shadow(0 0 6px rgba(255, 255, 255, 0.9))",
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 500,
             damping: 12,
             duration: 0.2
         }
     },
     transition: {
-        type: "spring",
+        type: "spring" as const,
         stiffness: 400,
         damping: 15
     }

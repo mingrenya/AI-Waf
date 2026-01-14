@@ -11,7 +11,7 @@ export default function IpBlockPage() {
     const [configDialogOpen, setConfigDialogOpen] = useState(false)
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col min-h-full">
             {/* 页面标题和配置按钮 - 固定高度 */}
             <div className="flex items-center justify-end pt-6 px-6 flex-shrink-0">
                 <AnimatedButton>

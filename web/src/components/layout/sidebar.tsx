@@ -96,7 +96,7 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
 
     return (
         <div
-            className="w-64 text-white flex flex-col border-r border-slate-200 dark:border-none relative overflow-hidden transition-all duration-300 bg-sidebar-gradient"
+            className="w-64 h-full text-white flex flex-col border-r border-slate-200 dark:border-none relative overflow-hidden transition-all duration-300 bg-sidebar-gradient"
         >
             {/* 霓虹灯效果 暗色模式 */}
             <div className="absolute inset-0 dark:animate-sidebar-neon-glow pointer-events-none"></div>

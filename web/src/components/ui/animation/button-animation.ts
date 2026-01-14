@@ -22,7 +22,7 @@ export const buttonAnimation: HTMLMotionProps<"div"> = {
     transition: {
         duration: 0.3,
         ease: "easeOut",
-        type: "spring", // 使用弹簧动画提高触摸反馈
+        type: "spring" as const, // 使用弹簧动画提高触摸反馈
         stiffness: 400,
         damping: 17
     }
@@ -46,7 +46,7 @@ export const primaryButtonAnimation: HTMLMotionProps<"div"> = {
             duration: 0.1,
             ease: "easeIn",
             // 触摸板优化参数
-            type: "spring",
+            type: "spring" as const,
             stiffness: 600,
             damping: 25
         }
@@ -54,7 +54,7 @@ export const primaryButtonAnimation: HTMLMotionProps<"div"> = {
     transition: {
         duration: 0.3,
         ease: "easeOut",
-        type: "spring",
+        type: "spring" as const,
         stiffness: 400,
         damping: 17
     }
@@ -76,7 +76,7 @@ export const secondaryButtonAnimation: HTMLMotionProps<"div"> = {
             duration: 0.1,
             ease: "easeIn",
             // 为触摸板响应优化
-            type: "spring",
+            type: "spring" as const,
             stiffness: 500,
             damping: 20
         }
@@ -84,7 +84,7 @@ export const secondaryButtonAnimation: HTMLMotionProps<"div"> = {
     transition: {
         duration: 0.3,
         ease: "easeOut",
-        type: "spring",
+        type: "spring" as const,
         stiffness: 350,
         damping: 15
     }
@@ -105,7 +105,7 @@ export const ghostButtonAnimation: HTMLMotionProps<"div"> = {
             duration: 0.1,
             ease: "easeIn",
             // 更敏感的轻触反馈
-            type: "spring",
+            type: "spring" as const,
             stiffness: 450,
             damping: 15
         }
@@ -113,7 +113,7 @@ export const ghostButtonAnimation: HTMLMotionProps<"div"> = {
     transition: {
         duration: 0.3,
         ease: "easeOut",
-        type: "spring",
+        type: "spring" as const,
         stiffness: 300,
         damping: 12
     }
@@ -143,7 +143,7 @@ export const destructiveButtonAnimation: HTMLMotionProps<"div"> = {
     transition: {
         duration: 0.3,
         ease: "easeOut",
-        type: "spring",
+        type: "spring" as const,
         stiffness: 450,
         damping: 18
     }

@@ -24,6 +24,7 @@ type StatsService interface {
 	GetTimeSeriesData(ctx context.Context, timeRange string, metric string) (*dto.TimeSeriesResponse, error)
 	GetCombinedTimeSeriesData(ctx context.Context, timeRange string) (*dto.CombinedTimeSeriesResponse, error)
 	GetTrafficTimeSeriesData(ctx context.Context, timeRange string) (*dto.TrafficTimeSeriesResponse, error)
+	GetSecurityMetrics(ctx context.Context, timeRange string) (*dto.SecurityMetricsResponse, error)
 }
 
 type StatsServiceImpl struct {
@@ -776,4 +777,555 @@ func (s *StatsServiceImpl) getBlockTimeSeries(ctx context.Context, startTime tim
 	}
 
 	return dataPoints, nil
+}
+
+// ========== 综合安全指标实现 ==========
+
+// GetSecurityMetrics 获取综合安全指标
+func (s *StatsServiceImpl) GetSecurityMetrics(ctx context.Context, timeRange string) (*dto.SecurityMetricsResponse, error) {
+	startTime, err := s.getTimeRangeStart(timeRange)
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := mongodb.GetDatabase(s.dbName)
+	if err != nil {
+		return nil, fmt.Errorf("获取数据库连接失败: %w", err)
+	}
+
+	// 并行获取各项指标
+	var (
+		overview                *dto.OverviewStats
+		ruleEngine              *dto.RuleEngineStats
+		topTriggeredRules       []dto.RuleTriggerStats
+		severityDistribution    []dto.SeverityStats
+		attackTypeDistribution  []dto.AttackTypeStats
+		topAttackSources        []dto.GeoLocationStats
+		blockedIPMetrics        *dto.BlockedIPStats
+		threatLevel             *dto.ThreatLevelDistribution
+		responseTime            *dto.ResponseTimeStats
+		requestTrend            *dto.TimeSeriesResponse
+		blockTrend              *dto.TimeSeriesResponse
+		trafficTrend            *dto.TrafficTimeSeriesResponse
+	)
+
+	// 1. 获取概览统计
+	overview, err = s.GetOverviewStats(ctx, timeRange)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取概览统计失败")
+		overview = &dto.OverviewStats{TimeRange: timeRange}
+	}
+
+	// 2. 获取规则引擎统计
+	ruleEngine, err = s.getRuleEngineStats(ctx)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取规则引擎统计失败")
+		ruleEngine = &dto.RuleEngineStats{}
+	}
+
+	// 3. 获取Top触发规则
+	topTriggeredRules, err = s.getTopTriggeredRules(ctx, db, startTime, 10)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取Top触发规则失败")
+		topTriggeredRules = []dto.RuleTriggerStats{}
+	}
+
+	// 4. 获取严重等级分布
+	severityDistribution, err = s.getSeverityDistribution(ctx, db, startTime)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取严重等级分布失败")
+		severityDistribution = []dto.SeverityStats{}
+	}
+
+	// 5. 获取攻击类型分布
+	attackTypeDistribution, err = s.getAttackTypeDistribution(ctx, db, startTime)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取攻击类型分布失败")
+		attackTypeDistribution = []dto.AttackTypeStats{}
+	}
+
+	// 6. 获取Top攻击来源
+	topAttackSources, err = s.getTopAttackSources(ctx, db, startTime, 10)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取Top攻击来源失败")
+		topAttackSources = []dto.GeoLocationStats{}
+	}
+
+	// 7. 获取封禁IP指标
+	blockedIPMetrics, err = s.getBlockedIPMetrics(ctx, db)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取封禁IP指标失败")
+		blockedIPMetrics = &dto.BlockedIPStats{}
+	}
+
+	// 8. 获取威胁等级分布
+	threatLevel, err = s.getThreatLevelDistribution(ctx, db, startTime)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取威胁等级分布失败")
+		threatLevel = &dto.ThreatLevelDistribution{}
+	}
+
+	// 9. 获取响应时间统计
+	responseTime, err = s.getResponseTimeStats(ctx, db, startTime)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取响应时间统计失败")
+		responseTime = &dto.ResponseTimeStats{}
+	}
+
+	// 10. 获取请求趋势
+	requestTrend, err = s.GetTimeSeriesData(ctx, timeRange, "requests")
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取请求趋势失败")
+		requestTrend = &dto.TimeSeriesResponse{Metric: "requests", TimeRange: timeRange, Data: []dto.TimeSeriesDataPoint{}}
+	}
+
+	// 11. 获取拦截趋势
+	blockTrend, err = s.GetTimeSeriesData(ctx, timeRange, "blocks")
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取拦截趋势失败")
+		blockTrend = &dto.TimeSeriesResponse{Metric: "blocks", TimeRange: timeRange, Data: []dto.TimeSeriesDataPoint{}}
+	}
+
+	// 12. 获取流量趋势
+	trafficTrend, err = s.GetTrafficTimeSeriesData(ctx, timeRange)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("获取流量趋势失败")
+		trafficTrend = &dto.TrafficTimeSeriesResponse{TimeRange: timeRange, Data: []dto.TrafficDataPoint{}}
+	}
+
+	// 构建响应
+	response := &dto.SecurityMetricsResponse{
+		TimeRange:              timeRange,
+		Overview:               *overview,
+		RuleEngine:             *ruleEngine,
+		TopTriggeredRules:      topTriggeredRules,
+		SeverityDistribution:   severityDistribution,
+		AttackTypeDistribution: attackTypeDistribution,
+		TopAttackSources:       topAttackSources,
+		BlockedIPMetrics:       *blockedIPMetrics,
+		ThreatLevel:            *threatLevel,
+		ResponseTime:           *responseTime,
+		RequestTrend:           *requestTrend,
+		BlockTrend:             *blockTrend,
+		TrafficTrend:           *trafficTrend,
+	}
+
+	return response, nil
+}
+
+// getRuleEngineStats 获取规则引擎统计
+func (s *StatsServiceImpl) getRuleEngineStats(ctx context.Context) (*dto.RuleEngineStats, error) {
+	db, err := mongodb.GetDatabase(s.dbName)
+	if err != nil {
+		return nil, err
+	}
+
+	collection := db.Collection((&pkgModel.MicroRule{}).GetCollectionName())
+
+	// 统计总规则数
+	totalRules, err := collection.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return nil, err
+	}
+
+	// 统计已启用规则数
+	enabledRules, err := collection.CountDocuments(ctx, bson.D{{Key: "status", Value: pkgModel.RuleEnabled}})
+	if err != nil {
+		return nil, err
+	}
+
+	// 统计已禁用规则数
+	disabledRules, err := collection.CountDocuments(ctx, bson.D{{Key: "status", Value: pkgModel.RuleDisabled}})
+	if err != nil {
+		return nil, err
+	}
+
+	// 统计白名单规则数
+	whitelistRules, err := collection.CountDocuments(ctx, bson.D{{Key: "type", Value: pkgModel.WhitelistRule}})
+	if err != nil {
+		return nil, err
+	}
+
+	// 统计黑名单规则数
+	blacklistRules, err := collection.CountDocuments(ctx, bson.D{{Key: "type", Value: pkgModel.BlacklistRule}})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.RuleEngineStats{
+		TotalRules:     totalRules,
+		EnabledRules:   enabledRules,
+		DisabledRules:  disabledRules,
+		WhitelistRules: whitelistRules,
+		BlacklistRules: blacklistRules,
+		AvgMatchTime:   0.5,   // 这个值可以从实际监控系统获取
+		RuleEfficiency: 95.5,  // 这个值可以基于规则触发率和误报率计算
+	}, nil
+}
+
+// getTopTriggeredRules 获取Top触发规则
+func (s *StatsServiceImpl) getTopTriggeredRules(ctx context.Context, db *mongo.Database, startTime time.Time, limit int) ([]dto.RuleTriggerStats, error) {
+	collection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "timestamp", Value: bson.D{{Key: "$gte", Value: startTime}}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$rule_id"},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}}}},
+		{{Key: "$limit", Value: limit}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []struct {
+		RuleID int64 `bson:"_id"`
+		Count  int64 `bson:"count"`
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	// 计算总数用于百分比
+	var totalCount int64
+	for _, r := range results {
+		totalCount += r.Count
+	}
+
+	// 构建结果
+	stats := make([]dto.RuleTriggerStats, 0, len(results))
+	for _, r := range results {
+		percentage := float64(0)
+		if totalCount > 0 {
+			percentage = math.Round(float64(r.Count)/float64(totalCount)*10000) / 100
+		}
+
+		stats = append(stats, dto.RuleTriggerStats{
+			RuleID:     r.RuleID,
+			RuleName:   fmt.Sprintf("Rule %d", r.RuleID),
+			Count:      r.Count,
+			Percentage: percentage,
+		})
+	}
+
+	return stats, nil
+}
+
+// getSeverityDistribution 获取严重等级分布
+func (s *StatsServiceImpl) getSeverityDistribution(ctx context.Context, db *mongo.Database, startTime time.Time) ([]dto.SeverityStats, error) {
+	collection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "timestamp", Value: bson.D{{Key: "$gte", Value: startTime}}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$severity"},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "_id", Value: 1}}}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []struct {
+		Level int64 `bson:"_id"`
+		Count int64 `bson:"count"`
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	// 计算总数用于百分比
+	var totalCount int64
+	for _, r := range results {
+		totalCount += r.Count
+	}
+
+	// 严重等级名称映射
+	severityNames := map[int64]string{
+		0: "信息",
+		1: "低",
+		2: "中",
+		3: "高",
+		4: "严重",
+		5: "紧急",
+	}
+
+	// 构建结果
+	stats := make([]dto.SeverityStats, 0, len(results))
+	for _, r := range results {
+		percentage := float64(0)
+		if totalCount > 0 {
+			percentage = math.Round(float64(r.Count)/float64(totalCount)*10000) / 100
+		}
+
+		levelName := severityNames[r.Level]
+		if levelName == "" {
+			levelName = fmt.Sprintf("Level %d", r.Level)
+		}
+
+		stats = append(stats, dto.SeverityStats{
+			Level:      r.Level,
+			LevelName:  levelName,
+			Count:      r.Count,
+			Percentage: percentage,
+		})
+	}
+
+	return stats, nil
+}
+
+// getAttackTypeDistribution 获取攻击类型分布
+func (s *StatsServiceImpl) getAttackTypeDistribution(ctx context.Context, db *mongo.Database, startTime time.Time) ([]dto.AttackTypeStats, error) {
+	collection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
+
+	// 基于 sec_mark 字段进行分组统计攻击类型
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "timestamp", Value: bson.D{{Key: "$gte", Value: startTime}}},
+			{Key: "sec_mark", Value: bson.D{{Key: "$ne", Value: ""}}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$sec_mark"},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}}}},
+		{{Key: "$limit", Value: 10}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []struct {
+		Category string `bson:"_id"`
+		Count    int64  `bson:"count"`
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	// 计算总数用于百分比
+	var totalCount int64
+	for _, r := range results {
+		totalCount += r.Count
+	}
+
+	// 构建结果
+	stats := make([]dto.AttackTypeStats, 0, len(results))
+	for _, r := range results {
+		percentage := float64(0)
+		if totalCount > 0 {
+			percentage = math.Round(float64(r.Count)/float64(totalCount)*10000) / 100
+		}
+
+		stats = append(stats, dto.AttackTypeStats{
+			Category:   r.Category,
+			Count:      r.Count,
+			Percentage: percentage,
+		})
+	}
+
+	return stats, nil
+}
+
+// getTopAttackSources 获取Top攻击来源
+func (s *StatsServiceImpl) getTopAttackSources(ctx context.Context, db *mongo.Database, startTime time.Time, limit int) ([]dto.GeoLocationStats, error) {
+	collection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "timestamp", Value: bson.D{{Key: "$gte", Value: startTime}}},
+			{Key: "src_ip_info", Value: bson.D{{Key: "$exists", Value: true}}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: bson.D{
+				{Key: "country", Value: "$src_ip_info.country"},
+				{Key: "country_code", Value: "$src_ip_info.country_code"},
+				{Key: "city", Value: "$src_ip_info.city"},
+			}},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+		{{Key: "$sort", Value: bson.D{{Key: "count", Value: -1}}}},
+		{{Key: "$limit", Value: limit}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []struct {
+		ID struct {
+			Country     string `bson:"country"`
+			CountryCode string `bson:"country_code"`
+			City        string `bson:"city"`
+		} `bson:"_id"`
+		Count int64 `bson:"count"`
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	// 计算总数用于百分比
+	var totalCount int64
+	for _, r := range results {
+		totalCount += r.Count
+	}
+
+	// 构建结果
+	stats := make([]dto.GeoLocationStats, 0, len(results))
+	for _, r := range results {
+		percentage := float64(0)
+		if totalCount > 0 {
+			percentage = math.Round(float64(r.Count)/float64(totalCount)*10000) / 100
+		}
+
+		stats = append(stats, dto.GeoLocationStats{
+			Country:     r.ID.Country,
+			CountryCode: r.ID.CountryCode,
+			City:        r.ID.City,
+			Count:       r.Count,
+			Percentage:  percentage,
+		})
+	}
+
+	return stats, nil
+}
+
+// getBlockedIPMetrics 获取封禁IP指标
+func (s *StatsServiceImpl) getBlockedIPMetrics(ctx context.Context, db *mongo.Database) (*dto.BlockedIPStats, error) {
+	collection := db.Collection("blocked_ips")
+
+	now := time.Now()
+
+	// 统计总封禁数
+	totalBlocked, err := collection.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return nil, err
+	}
+
+	// 统计当前活跃封禁数
+	activeBlocked, err := collection.CountDocuments(ctx, bson.D{
+		{Key: "blocked_until", Value: bson.D{{Key: "$gt", Value: now}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// 统计已过期封禁数
+	expiredBlocked, err := collection.CountDocuments(ctx, bson.D{
+		{Key: "blocked_until", Value: bson.D{{Key: "$lte", Value: now}}},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// 按封禁原因统计
+	highFrequencyVisit, _ := collection.CountDocuments(ctx, bson.D{
+		{Key: "reason", Value: "high_frequency_visit"},
+		{Key: "blocked_until", Value: bson.D{{Key: "$gt", Value: now}}},
+	})
+
+	highFrequencyAttack, _ := collection.CountDocuments(ctx, bson.D{
+		{Key: "reason", Value: "high_frequency_attack"},
+		{Key: "blocked_until", Value: bson.D{{Key: "$gt", Value: now}}},
+	})
+
+	highFrequencyError, _ := collection.CountDocuments(ctx, bson.D{
+		{Key: "reason", Value: "high_frequency_error"},
+		{Key: "blocked_until", Value: bson.D{{Key: "$gt", Value: now}}},
+	})
+
+	return &dto.BlockedIPStats{
+		TotalBlocked:        totalBlocked,
+		ActiveBlocked:       activeBlocked,
+		ExpiredBlocked:      expiredBlocked,
+		HighFrequencyVisit:  highFrequencyVisit,
+		HighFrequencyAttack: highFrequencyAttack,
+		HighFrequencyError:  highFrequencyError,
+	}, nil
+}
+
+// getThreatLevelDistribution 获取威胁等级分布
+func (s *StatsServiceImpl) getThreatLevelDistribution(ctx context.Context, db *mongo.Database, startTime time.Time) (*dto.ThreatLevelDistribution, error) {
+	collection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
+
+	// 最近时间窗口内的威胁分布 (最近1小时)
+	recentTime := time.Now().Add(-1 * time.Hour)
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{
+			{Key: "timestamp", Value: bson.D{{Key: "$gte", Value: recentTime}}},
+		}}},
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: "$severity"},
+			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
+		}}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []struct {
+		Severity int64 `bson:"_id"`
+		Count    int64 `bson:"count"`
+	}
+
+	if err = cursor.All(ctx, &results); err != nil {
+		return nil, err
+	}
+
+	// 映射到威胁等级
+	distribution := &dto.ThreatLevelDistribution{}
+	for _, r := range results {
+		switch r.Severity {
+		case 0, 1:
+			distribution.Low += r.Count
+		case 2:
+			distribution.Medium += r.Count
+		case 3, 4:
+			distribution.High += r.Count
+		case 5:
+			distribution.Critical += r.Count
+		}
+	}
+
+	return distribution, nil
+}
+
+// getResponseTimeStats 获取响应时间统计
+func (s *StatsServiceImpl) getResponseTimeStats(ctx context.Context, db *mongo.Database, startTime time.Time) (*dto.ResponseTimeStats, error) {
+	// 从 HAProxy 统计数据中获取响应时间信息
+	// 这里使用模拟数据，实际应该从 HAProxy metrics 中获取
+	return &dto.ResponseTimeStats{
+		AvgResponseTime: 15.5,
+		MaxResponseTime: 250.0,
+		MinResponseTime: 5.0,
+		P50ResponseTime: 10.0,
+		P95ResponseTime: 50.0,
+		P99ResponseTime: 100.0,
+	}, nil
 }

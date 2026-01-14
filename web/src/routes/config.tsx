@@ -11,7 +11,7 @@ import { RootLayout } from "@/components/layout/root-layout"
 import { MonitorLayOut } from "@/pages/monitor/layout"
 import { RulesLayOut } from "@/pages/rule/layout"
 import { SettingLayOut } from "@/pages/setting/layout"
-import { LogLayOut } from "@/pages/logs/layout"
+import { LogsLayout } from "@/pages/logs/layout"
 import { AlertLayOut } from "@/pages/alert/layout"
 
 // 直接导入子组件
@@ -28,6 +28,7 @@ import FlowControlPage from "@/pages/rule/pages/cc/page"
 import AlertChannelPage from "@/pages/alert/pages/channel/page"
 import AlertRulePage from "@/pages/alert/pages/rule/page"
 import AlertHistoryPage from "@/pages/alert/pages/history/page"
+import SecurityMetricsPage from "@/pages/security-metrics/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
 // 懒加载认证页面
@@ -57,10 +58,10 @@ interface BreadcrumbConfig {
 export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, BreadcrumbConfig> {
     return {
         [ROUTES.LOGS]: {
-            defaultPath: "attack",
+            defaultPath: "event",
             items: [
-                { title: t('breadcrumb.logs.attack'), path: "attack", component: <EventsPage /> },
-                { title: t('breadcrumb.logs.protect'), path: "protect", component: <LogsPage /> },
+                { title: t('breadcrumb.logs.attack'), path: "event", component: <EventsPage /> },
+                { title: t('breadcrumb.logs.protect'), path: "log", component: <LogsPage /> },
             ]
         },
         [ROUTES.MONITOR]: {
@@ -68,6 +69,7 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
             items: [
                 { title: t('breadcrumb.monitor.overview'), path: "overview", component: <StatsPage /> },
                 { title: t('breadcrumb.monitor.dashboard'), path: "dashboard", component: <Navigate to="/security-dashboard" replace /> },
+                { title: t('breadcrumb.monitor.securityMetrics'), path: "security-metrics", component: <SecurityMetricsPage /> },
             ]
         },
         [ROUTES.RULES]: {
@@ -145,7 +147,7 @@ export function useRoutes(): RouteObject[] {
                 },
                 {
                     path: ROUTES.LOGS,
-                    element: <LogLayOut />,
+                    element: <LogsLayout />,
                     children: createChildRoutes(breadcrumbMap[ROUTES.LOGS])
                 },
                 {

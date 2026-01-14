@@ -75,7 +75,7 @@ export const dialogContentItemAnimation: HTMLMotionProps<"div"> = {
       y: 0,
       scale: 1,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 20, // 更高的阻尼使动画更自然不过度弹跳
         stiffness: 260, // 适当的刚度平衡速度和流畅度
         mass: 0.4 // 较轻的质量使动画更灵活

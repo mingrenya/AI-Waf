@@ -24,8 +24,6 @@ const queryClient = new QueryClient({
     }
 })
 
-
-
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ErrorBoundary>
@@ -41,3 +39,12 @@ createRoot(document.getElementById('root')!).render(
         </ErrorBoundary>
     </StrictMode>,
 )
+
+// React 挂载后移除加载动画
+setTimeout(() => {
+    const loadingElement = document.querySelector('.app-loading')
+    if (loadingElement) {
+        loadingElement.classList.add('app-loading-fade-out')
+        setTimeout(() => loadingElement.remove(), 500)
+    }
+}, 100)

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" translate="no">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="google" content="notranslate" />
 
         <link rel="icon" type="image/svg+xml" href="/logo.svg" />
 
@@ -37,7 +38,6 @@
             html {
                 margin: 0;
                 padding: 0;
-                overflow: hidden;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
                     Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
                     "Helvetica Neue", sans-serif;
@@ -213,35 +213,48 @@
                     transform: translateY(0);
                 }
             }
+
+            /* 淡出动画 */
+            .app-loading-fade-out {
+                animation: loading-fade-out 0.5s ease-out forwards;
+            }
+
+            @keyframes loading-fade-out {
+                from {
+                    opacity: 1;
+                }
+                to {
+                    opacity: 0;
+                }
+            }
         </style>
 
         <title>RuiQi WAF</title>
     </head>
 
-    <body>
-        <div id="root">
-            <!-- 应用加载前显示的加载指示器 -->
-            <div class="app-loading">
-                <div class="app-loading-background"></div>
-                <div class="app-loading-blur-elements">
-                    <div class="app-loading-blur-1"></div>
-                    <div class="app-loading-blur-2"></div>
-                    <div class="app-loading-blur-3"></div>
+    <body translate="no">
+        <!-- 应用加载前显示的加载指示器 - 放在 root 外面 -->
+        <div class="app-loading">
+            <div class="app-loading-background"></div>
+            <div class="app-loading-blur-elements">
+                <div class="app-loading-blur-1"></div>
+                <div class="app-loading-blur-2"></div>
+                <div class="app-loading-blur-3"></div>
+            </div>
+            <div class="app-loading-content">
+                <div class="app-loading-text">Loading...</div>
+                <div class="app-loading-progress-container">
+                    <div
+                        class="app-loading-progress-bar"
+                        id="progressBar"
+                    ></div>
                 </div>
-                <div class="app-loading-content">
-                    <div class="app-loading-text">Loading...</div>
-                    <div class="app-loading-progress-container">
-                        <div
-                            class="app-loading-progress-bar"
-                            id="progressBar"
-                        ></div>
-                    </div>
-                    <div class="app-loading-percentage" id="progressText">
-                        0% Complete
-                    </div>
+                <div class="app-loading-percentage" id="progressText">
+                    0% Complete
                 </div>
             </div>
         </div>
+        <div id="root"></div>
         <script>
             // Match the React component's progress calculation logic exactly
             (function () {

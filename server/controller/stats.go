@@ -19,6 +19,7 @@ type StatsController interface {
 	GetTimeSeriesData(ctx *gin.Context)
 	GetCombinedTimeSeriesData(ctx *gin.Context)
 	GetTrafficTimeSeriesData(ctx *gin.Context)
+	GetSecurityMetrics(ctx *gin.Context)
 }
 
 type StatsControllerImpl struct {
@@ -245,4 +246,44 @@ func (c *StatsControllerImpl) GetTrafficTimeSeriesData(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, "获取流量时间序列数据成功", data)
+}
+
+// GetSecurityMetrics 获取综合安全指标
+//
+//	@Summary		获取综合安全指标
+//	@Description	获取综合安全指标仪表板数据，包括规则引擎统计、攻击类型分布、威胁等级、封禁IP等多维度安全指标
+//	@Tags			统计信息
+//	@Produce		json
+//	@Param			timeRange	query	string	true	"时间范围：24h(24小时)、7d(7天)、30d(30天)"	Enums(24h, 7d, 30d)	default(24h)
+//	@Security		BearerAuth
+//	@Success		200	{object}	model.SuccessResponse{data=dto.SecurityMetricsResponse}	"获取综合安全指标成功"
+//	@Failure		400	{object}	model.ErrResponse											"请求参数错误"
+//	@Failure		401	{object}	model.ErrResponseDontShowError								"未授权访问"
+//	@Failure		500	{object}	model.ErrResponseDontShowError								"服务器内部错误"
+//	@Router			/api/v1/stats/security-metrics [get]
+func (c *StatsControllerImpl) GetSecurityMetrics(ctx *gin.Context) {
+	// 解析请求参数
+	var req dto.SecurityMetricsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		c.logger.Warn().Err(err).Msg("绑定综合安全指标请求参数失败")
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	// 检查请求参数
+	if req.TimeRange == "" {
+		req.TimeRange = dto.TimeRange24Hours // 默认24小时
+	}
+
+	// 调用服务
+	data, err := c.statsService.GetSecurityMetrics(ctx, req.TimeRange)
+	if err != nil {
+		c.logger.Error().Err(err).
+			Str("timeRange", req.TimeRange).
+			Msg("获取综合安全指标失败")
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+
+	response.Success(ctx, "获取综合安全指标成功", data)
 }

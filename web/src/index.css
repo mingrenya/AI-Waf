@@ -1,6 +1,10 @@
+/* stylelint-disable-next-line at-rule-no-unknown */
 @tailwind base;
+/* stylelint-disable-next-line at-rule-no-unknown */
 @tailwind components;
+/* stylelint-disable-next-line at-rule-no-unknown */
 @tailwind utilities;
+/* stylelint-disable-next-line at-rule-no-unknown */
 
 @layer base {
     :root {
@@ -120,8 +124,16 @@
         @apply border-border;
     }
 
+    html,
     body {
         @apply bg-background text-foreground;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    #root {
+        height: 100%;
+        overflow: hidden;
     }
 }
 

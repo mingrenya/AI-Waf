@@ -15,7 +15,8 @@
         },
         "monitor": {
             "overview": "监控",
-            "dashboard": "防护大屏"
+            "dashboard": "防护大屏",
+            "securityMetrics": "综合安全指标"
         },
         "rules": {
             "system": "系统规则",
@@ -42,7 +43,11 @@
         "create": "创建",
         "delete": "删除",
         "cancel": "取消",
-        "submitting": "提交中..."
+        "submitting": "提交中...",
+        "last24Hours": "最近24小时",
+        "last7Days": "最近7天",
+        "last30Days": "最近30天",
+        "errorLoadingData": "加载数据失败"
     },
     "error": {
         "title": "发生了错误",
@@ -648,6 +653,43 @@
             "title": "实时QPS监控",
             "tooltip": "{{time}}: {{value}} QPS"
         }
+    },
+    "securityMetrics": {
+        "title": "综合安全指标",
+        "description": "全面的安全态势分析和威胁情报展示",
+        "totalRequests": "总请求数",
+        "blockCount": "拦截数量",
+        "attackIPCount": "攻击IP数",
+        "error4xx": "4xx错误",
+        "ruleEngine": "规则引擎",
+        "ruleEngineDesc": "规则引擎性能和配置状态",
+        "totalRules": "总规则数",
+        "enabledRules": "已启用",
+        "disabledRules": "已禁用",
+        "whitelistRules": "白名单",
+        "blacklistRules": "黑名单",
+        "ruleEfficiency": "规则效率",
+        "threatLevel": "威胁等级",
+        "threatLevelDesc": "当前威胁等级分布（最近1小时）",
+        "critical": "严重",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "totalThreats": "总威胁数",
+        "topTriggeredRules": "Top触发规则",
+        "topTriggeredRulesDesc": "触发次数最多的安全规则",
+        "severityDistribution": "严重等级分布",
+        "attackTypeDistribution": "攻击类型分布",
+        "topAttackSources": "Top攻击来源",
+        "blockedIPMetrics": "封禁IP统计",
+        "totalBlocked": "总封禁数",
+        "activeBlocked": "当前活跃",
+        "highFrequencyVisit": "高频访问",
+        "highFrequencyAttack": "高频攻击",
+        "highFrequencyError": "高频错误",
+        "responseTime": "响应时间",
+        "avgResponseTime": "平均响应时间",
+        "maxResponseTime": "最大响应时间"
     },
     "alert": {
         "management": "告警管理",

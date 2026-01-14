@@ -8,14 +8,14 @@ export const layoutAnimationProps = {
     exit: { opacity: 0, scale: 0.8 },
     transition: {
         layout: { 
-            type: "spring", 
+            type: "spring" as const, 
             damping: 25, 
             stiffness: 300,
             mass: 0.8
         },
         opacity: { duration: 0.3 },
         scale: { 
-            type: "spring", 
+            type: "spring" as const, 
             damping: 15, 
             stiffness: 200 
         }
@@ -35,7 +35,7 @@ export const gridItemAnimation: HTMLMotionProps<"div"> = {
             y: 0,
             scale: 1,
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 damping: 15,
                 stiffness: 200
             }

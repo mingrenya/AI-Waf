@@ -202,7 +202,7 @@ export default function IPGroupPage() {
     })
 
     return (
-        <Card className="flex flex-col h-full p-6 border-none shadow-none">
+        <Card className="flex flex-col min-h-full p-6 border-none shadow-none">
             {/* 头部操作栏 */}
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-primary dark:text-white">

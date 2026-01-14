@@ -97,7 +97,7 @@ export const pageScaleTransition: HTMLMotionProps<"div"> = {
     y: 0,
     transition: { 
       duration: 0.4,
-      scale: { type: "spring", stiffness: 120, damping: 20 },
+      scale: { type: "spring" as const, stiffness: 120, damping: 20 },
       opacity: { duration: 0.3 },
       y: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
     }

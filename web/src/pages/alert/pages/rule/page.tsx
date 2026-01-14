@@ -52,7 +52,7 @@ export default function AlertRulePage() {
     }
 
     return (
-        <Card className="p-6 w-full h-full border-none shadow-none rounded-none">
+        <Card className="p-6 w-full min-h-full border-none shadow-none rounded-none">
             <div className="flex justify-between items-center mb-6 bg-zinc-50 dark:bg-muted/30 rounded-md p-4 transition-colors duration-200">
                 <h2 className="text-xl font-semibold text-primary dark:text-white">{t('alert.ruleManagement')}</h2>
                 <div className="flex gap-2">

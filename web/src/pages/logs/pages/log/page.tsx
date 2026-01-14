@@ -60,6 +60,7 @@ export default function LogsPage() {
 
     const { data, isLoading, isError, error, refetch } = useAttackLogs(queryParams)
 
+
     const handleFilter = (values: AttackLogQueryFormValues) => {
         setQueryParams(values)
     }

@@ -15,7 +15,8 @@
         },
         "monitor": {
             "overview": "Monitor",
-            "dashboard": "Security Dashboard"
+            "dashboard": "Security Dashboard",
+            "securityMetrics": "Security Metrics"
         },
         "rules": {
             "system": "System rules",
@@ -42,7 +43,11 @@
         "create": "Create",
         "delete": "Delete",
         "cancel": "Cancel",
-        "submitting": "Submitting..."
+        "submitting": "Submitting...",
+        "last24Hours": "Last 24 Hours",
+        "last7Days": "Last 7 Days",
+        "last30Days": "Last 30 Days",
+        "errorLoadingData": "Error loading data"
     },
     "error": {
         "title": "An Error Occurred",
@@ -648,6 +653,43 @@
             "title": "Realtime QPS Monitor",
             "tooltip": "{{time}}: {{value}} QPS"
         }
+    },
+    "securityMetrics": {
+        "title": "Security Metrics",
+        "description": "Comprehensive security posture analysis and threat intelligence",
+        "totalRequests": "Total Requests",
+        "blockCount": "Block Count",
+        "attackIPCount": "Attack IPs",
+        "error4xx": "4xx Errors",
+        "ruleEngine": "Rule Engine",
+        "ruleEngineDesc": "Rule engine performance and configuration status",
+        "totalRules": "Total Rules",
+        "enabledRules": "Enabled",
+        "disabledRules": "Disabled",
+        "whitelistRules": "Whitelist",
+        "blacklistRules": "Blacklist",
+        "ruleEfficiency": "Rule Efficiency",
+        "threatLevel": "Threat Level",
+        "threatLevelDesc": "Current threat level distribution (Last 1 hour)",
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "totalThreats": "Total Threats",
+        "topTriggeredRules": "Top Triggered Rules",
+        "topTriggeredRulesDesc": "Most frequently triggered security rules",
+        "severityDistribution": "Severity Distribution",
+        "attackTypeDistribution": "Attack Type Distribution",
+        "topAttackSources": "Top Attack Sources",
+        "blockedIPMetrics": "Blocked IP Metrics",
+        "totalBlocked": "Total Blocked",
+        "activeBlocked": "Currently Active",
+        "highFrequencyVisit": "High Frequency Visit",
+        "highFrequencyAttack": "High Frequency Attack",
+        "highFrequencyError": "High Frequency Error",
+        "responseTime": "Response Time",
+        "avgResponseTime": "Average Response Time",
+        "maxResponseTime": "Maximum Response Time"
     },
     "alert": {
         "management": "Alert Management",
