@@ -35,7 +35,7 @@ export default function EventsPage() {
     const [enablePolling, setEnablePolling] = useState(false)
     const [pollingInterval, setPollingInterval] = useState(30) // 默认30秒
 
-    const { data, isLoading, error, isError, refetch } = useAttackEvents(queryParams)
+    const { data, isPending, error, isError, refetch } = useAttackEvents(queryParams)
 
     // 设置轮询
     useEffect(() => {
@@ -172,9 +172,9 @@ export default function EventsPage() {
     ]
 
     const table = useReactTable({
-        data: data?.results || [],
+        data: data?.results ?? [],
         columns,
-        pageCount: data?.totalPages || 0,
+        pageCount: data?.totalPages ?? 0,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
@@ -233,7 +233,7 @@ export default function EventsPage() {
                         loadingStyle="skeleton"
                         table={table}
                         columns={columns}
-                        isLoading={isLoading}
+                        isLoading={isPending}
                         fixedHeader={true}
                         animatedRows={true}
                         showScrollShadows={true}

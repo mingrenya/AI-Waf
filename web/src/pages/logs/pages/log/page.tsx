@@ -58,7 +58,7 @@ export default function LogsPage() {
         }
     }, [location.search])
 
-    const { data, isLoading, isError, error, refetch } = useAttackLogs(queryParams)
+    const { data, isPending, isError, error, refetch } = useAttackLogs(queryParams)
 
 
     const handleFilter = (values: AttackLogQueryFormValues) => {
@@ -144,9 +144,9 @@ export default function LogsPage() {
     ]
 
     const table = useReactTable({
-        data: data?.results || [],
+        data: data?.results ?? [],
         columns,
-        pageCount: data?.totalPages || 0,
+        pageCount: data?.totalPages ?? 0,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         manualPagination: true,
@@ -198,7 +198,7 @@ export default function LogsPage() {
                         loadingStyle="skeleton"
                         table={table}
                         columns={columns}
-                        isLoading={isLoading}
+                        isLoading={isPending}
                         fixedHeader={true}
                         animatedRows={true}
                         showScrollShadows={true}

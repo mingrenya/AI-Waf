@@ -10,7 +10,7 @@ export function Breadcrumb() {
     const [mainPath, subPath] = location.pathname.split("/").filter(Boolean)
     const config = breadcrumbMap[`/${mainPath}` as RoutePath]
 
-    if (!config) return null
+    if (!config) return <div className="h-0" />
 
     const currentPath = subPath || config.defaultPath
 
