@@ -3,6 +3,8 @@ import { useBreadcrumbMap } from "@/routes/config"
 import type { RoutePath } from "@/routes/constants"
 import { cn } from "@/lib/utils"
 import { ChevronRight } from "lucide-react"
+import { MCPStatusIndicator } from "@/components/common/mcp-status-indicator"
+import { AIAssistantButton } from "@/components/common/ai-assistant-button"
 
 export function Breadcrumb() {
     const location = useLocation()
@@ -17,7 +19,8 @@ export function Breadcrumb() {
     return (
         <div className="bg-white dark:bg-background border-b border-slate-100 dark:border-background shadow-sm">
             <div className="px-6 py-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
                     {config.items.map((item, index) => (
                         <div key={item.path} className="flex items-center">
                             {index > 0 && <ChevronRight className="w-4 h-4 mx-2 text-primary text-shadow-primary" />}
@@ -38,6 +41,11 @@ export function Breadcrumb() {
                             </Link>
                         </div>
                     ))}
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <MCPStatusIndicator />
+                        <AIAssistantButton />
+                    </div>
                 </div>
             </div>
         </div>

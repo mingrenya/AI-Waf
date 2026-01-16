@@ -14,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 
 	flowcontroller "github.com/mingrenya/AI-Waf/coraza-spoa/internal/flow-controller"
+	trafficanalyzer "github.com/mingrenya/AI-Waf/coraza-spoa/internal/traffic-analyzer"
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	coreruleset "github.com/corazawaf/coraza-coreruleset"
 	"github.com/corazawaf/coraza/v3"
@@ -46,6 +47,13 @@ type ApplicationOptions struct {
 	GeoIPConfig          *GeoIP2Options        // GeoIP配置，用于IP地理位置处理
 	RuleEngineDbConfig   *MongoDBConfig        // 规则引擎数据库配置
 	FlowControllerConfig *FlowControllerConfig // 流量控制器配置
+	TrafficAnalyzerConfig *TrafficAnalyzerConfig // 流量分析器配置
+}
+
+// TrafficAnalyzerConfig 流量分析器配置
+type TrafficAnalyzerConfig struct {
+	Client   *mongo.Client // MongoDB客户端
+	Database string        // 数据库名称
 }
 
 // FlowControllerConfig 流量控制器配置
@@ -55,22 +63,24 @@ type FlowControllerConfig struct {
 }
 
 type Application struct {
-	waf            coraza.WAF
-	cache          cache.ExpiringCache
-	logStore       LogStore
-	ipProcessor    IPProcessor
-	ruleEngine     *RuleEngine
-	flowController *flowcontroller.FlowController
-	ipRecorder     flowcontroller.IPRecorder
+	waf             coraza.WAF
+	cache           cache.ExpiringCache
+	logStore        LogStore
+	ipProcessor     IPProcessor
+	ruleEngine      *RuleEngine
+	flowController  *flowcontroller.FlowController
+	ipRecorder      flowcontroller.IPRecorder
+	trafficAnalyzer *trafficanalyzer.TrafficAnalyzer
 
 	AppConfig
 }
 
 // 扩展transaction结构体，添加请求信息
 type transaction struct {
-	tx      types.Transaction
-	m       sync.Mutex
-	request *applicationRequest // 存储请求信息
+	tx        types.Transaction
+	m         sync.Mutex
+	request   *applicationRequest // 存储请求信息
+	startTime time.Time            // 请求开始时间
 }
 
 type applicationRequest struct {
@@ -266,12 +276,14 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 	}
 
 	tx := a.waf.NewTransactionWithID(req.ID)
+	startTime := time.Now() // 记录请求开始时间
 	defer func() {
 		if err == nil && a.ResponseCheck {
 			// 存储transaction和请求信息到缓存
 			txCache := &transaction{
-				tx:      tx,
-				request: &req, // 存储请求信息
+				tx:        tx,
+				request:   &req,       // 存储请求信息
+				startTime: startTime,  // 存储开始时间
 			}
 			a.cache.SetWithExpiration(tx.ID(), txCache, a.TransactionTTL)
 			return
@@ -523,6 +535,33 @@ func (a *Application) HandleResponse(ctx context.Context, writer *encoding.Actio
 	}
 
 	defer func() {
+		// 记录流量事件到流量分析器
+		if a.trafficAnalyzer != nil && t.request != nil {
+			event := &trafficanalyzer.TrafficEvent{
+				Timestamp:    time.Now(),
+				SrcIP:        t.request.SrcIp.String(),
+				DstIP:        t.request.DstIp.String(),
+				DstPort:      t.request.DstPort,
+				Method:       t.request.Method,
+				Path:         string(t.request.Path),
+				StatusCode:   int(res.Status),
+				IsBlocked:    tx.IsInterrupted(),
+				IsAttack:     tx.IsInterrupted(),
+				ResponseTime: time.Since(t.startTime), // 从请求开始时间计算响应时间
+			}
+
+			// 确定事件类型
+			if tx.IsInterrupted() {
+				event.Type = "attack"
+			} else if res.Status >= 400 {
+				event.Type = "error"
+			} else {
+				event.Type = "visit"
+			}
+
+			a.trafficAnalyzer.RecordTraffic(event)
+		}
+
 		// 处理中断情况和日志记录
 		if tx.IsInterrupted() && a.logStore != nil {
 			// 记录攻击
@@ -846,6 +885,14 @@ func (a AppConfig) NewApplicationWithContext(ctx context.Context, options Applic
 				a.Logger.Warn().Err(err).Msg("流量控制器初始化失败")
 			}
 		}
+	}
+
+	// 初始化流量分析器
+	if options.TrafficAnalyzerConfig != nil && options.TrafficAnalyzerConfig.Client != nil {
+		db := options.TrafficAnalyzerConfig.Client.Database(options.TrafficAnalyzerConfig.Database)
+		analyzer := trafficanalyzer.NewTrafficAnalyzer(db, a.Logger, app.flowController)
+		app.trafficAnalyzer = analyzer
+		a.Logger.Info().Msg("流量分析器已初始化")
 	}
 
 	debugLogger := debuglog.Default().

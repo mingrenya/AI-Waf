@@ -19,6 +19,7 @@ import (
 	_ "github.com/mingrenya/AI-Waf/server/docs" // 导入 swagger 文档
 	"github.com/mingrenya/AI-Waf/server/router"
 	haproxyStats "github.com/mingrenya/AI-Waf/server/service/cornjob/haproxy"
+	aiAnalyzerTask "github.com/mingrenya/AI-Waf/server/service/cornjob/ai_analyzer"
 	"github.com/mingrenya/AI-Waf/server/service/daemon"
 	"github.com/mingrenya/AI-Waf/server/validator"
 )
@@ -87,6 +88,16 @@ func main() {
 	}
 	// Register cleanup function to be called during shutdown
 	defer haproxyStatsCleanup()
+
+	// Start AI Analyzer cron task
+	aiTask := aiAnalyzerTask.NewAIAnalyzerTask(db)
+	err = aiTask.Start()
+	if err != nil {
+		config.Logger.Error().Err(err).Msg("Failed to start AI Analyzer task")
+		return
+	}
+	config.Logger.Info().Msg("AI Analyzer cron task started successfully")
+	defer aiTask.Stop()
 
 	// Set Gin mode based on configuration
 	if config.Global.IsProduction {

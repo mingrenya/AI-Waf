@@ -13,6 +13,7 @@ import { RulesLayOut } from "@/pages/rule/layout"
 import { SettingLayOut } from "@/pages/setting/layout"
 import { LogsLayout } from "@/pages/logs/layout"
 import { AlertLayOut } from "@/pages/alert/layout"
+import { AIAnalyzerLayOut } from "@/pages/ai-analyzer/layout"
 
 // 直接导入子组件
 import GlobalSettingPage from "@/pages/setting/pages/global-setting/page"
@@ -29,6 +30,11 @@ import AlertChannelPage from "@/pages/alert/pages/channel/page"
 import AlertRulePage from "@/pages/alert/pages/rule/page"
 import AlertHistoryPage from "@/pages/alert/pages/history/page"
 import SecurityMetricsPage from "@/pages/security-metrics/page"
+import AdaptiveThrottlingPage from "@/pages/rule/pages/adaptive-throttling/page"
+import PatternsPage from "@/pages/ai-analyzer/pages/patterns/page"
+import RulesPage from "@/pages/ai-analyzer/pages/rules/page"
+import ConfigPage from "@/pages/ai-analyzer/pages/config/page"
+import AIAssistantPage from "@/pages/ai-analyzer/pages/assistant/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
 // 懒加载认证页面
@@ -78,7 +84,8 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
                 // { title: t('breadcrumb.rules.system'), path: "system", component: <SysRules /> },
                 { title: t('breadcrumb.rules.user'), path: "user", component: <MicroRulePage /> },
                 { title: t('breadcrumb.rules.ipGroup'), path: "ip-group", component: <IPGroupPage /> },
-                { title: t('breadcrumb.rules.flowControl'), path: "flow-control", component: <FlowControlPage /> }
+                { title: t('breadcrumb.rules.flowControl'), path: "flow-control", component: <FlowControlPage /> },
+                { title: t('breadcrumb.rules.adaptiveThrottling'), path: "adaptive-throttling", component: <AdaptiveThrottlingPage /> }
             ]
         },
         [ROUTES.SETTINGS]: {
@@ -95,6 +102,15 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
                 { title: t('breadcrumb.alerts.channel'), path: "channel", component: <AlertChannelPage /> },
                 { title: t('breadcrumb.alerts.rule'), path: "rule", component: <AlertRulePage /> },
                 { title: t('breadcrumb.alerts.history'), path: "history", component: <AlertHistoryPage /> }
+            ]
+        },
+        [ROUTES.AI_ANALYZER]: {
+            defaultPath: "patterns",
+            items: [
+                { title: t('breadcrumb.aiAnalyzer.patterns'), path: "patterns", component: <PatternsPage /> },
+                { title: t('breadcrumb.aiAnalyzer.rules'), path: "rules", component: <RulesPage /> },
+                { title: t('breadcrumb.aiAnalyzer.assistant'), path: "assistant", component: <AIAssistantPage /> },
+                { title: t('breadcrumb.aiAnalyzer.config'), path: "config", component: <ConfigPage /> }
             ]
         }
     }
@@ -169,6 +185,11 @@ export function useRoutes(): RouteObject[] {
                     path: ROUTES.ALERTS,
                     element: <AlertLayOut />,
                     children: createChildRoutes(breadcrumbMap[ROUTES.ALERTS])
+                },
+                {
+                    path: ROUTES.AI_ANALYZER,
+                    element: <AIAnalyzerLayOut />,
+                    children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER])
                 }
             ]
         }]

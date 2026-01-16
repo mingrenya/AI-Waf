@@ -45,6 +45,33 @@ services:
     networks:
       - waf-network
 
+  # MCP Server 服务 - 基于官方go-sdk的标准实现
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp.new
+    container_name: ai-waf-mcp-server
+    restart: always
+    depends_on:
+      - mrya
+    environment:
+      # MCP Server通过HTTP调用后端API
+      # 使用 host.docker.internal 访问宿主机的 localhost:2333
+      WAF_BACKEND_URL: http://host.docker.internal:2333
+      WAF_API_TOKEN: ${MCP_API_TOKEN:-}  # 从环境变量读取，或在.env文件配置
+    # MCP Server 通过 STDIO 通信,不需要暴露端口
+    # stdin_open和tty用于支持stdio传输
+    stdin_open: true
+    tty: true
+    networks:
+      - waf-network
+    # 日志输出
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 # 定义持久化卷
 volumes:
   mongodb_data:

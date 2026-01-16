@@ -2,7 +2,7 @@
 
 import { Link, useLocation, useNavigate } from "react-router"
 import { cn } from "@/lib/utils"
-import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, BookOpen, Github, Bell } from "lucide-react"
+import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, BookOpen, Github, Bell, Brain } from "lucide-react"
 import { ROUTES } from "@/routes/constants"
 import { useTranslation } from "react-i18next"
 import type { TFunction } from "i18next"
@@ -37,6 +37,12 @@ function createSidebarConfig(t: TFunction) {
             display: true,
         },
         {
+            title: t("sidebar.aiAnalyzer"),
+            icon: Brain,
+            href: ROUTES.AI_ANALYZER,
+            display: true,
+        },
+        {
             title: t("sidebar.settings"),
             icon: Settings,
             href: ROUTES.SETTINGS,
@@ -50,6 +56,7 @@ interface SidebarDisplayConfig {
     logs?: boolean
     rules?: boolean
     alerts?: boolean
+    aiAnalyzer?: boolean
     settings?: boolean
 }
 
@@ -73,6 +80,8 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
         let configKey: keyof SidebarDisplayConfig = "monitor"
         if (item.href === ROUTES.LOGS) configKey = "logs"
         if (item.href === ROUTES.RULES) configKey = "rules"
+        if (item.href === ROUTES.ALERTS) configKey = "alerts"
+        if (item.href === ROUTES.AI_ANALYZER) configKey = "aiAnalyzer"
         if (item.href === ROUTES.SETTINGS) configKey = "settings"
 
         // Use config value or default

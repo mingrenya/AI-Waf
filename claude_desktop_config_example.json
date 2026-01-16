@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-waf": {
+      "command": "/Users/duheling/Downloads/AI-Waf/mcp-server/ai-waf-mcp",
+      "env": {
+        "WAF_BACKEND_URL": "http://localhost:2333",
+        "WAF_API_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTY2MWM1NDI3YmFlMmZmM2YzN2Q3NzEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaXNzIjoiTVJZYSIsInN1YiI6IjY5NjYxYzU0MjdiYWUyZmYzZjM3ZDc3MSIsImV4cCI6MTc2ODU1ODIyNiwibmJmIjoxNzY4NDcxODI2LCJpYXQiOjE3Njg0NzE4MjZ9.WWkZASwN1ITv7WwceVBTgheKse8pex-PxRFoyzQ3uNA"
+      }
+    }
+  }
+}

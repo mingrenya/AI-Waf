@@ -1,0 +1,47 @@
+# MCP Server Dockerfile - 多阶段构建
+FROM golang:1.23-alpine AS builder
+
+# 安装必要的构建工具
+RUN apk add --no-cache git
+
+WORKDIR /build
+
+# 启用自动工具链下载以支持更高版本的 Go
+ENV GOTOOLCHAIN=auto
+
+# 首先复制 pkg 模块（coraza-spoa 依赖它）
+COPY pkg/go.mod pkg/go.sum ./pkg/
+COPY pkg/ ./pkg/
+
+# 复制 coraza-spoa 模块
+COPY coraza-spoa/go.mod coraza-spoa/go.sum ./coraza-spoa/
+
+# 下载依赖
+WORKDIR /build/coraza-spoa
+RUN go mod download
+
+# 复制 coraza-spoa 源代码
+COPY coraza-spoa/ ./
+
+# 构建 MCP Server（使用 replace 指令中的本地 pkg）
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o mcp-server ./cmd/mcp-server
+
+# 运行阶段 - 使用最小镜像
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /app
+
+# 从构建阶段复制二进制文件
+COPY --from=builder /build/coraza-spoa/mcp-server .
+
+# MCP Server 使用 STDIO,不需要暴露端口
+# 但为了管理和调试,我们可以添加健康检查
+
+# 设置环境变量（默认值，可被 docker-compose 覆盖）
+ENV MONGO_URI=mongodb://root:example@mongodb:27017
+ENV DATABASE=waf
+
+# 启动命令 - 使用 shell 形式以支持环境变量展开
+CMD /bin/sh -c "./mcp-server -mongo $MONGO_URI -db $DATABASE"

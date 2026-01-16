@@ -60,6 +60,9 @@ func main() {
 	defer cancelFunc()
 
 	var mongoConfig *internal.MongoConfig
+	var flowControllerConfig *internal.FlowControllerConfig
+	var trafficAnalyzerConfig *internal.TrafficAnalyzerConfig
+	var ruleEngineDbConfig *internal.MongoDBConfig
 
 	if config.MongoURI != "" {
 		var wafLog model.WAFLog
@@ -71,6 +74,24 @@ func main() {
 			Client:     mongoClient,
 			Database:   "waf",
 			Collection: wafLog.GetCollectionName(),
+		}
+
+		// 初始化流量控制器配置
+		flowControllerConfig = &internal.FlowControllerConfig{
+			Client:   mongoClient,
+			Database: "waf",
+		}
+
+		// 初始化流量分析器配置
+		trafficAnalyzerConfig = &internal.TrafficAnalyzerConfig{
+			Client:   mongoClient,
+			Database: "waf",
+		}
+
+		// 初始化规则引擎数据库配置
+		ruleEngineDbConfig = &internal.MongoDBConfig{
+			MongoClient: mongoClient,
+			Database:    "waf",
 		}
 	}
 
@@ -87,8 +108,11 @@ func main() {
 	}
 
 	apps, err := cfg.NewApplicationsWithContext(ctx, internal.ApplicationOptions{
-		MongoConfig: mongoConfig,
-		GeoIPConfig: geoIPConfigPtr,
+		MongoConfig:           mongoConfig,
+		GeoIPConfig:           geoIPConfigPtr,
+		RuleEngineDbConfig:    ruleEngineDbConfig,
+		FlowControllerConfig:  flowControllerConfig,
+		TrafficAnalyzerConfig: trafficAnalyzerConfig,
 	})
 
 	if err != nil {
@@ -152,8 +176,11 @@ outer:
 			}
 
 			apps, err := newCfg.NewApplicationsWithContext(ctx, internal.ApplicationOptions{
-				MongoConfig: mongoConfig,
-				GeoIPConfig: geoIPConfigPtr,
+				MongoConfig:           mongoConfig,
+				GeoIPConfig:           geoIPConfigPtr,
+				RuleEngineDbConfig:    ruleEngineDbConfig,
+				FlowControllerConfig:  flowControllerConfig,
+				TrafficAnalyzerConfig: trafficAnalyzerConfig,
 			})
 			if err != nil {
 				config.GlobalLogger.Error().Err(err).Msg("Error applying configuration, using old configuration")

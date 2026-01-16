@@ -6,7 +6,8 @@
         "rules": "Rules",
         "settings": "Settings",
         "alerts": "Alerts",
-        "logout": "Logout"
+        "logout": "Logout",
+        "aiAnalyzer": "AI Analyzer"
     },
     "breadcrumb": {
         "logs": {
@@ -22,7 +23,8 @@
             "system": "System rules",
             "user": "Custom rules",
             "ipGroup": "IP Group Management",
-            "flowControl": "Rate Limiting"
+            "flowControl": "Rate Limiting",
+            "adaptiveThrottling": "Adaptive Throttling"
         },
         "settings": {
             "settings": "Settings",
@@ -33,6 +35,12 @@
             "channel": "Channels",
             "rule": "Rules",
             "history": "History"
+        },
+        "aiAnalyzer": {
+            "patterns": "Attack Patterns",
+            "rules": "Generated Rules",
+            "assistant": "AI Assistant",
+            "config": "Configuration"
         }
     },
     "common": {

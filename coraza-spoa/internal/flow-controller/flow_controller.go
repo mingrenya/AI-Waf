@@ -181,6 +181,47 @@ func (fc *FlowController) UpdateConfig(config FlowControlConfig) {
 	}
 }
 
+// GetConfig 获取当前流控配置
+func (fc *FlowController) GetConfig() FlowControlConfig {
+	fc.mutex.Lock()
+	defer fc.mutex.Unlock()
+	return fc.config
+}
+
+// UpdateThreshold 更新指定类型的阈值
+func (fc *FlowController) UpdateThreshold(typ string, threshold int64) error {
+	fc.mutex.Lock()
+	defer fc.mutex.Unlock()
+
+	// 更新对应类型的阈值
+	switch typ {
+	case "visit":
+		fc.config.VisitLimit.Threshold = threshold
+	case "attack":
+		fc.config.AttackLimit.Threshold = threshold
+	case "error":
+		fc.config.ErrorLimit.Threshold = threshold
+	default:
+		return fmt.Errorf("未知的限流类型: %s", typ)
+	}
+
+	// 如果已初始化，重新加载规则
+	if fc.initialized {
+		// 清空现有规则
+		hotspot.ClearRules()
+
+		// 重新配置各类流控规则
+		fc.setupAllRules()
+
+		fc.logger.Info().
+			Str("type", typ).
+			Int64("threshold", threshold).
+			Msg("流控阈值已更新")
+	}
+
+	return nil
+}
+
 // NewFlowController 创建新的流控处理器
 func NewFlowController(config FlowControlConfig, logger zerolog.Logger, recorder IPRecorder) *FlowController {
 	return &FlowController{

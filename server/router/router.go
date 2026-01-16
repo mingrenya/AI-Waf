@@ -34,6 +34,12 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	alertChannelRepo := repository.NewAlertChannelRepository(db)
 	alertRuleRepo := repository.NewAlertRuleRepository(db)
 	alertHistoryRepo := repository.NewAlertHistoryRepository(db)
+	adaptiveThrottlingRepo := repository.NewAdaptiveThrottlingRepository(db)
+	attackPatternRepo := repository.NewAttackPatternRepository(db)
+	generatedRuleRepo := repository.NewGeneratedRuleRepository(db)
+	aiAnalyzerConfigRepo := repository.NewAIAnalyzerConfigRepository(db)
+	mcpConversationRepo := repository.NewMCPConversationRepository(db)
+	mcpRepo := repository.NewMCPRepository(db)
 
 	// 创建服务
 	authService := service.NewAuthService(userRepo, roleRepo)
@@ -47,6 +53,9 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	statsService := service.NewStatsService(wafLogRepo)
 	blockedIPService := service.NewBlockedIPService(blockedIPRepo)
 	alertService := service.NewAlertService(alertChannelRepo, alertRuleRepo, alertHistoryRepo, statsService)
+	adaptiveThrottlingService := service.NewAdaptiveThrottlingService(adaptiveThrottlingRepo)
+	aiAnalyzerService := service.NewAIAnalyzerService(attackPatternRepo, generatedRuleRepo, aiAnalyzerConfigRepo, mcpConversationRepo)
+	mcpService := service.NewMCPService(mcpRepo)
 	
 	// 启动告警后台任务
 	logger := config.GetServiceLogger("router")
@@ -73,6 +82,9 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	statsController := controller.NewStatsController(runnerService, statsService)
 	blockedIPController := controller.NewBlockedIPController(blockedIPService)
 	alertController := controller.NewAlertController(alertService)
+	adaptiveThrottlingController := controller.NewAdaptiveThrottlingController(adaptiveThrottlingService)
+	aiAnalyzerController := controller.NewAIAnalyzerController(aiAnalyzerService)
+	mcpController := controller.NewMCPController(mcpService)
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
 		c.Set("userRepo", userRepo)
@@ -225,6 +237,25 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		blockedIPRoutes.DELETE("/cleanup", middleware.HasPermission(model.PermConfigUpdate), blockedIPController.CleanupExpiredBlockedIPs)
 	}
 
+	// 自适应限流模块
+	adaptiveThrottlingRoutes := authenticated.Group("/adaptive-throttling")
+	{
+		// 配置管理
+		adaptiveThrottlingRoutes.GET("", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetConfig)
+		adaptiveThrottlingRoutes.PUT("", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.UpdateConfig)
+		adaptiveThrottlingRoutes.DELETE("", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.DeleteConfig)
+		
+		// 数据查询
+		adaptiveThrottlingRoutes.GET("/patterns", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetTrafficPatterns)
+		adaptiveThrottlingRoutes.GET("/baselines", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetBaselines)
+		adaptiveThrottlingRoutes.GET("/logs", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetAdjustmentLogs)
+		adaptiveThrottlingRoutes.GET("/stats", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetStats)
+		
+		// 操作
+		adaptiveThrottlingRoutes.POST("/recalculate-baseline", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.RecalculateBaseline)
+		adaptiveThrottlingRoutes.POST("/reset-learning", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.ResetLearning)
+	}
+
 	// 告警管理模块
 	alertRoutes := authenticated.Group("/alerts")
 	{
@@ -249,6 +280,51 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		
 		// 告警统计
 		alertRoutes.GET("/statistics", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetStatistics)
+	}
+
+	// AI分析器模块
+	aiAnalyzerRoutes := authenticated.Group("/ai-analyzer")
+	{
+		// 攻击模式管理
+		aiAnalyzerRoutes.GET("/patterns", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.ListAttackPatterns)
+		aiAnalyzerRoutes.GET("/patterns/:id", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetAttackPattern)
+		aiAnalyzerRoutes.DELETE("/patterns/:id", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.DeleteAttackPattern)
+
+		// 生成规则管理
+		aiAnalyzerRoutes.GET("/rules", middleware.HasPermission(model.PermConfigRead), aiAnalyzerController.ListGeneratedRules)
+		aiAnalyzerRoutes.GET("/rules/:id", middleware.HasPermission(model.PermConfigRead), aiAnalyzerController.GetGeneratedRule)
+		aiAnalyzerRoutes.DELETE("/rules/:id", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.DeleteGeneratedRule)
+		aiAnalyzerRoutes.POST("/rules/review", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.ReviewRule)
+		aiAnalyzerRoutes.GET("/rules/pending", middleware.HasPermission(model.PermConfigRead), aiAnalyzerController.GetPendingRules)
+		aiAnalyzerRoutes.POST("/rules/:id/deploy", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.DeployRule)
+
+		// AI分析器配置
+		aiAnalyzerRoutes.GET("/config", middleware.HasPermission(model.PermConfigRead), aiAnalyzerController.GetAnalyzerConfig)
+		aiAnalyzerRoutes.PUT("/config", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.UpdateAnalyzerConfig)
+
+		// MCP对话管理
+		aiAnalyzerRoutes.GET("/conversations", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.ListMCPConversations)
+		aiAnalyzerRoutes.GET("/conversations/:id", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetMCPConversation)
+		aiAnalyzerRoutes.DELETE("/conversations/:id", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.DeleteMCPConversation)
+
+		// 统计分析
+		aiAnalyzerRoutes.GET("/stats", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetAnalyzerStats)
+		
+		// 手动触发AI分析
+		aiAnalyzerRoutes.POST("/trigger", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.TriggerAnalysis)
+	}
+
+	// MCP 服务模块
+	mcpRoutes := authenticated.Group("/mcp")
+	{
+		// 获取MCP连接状态 - 任何已认证用户都可访问
+		mcpRoutes.GET("/status", mcpController.GetMCPStatus)
+		// 获取MCP工具列表 - 任何已认证用户都可访问
+		mcpRoutes.GET("/tools", mcpController.GetMCPTools)
+		// 获取工具调用历史 - 需要logs:read权限
+		mcpRoutes.GET("/tool-calls", middleware.HasPermission(model.PermWAFLogRead), mcpController.GetMCPToolCallHistory)
+		// 记录工具调用 - MCP Server调用，需要认证但不需要特殊权限
+		mcpRoutes.POST("/tool-calls/record", mcpController.RecordToolCall)
 	}
 
 	// 审计日志模块

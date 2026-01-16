@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/mingrenya/AI-Waf/server/config"
 	cornjob "github.com/mingrenya/AI-Waf/server/service/cornjob/haproxy"
@@ -112,18 +113,26 @@ func (s *RunnerServiceImpl) Restart(ctx context.Context) error {
 	// 更新 haproxy 服务打点数据列表
 	targetList, err := cornjob.GetLatestTargetList()
 	if err != nil {
-		return fmt.Errorf("failed to get target list: %w", err)
+		s.logger.Warn().Err(err).Msg("获取目标列表失败，使用空列表")
+		targetList = []string{}
 	}
 
 	cronJobService, err := cornjob.GetInstance(s.runner, targetList)
 	if err != nil {
-		return fmt.Errorf("failed to create cron job service: %w", err)
+		s.logger.Warn().Err(err).Msg("创建定时任务服务失败")
+		// 继续执行重启，不因此失败
+	} else {
+		cronJobService.UpdateTargetList(targetList)
 	}
-	cronJobService.UpdateTargetList(targetList)
 
-	// 重启服务
+	// 重启服务 - 忽略"连接已关闭"类型的错误
 	err = s.runner.Restart()
 	if err != nil {
+		// 检查是否是网络连接关闭错误（这是正常的重启过程）
+		if strings.Contains(err.Error(), "use of closed network connection") {
+			s.logger.Info().Msg("服务正在重启（连接已关闭是正常现象）")
+			return nil
+		}
 		s.logger.Error().Err(err).Msg("重启运行器失败")
 		return fmt.Errorf("重启运行器失败: %w", err)
 	}

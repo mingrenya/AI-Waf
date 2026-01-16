@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-waf": {
+      "command": "/Users/duheling/Downloads/AI-Waf/scripts/start-mcp-server.sh",
+      "env": {
+        "MONGO_URI": "mongodb://localhost:27017",
+        "DATABASE": "waf"
+      }
+    }
+  }
+}
