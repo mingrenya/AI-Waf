@@ -27,12 +27,13 @@ WORKDIR /build
 COPY coraza-spoa/ ./coraza-spoa/
 COPY pkg/ ./pkg/
 COPY server/ ./server/
+COPY mcp-server/ ./mcp-server/
 COPY go.work ./
 COPY geo-ip/ ./geo-ip/
 # 复制前端构建产物到正确位置
 COPY --from=frontend-builder /app/dist ./server/public/dist
 # 使用Go的工作区功能进行构建
-RUN go work use ./coraza-spoa ./pkg ./server
+RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server
 RUN cd server && go build -o ../mrya-waf main.go
 
 # 阶段3: 最终镜像 - 使用官方 HAProxy 3.0.10 镜像

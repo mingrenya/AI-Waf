@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	serverURL = flag.String("server", "http://localhost:8080", "MCP Server地址")
+	serverURL = flag.String("server", "http://localhost:8088", "MCP Server地址")
 	toolName  = flag.String("tool", "", "要测试的工具名称（空则列出所有工具）")
 	args      = flag.String("args", "{}", "工具参数（JSON格式）")
 )
@@ -26,9 +26,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "AI-Waf MCP Client 测试工具\n\n")
 		fmt.Fprintf(os.Stderr, "使用方式:\n")
 		fmt.Fprintf(os.Stderr, "  1. 列出所有工具:\n")
-		fmt.Fprintf(os.Stderr, "     go run client-test.go -server http://localhost:8080\n\n")
+		fmt.Fprintf(os.Stderr, "     go run client-test.go -server http://localhost:8088\n\n")
 		fmt.Fprintf(os.Stderr, "  2. 调用特定工具:\n")
-		fmt.Fprintf(os.Stderr, "     go run client-test.go -server http://localhost:8080 -tool list_attack_logs -args '{\"limit\":10}'\n\n")
+		fmt.Fprintf(os.Stderr, "     go run client-test.go -server http://localhost:8088 -tool list_attack_logs -args '{\"limit\":10}'\n\n")
 		fmt.Fprintf(os.Stderr, "参数:\n")
 		flag.PrintDefaults()
 	}
@@ -127,6 +127,13 @@ func callTool(ctx context.Context, session *mcp.ClientSession, toolName, argsJSO
 		log.Fatalf("参数解析失败: %v", err)
 	}
 
+	// 为特定工具添加默认参数
+	if toolName == "list_attack_logs" {
+		if _, ok := arguments["hours"]; !ok {
+			arguments["hours"] = 24 // 默认值为 24 小时
+		}
+	}
+
 	// 调用工具
 	start := time.Now()
 	result, err := session.CallTool(ctx, &mcp.CallToolParams{
@@ -179,8 +186,12 @@ func printContent(content mcp.Content) {
 		if c.Resource.Text != "" {
 			fmt.Printf("文本: %s\n", c.Resource.Text)
 		}
-		if c.Resource.Blob != "" {
-			fmt.Printf("Blob: %s...\n", c.Resource.Blob[:min(100, len(c.Resource.Blob))])
+		if len(c.Resource.Blob) > 0 {
+			blobLen := len(c.Resource.Blob)
+			if blobLen > 100 {
+				blobLen = 100
+			}
+			fmt.Printf("Blob: %x... (长度: %d 字节)\n", c.Resource.Blob[:blobLen], len(c.Resource.Blob))
 		}
 
 	default:

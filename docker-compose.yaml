@@ -54,11 +54,13 @@ services:
     restart: always
     depends_on:
       - mrya
+    env_file:
+      - .env  # 加载环境变量配置文件
     environment:
       # MCP Server通过HTTP调用后端API
-      # 使用 host.docker.internal 访问宿主机的 localhost:2333
-      WAF_BACKEND_URL: http://host.docker.internal:2333
-      WAF_API_TOKEN: ${MCP_API_TOKEN:-}  # 从环境变量读取，或在.env文件配置
+      # 使用 Docker 内部网络，通过服务名访问
+      WAF_BACKEND_URL: http://mrya:2333
+      WAF_API_TOKEN: ${MCP_API_TOKEN}  # 从.env文件读取
     # MCP Server 通过 STDIO 通信,不需要暴露端口
     # stdin_open和tty用于支持stdio传输
     stdin_open: true

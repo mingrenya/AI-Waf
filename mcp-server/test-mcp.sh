@@ -31,7 +31,7 @@ cd /Users/duheling/Downloads/AI-Waf/mcp-server
 
 # 设置环境变量
 export WAF_BACKEND_URL=http://localhost:2333
-export WAF_API_TOKEN=test-token-123
+export WAF_API_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTY2MWM1NDI3YmFlMmZmM2YzN2Q3NzEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaXNzIjoiTVJZYSIsInN1YiI6IjY5NjYxYzU0MjdiYWUyZmYzZjM3ZDc3MSIsImV4cCI6MTc2ODU1ODIyNiwibmJmIjoxNzY4NDcxODI2LCJpYXQiOjE3Njg0NzE4MjZ9.WWkZASwN1ITv7WwceVBTgheKse8pex-PxRFoyzQ3uNA
 
 echo "启动 HTTP MCP Server (8080端口)..."
 go run cmd/server-http/main.go -addr localhost:8080 > /tmp/mcp-server.log 2>&1 &
