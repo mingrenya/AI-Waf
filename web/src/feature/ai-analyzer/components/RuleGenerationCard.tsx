@@ -12,7 +12,7 @@ interface RuleGenerationCardProps {
 }
 
 export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCardProps) {
-    const ruleGeneration = config.ruleGeneration || {}
+    const ruleGeneration = config?.ruleGeneration || {}
 
     return (
         <Card>
@@ -32,7 +32,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                         </div>
                     </div>
                     <Switch
-                        checked={ruleGeneration.enabled}
+                        checked={ruleGeneration.enabled ?? false}
                         onCheckedChange={(checked) =>
                             onConfigChange({
                                 ...config,
@@ -42,7 +42,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                                 },
                             })
                         }
-                        disabled={!config.enabled}
+                        disabled={!config?.enabled}
                     />
                 </div>
 
@@ -64,7 +64,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                         }
                         min={0}
                         max={1}
-                        disabled={!config.enabled || !ruleGeneration.enabled}
+                        disabled={!config?.enabled || !(ruleGeneration.enabled ?? false)}
                     />
                     <div className="flex items-start gap-2 text-xs text-muted-foreground">
                         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
@@ -81,7 +81,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                             </div>
                         </div>
                         <Switch
-                            checked={ruleGeneration.autoDeploy}
+                            checked={ruleGeneration.autoDeploy ?? false}
                             onCheckedChange={(checked) =>
                                 onConfigChange({
                                     ...config,
@@ -91,7 +91,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                                     },
                                 })
                             }
-                            disabled={!config.enabled || !ruleGeneration.enabled}
+                            disabled={!config?.enabled || !(ruleGeneration.enabled ?? false)}
                         />
                     </div>
 
@@ -103,7 +103,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                             </div>
                         </div>
                         <Switch
-                            checked={ruleGeneration.reviewRequired}
+                            checked={ruleGeneration.reviewRequired ?? false}
                             onCheckedChange={(checked) =>
                                 onConfigChange({
                                     ...config,
@@ -113,7 +113,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                                     },
                                 })
                             }
-                            disabled={!config.enabled || !ruleGeneration.enabled}
+                            disabled={!config?.enabled || !(ruleGeneration.enabled ?? false)}
                         />
                     </div>
                 </div>
@@ -131,7 +131,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
                                 },
                             })
                         }
-                        disabled={!config.enabled || !ruleGeneration.enabled}
+                        disabled={!config?.enabled || !(ruleGeneration.enabled ?? false)}
                     >
                         <SelectTrigger id="default-action">
                             <SelectValue />

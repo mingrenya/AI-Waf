@@ -68,6 +68,27 @@ export const getAIAnalysisResult = (timeRange?: string) => {
 }
 
 /**
+ * AI聊天 - 发送消息
+ */
+export const sendChatMessage = (data: {
+  message: string
+  messages?: Array<{ role: string; content: string }>
+  stream?: boolean
+}) => {
+  return api.post<{ message: string; toolCalls?: string[]; timestamp: string }>('/ai/chat', data)
+}
+
+/**
+ * AI聊天 - 流式响应
+ */
+export const sendChatMessageStream = (data: {
+  message: string
+  messages?: Array<{ role: string; content: string }>
+}) => {
+  return api.post('/ai/chat/stream', { ...data, stream: true })
+}
+
+/**
  * 触发AI分析
  */
 export const triggerAIAnalysis = (params?: {

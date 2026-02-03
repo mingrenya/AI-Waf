@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -85,22 +85,24 @@ export function AdaptiveConfigForm() {
         }
     })
 
-    useEffect(() => {
-        fetchConfig()
-    }, [])
-
-    const fetchConfig = async () => {
+    const fetchConfig = useCallback(async () => {
         try {
             setFetching(true)
             const config = await adaptiveThrottlingApi.getConfig()
             form.reset(config)
-        } catch (error) {
+        } catch {
             // 配置不存在时使用默认值
-            console.log('No existing config, using defaults')
+            if (import.meta.env.DEV) {
+                console.log('No existing config, using defaults')
+            }
         } finally {
             setFetching(false)
         }
-    }
+    }, [form])
+
+    useEffect(() => {
+        fetchConfig()
+    }, [fetchConfig])
 
     const onSubmit = async (data: ConfigFormValues) => {
         try {
@@ -109,7 +111,7 @@ export function AdaptiveConfigForm() {
             toast({
                 title: t('adaptiveThrottling.config.saveSuccess', '配置保存成功')
             })
-        } catch (error) {
+        } catch {
             toast({
                 title: t('adaptiveThrottling.config.saveError', '配置保存失败'),
                 variant: 'destructive'

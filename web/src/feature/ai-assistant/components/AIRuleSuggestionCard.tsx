@@ -27,21 +27,13 @@ import {
   CheckCircle,
   XCircle,
   Rocket,
-  AlertTriangle,
   Info,
   TrendingUp,
   Clock,
 } from 'lucide-react'
-import { getAIRuleSuggestions, approveAIRuleSuggestion, rejectAIRuleSuggestion, deployAIRuleSuggestion } from '@/api/mcp'
-import type { AIRuleSuggestion } from '@/types/mcp'
+import { aiAnalyzerApi } from '@/api/ai-analyzer'
+import type { GeneratedRule } from '@/types/ai-analyzer'
 import { useToast } from '@/hooks/use-toast'
-
-const severityConfig = {
-  critical: { label: '严重', variant: 'destructive' as const, icon: AlertTriangle, color: 'text-red-600' },
-  high: { label: '高', variant: 'destructive' as const, icon: AlertTriangle, color: 'text-orange-600' },
-  medium: { label: '中', variant: 'default' as const, icon: Info, color: 'text-yellow-600' },
-  low: { label: '低', variant: 'secondary' as const, icon: Info, color: 'text-blue-600' },
-}
 
 const statusConfig = {
   pending: { label: '待审核', variant: 'secondary' as const },
@@ -52,54 +44,45 @@ const statusConfig = {
 
 export function AIRuleSuggestionCard() {
   const [statusFilter, setStatusFilter] = useState<string>('pending')
-  const [severityFilter, setSeverityFilter] = useState<string>('all')
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['ai-rule-suggestions', statusFilter, severityFilter],
+    queryKey: ['generated-rules', statusFilter],
     queryFn: () =>
-      getAIRuleSuggestions({
+      aiAnalyzerApi.listGeneratedRules({
+        page: 1,
+        size: 20,
         status: statusFilter,
-        severity: severityFilter === 'all' ? undefined : severityFilter,
-        limit: 20,
       }),
   })
 
-  const approveMutation = useMutation({
-    mutationFn: approveAIRuleSuggestion,
-    onSuccess: () => {
-      toast({ title: '规则已批准' })
-      queryClient.invalidateQueries({ queryKey: ['ai-rule-suggestions'] })
+  const reviewMutation = useMutation({
+    mutationFn: ({ ruleId, action, comment }: { ruleId: string; action: 'approve' | 'reject'; comment: string }) =>
+      aiAnalyzerApi.reviewRule({ ruleId, action, comment }),
+    onSuccess: (_, variables) => {
+      toast({ 
+        title: variables.action === 'approve' ? '规则已批准' : '规则已拒绝'
+      })
+      queryClient.invalidateQueries({ queryKey: ['generated-rules'] })
     },
     onError: () => {
-      toast({ title: '批准失败', variant: 'destructive' })
-    },
-  })
-
-  const rejectMutation = useMutation({
-    mutationFn: (suggestionId: string) => rejectAIRuleSuggestion(suggestionId),
-    onSuccess: () => {
-      toast({ title: '规则已拒绝' })
-      queryClient.invalidateQueries({ queryKey: ['ai-rule-suggestions'] })
-    },
-    onError: () => {
-      toast({ title: '拒绝失败', variant: 'destructive' })
+      toast({ title: '操作失败', variant: 'destructive' })
     },
   })
 
   const deployMutation = useMutation({
-    mutationFn: deployAIRuleSuggestion,
+    mutationFn: aiAnalyzerApi.deployRule,
     onSuccess: () => {
       toast({ title: '规则已部署' })
-      queryClient.invalidateQueries({ queryKey: ['ai-rule-suggestions'] })
+      queryClient.invalidateQueries({ queryKey: ['generated-rules'] })
     },
     onError: () => {
       toast({ title: '部署失败', variant: 'destructive' })
     },
   })
 
-  const suggestions = data?.data?.data || []
+  const rules = data?.list || []
 
   return (
     <Card>
@@ -115,18 +98,6 @@ export function AIRuleSuggestionCard() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
-            <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="w-[120px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部严重程度</SelectItem>
-                <SelectItem value="critical">严重</SelectItem>
-                <SelectItem value="high">高</SelectItem>
-                <SelectItem value="medium">中</SelectItem>
-                <SelectItem value="low">低</SelectItem>
-              </SelectContent>
-            </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[120px]">
                 <SelectValue />
@@ -147,82 +118,87 @@ export function AIRuleSuggestionCard() {
             <div className="flex items-center justify-center py-8">
               <p className="text-muted-foreground">加载中...</p>
             </div>
-          ) : suggestions.length === 0 ? (
+          ) : rules.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Info className="h-12 w-12 mb-2 opacity-50" />
               <p>暂无规则建议</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {suggestions.map((suggestion: AIRuleSuggestion) => {
-                const SeverityIcon = severityConfig[suggestion.severity].icon
+              {rules.map((rule: GeneratedRule) => {
                 return (
-                  <Card key={suggestion.id}>
+                  <Card key={rule.id}>
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="space-y-1 flex-1">
-                          <CardTitle className="text-base">{suggestion.ruleName}</CardTitle>
+                          <CardTitle className="text-base">{rule.rule_type}</CardTitle>
                           <CardDescription className="text-sm">
-                            来源模式: {suggestion.patternName}
+                            模式 ID: {rule.pattern_id || 'N/A'}
                           </CardDescription>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                          <Badge variant={severityConfig[suggestion.severity].variant}>
-                            <SeverityIcon className="h-3 w-3 mr-1" />
-                            {severityConfig[suggestion.severity].label}
-                          </Badge>
-                          <Badge variant={statusConfig[suggestion.status].variant}>
-                            {statusConfig[suggestion.status].label}
+                          <Badge variant={statusConfig[rule.status]?.variant || 'outline'}>
+                            {statusConfig[rule.status]?.label || rule.status}
                           </Badge>
                         </div>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-3 pb-3">
                       <div className="space-y-2">
-                        <p className="text-sm">{suggestion.description}</p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {new Date(suggestion.createdAt).toLocaleString('zh-CN')}
+                            {new Date(rule.created_at).toLocaleString('zh-CN')}
                           </span>
-                          <span>置信度: {(suggestion.confidence * 100).toFixed(1)}%</span>
+                          <span>置信度: {(rule.confidence * 100).toFixed(1)}%</span>
                           <Badge variant="outline" className="text-xs">
-                            {suggestion.ruleType}
+                            {rule.rule_type}
                           </Badge>
                         </div>
                       </div>
                       <Separator />
                       <div className="space-y-1">
-                        <p className="text-xs font-medium">建议:</p>
-                        <p className="text-xs text-muted-foreground">{suggestion.recommendation}</p>
+                        <p className="text-xs font-medium">规则内容:</p>
+                        <pre className="text-xs text-muted-foreground bg-muted p-2 rounded overflow-x-auto">
+                          {rule.rule_content}
+                        </pre>
                       </div>
+                      {rule.review_comment && (
+                        <>
+                          <Separator />
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium">审核意见:</p>
+                            <p className="text-xs text-muted-foreground">{rule.review_comment}</p>
+                          </div>
+                        </>
+                      )}
                     </CardContent>
                     <CardFooter className="flex justify-end gap-2">
-                      {suggestion.status === 'pending' && (
+                      {rule.status === 'pending' && (
                         <>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => rejectMutation.mutate(suggestion.id)}
-                            disabled={rejectMutation.isPending}
+                            onClick={() => reviewMutation.mutate({ ruleId: rule.id, action: 'reject', comment: '拒绝' })}
+                            disabled={reviewMutation.isPending}
                           >
                             <XCircle className="h-4 w-4 mr-1" />
                             拒绝
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => approveMutation.mutate(suggestion.id)}
-                            disabled={approveMutation.isPending}
+                            onClick={() => reviewMutation.mutate({ ruleId: rule.id, action: 'approve', comment: '批准' })}
+                            disabled={reviewMutation.isPending}
                           >
                             <CheckCircle className="h-4 w-4 mr-1" />
                             批准
                           </Button>
                         </>
                       )}
-                      {suggestion.status === 'approved' && (
+                      {rule.status === 'approved' && (
                         <Button
                           size="sm"
-                          onClick={() => deployMutation.mutate(suggestion.id)}
+                          onClick={() => deployMutation.mutate(rule.id)}
                           disabled={deployMutation.isPending}
                         >
                           <Rocket className="h-4 w-4 mr-1" />

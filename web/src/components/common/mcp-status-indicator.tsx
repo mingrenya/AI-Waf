@@ -42,16 +42,16 @@ export function MCPStatusIndicator() {
             <XCircle className="h-4 w-4" />
           )}
           <span className="text-xs font-medium">
-            MCP {isConnected ? '已连接' : '未连接'}
+            MCP {isConnected ? '可用' : '不可用'}
           </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="font-semibold">MCP 服务器状态</h4>
+            <h4 className="font-semibold">MCP 功能状态</h4>
             <Badge variant={isConnected ? 'default' : 'destructive'}>
-              {isConnected ? '在线' : '离线'}
+              {isConnected ? '可用' : '不可用'}
             </Badge>
           </div>
 

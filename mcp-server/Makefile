@@ -1,6 +1,6 @@
 .PHONY: build run clean test
 
-# 编译
+# 编译（包含所有需要的文件）
 build:
 	go build -o ai-waf-mcp .
 

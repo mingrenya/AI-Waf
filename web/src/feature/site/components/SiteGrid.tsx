@@ -60,8 +60,16 @@ export function SiteGrid({ onEdit, onDelete }: SiteGridProps) {
         queryFn: ({ pageParam }) => siteApi.getSites(pageParam as number, PAGE_SIZE),
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
-            // 优化判断逻辑：使用实际获取的数据总量，而不是假设每页恰好有PAGE_SIZE条
-            const fetchedItemsCount = allPages.reduce((total, page) => total + page.items.length, 0)
+            if (!lastPage || typeof lastPage.total === 'undefined') {
+                return undefined
+            }
+
+            if (!allPages) {
+                return undefined
+            }
+
+            // 优化判断逻辑：使用实际获取的数据总量，安全访问page.items
+            const fetchedItemsCount = allPages.reduce((total, page) => total + (page?.items?.length || 0), 0)
             return fetchedItemsCount < lastPage.total ? allPages.length + 1 : undefined
         },
     })

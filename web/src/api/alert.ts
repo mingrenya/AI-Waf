@@ -16,9 +16,9 @@ import {
 } from '@/types/alert'
 
 // 告警API接口基础路径
-const CHANNEL_URL = '/alert/channel'
-const RULE_URL = '/alert/rule'
-const HISTORY_URL = '/alert/history'
+const CHANNEL_URL = '/alerts/channels'
+const RULE_URL = '/alerts/rules'
+const HISTORY_URL = '/alerts/history'
 
 /**
  * 告警通道相关API服务
@@ -158,7 +158,7 @@ export const alertHistoryApi = {
         severity?: string,
         status?: string
     ): Promise<AlertHistoryResponse> => {
-        const params: Record<string, any> = { page, size }
+        const params: Record<string, string | number> = { page, size }
         if (ruleId) params.ruleId = ruleId
         if (severity) params.severity = severity
         if (status) params.status = status

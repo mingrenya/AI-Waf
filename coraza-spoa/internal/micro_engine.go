@@ -8,11 +8,20 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+)
+
+// 常量定义
+const (
+	// 最大递归深度限制,防止栈溢出
+	MaxRecursionDepth = 10
+	// 正则表达式最大长度
+	MaxRegexLength = 1000
 )
 
 // 匹配方式
@@ -52,6 +61,104 @@ const (
 	LogicalAND LogicalOperator = "AND"
 	LogicalOR  LogicalOperator = "OR"
 )
+
+// regexCacheEntry 正则表达式缓存条目
+type regexCacheEntry struct {
+	re       *regexp.Regexp
+	lastUsed time.Time
+	useCount int
+}
+
+// regexCache 线程安全的正则表达式缓存，支持 LRU 淘汰策略
+type regexCache struct {
+	mu      sync.RWMutex
+	cache   map[string]*regexCacheEntry
+	maxSize int
+	ttl     time.Duration
+}
+
+// newRegexCache 创建新的正则缓存
+func newRegexCache(maxSize int, ttl time.Duration) *regexCache {
+	return &regexCache{
+		cache:   make(map[string]*regexCacheEntry),
+		maxSize: maxSize,
+		ttl:     ttl,
+	}
+}
+
+// get 获取缓存的正则表达式
+func (rc *regexCache) get(pattern string) (*regexp.Regexp, bool) {
+	rc.mu.RLock()
+	entry, exists := rc.cache[pattern]
+	rc.mu.RUnlock()
+
+	if !exists {
+		return nil, false
+	}
+
+	// 检查是否过期
+	if rc.ttl > 0 && time.Since(entry.lastUsed) > rc.ttl {
+		rc.mu.Lock()
+		delete(rc.cache, pattern)
+		rc.mu.Unlock()
+		return nil, false
+	}
+
+	// 更新使用信息
+	rc.mu.Lock()
+	entry.lastUsed = time.Now()
+	entry.useCount++
+	rc.mu.Unlock()
+
+	return entry.re, true
+}
+
+// set 设置缓存的正则表达式
+func (rc *regexCache) set(pattern string, re *regexp.Regexp) {
+	rc.mu.Lock()
+	defer rc.mu.Unlock()
+
+	// 如果缓存已满，移除最少使用的条目
+	if len(rc.cache) >= rc.maxSize {
+		rc.evictLRU()
+	}
+
+	rc.cache[pattern] = &regexCacheEntry{
+		re:       re,
+		lastUsed: time.Now(),
+		useCount: 1,
+	}
+}
+
+// evictLRU 淘汰最少使用的缓存条目
+func (rc *regexCache) evictLRU() {
+	var oldestPattern string
+	var oldestTime time.Time
+	var minUseCount int
+	firstEntry := true
+
+	for pattern, entry := range rc.cache {
+		if firstEntry {
+			oldestPattern = pattern
+			oldestTime = entry.lastUsed
+			minUseCount = entry.useCount
+			firstEntry = false
+			continue
+		}
+
+		// 优先移除使用次数少的，相同时移除最久未使用的
+		if entry.useCount < minUseCount ||
+			(entry.useCount == minUseCount && entry.lastUsed.Before(oldestTime)) {
+			oldestPattern = pattern
+			oldestTime = entry.lastUsed
+			minUseCount = entry.useCount
+		}
+	}
+
+	if oldestPattern != "" {
+		delete(rc.cache, oldestPattern)
+	}
+}
 
 // Matcher接口定义了条件匹配的方法
 type Matcher interface {
@@ -136,35 +243,60 @@ func (c *CompositeCondition) Match(eng *RuleEngine, ip, url, path string) (bool,
 // ConditionFactory 条件工厂
 type ConditionFactory struct{}
 
-// ParseCondition 解析条件
+// ParseCondition 解析条件(公共入口)
 func (f *ConditionFactory) ParseCondition(data bson.Raw) (Matcher, error) {
+	return f.parseConditionWithDepth(data, 0)
+}
+
+// parseConditionWithDepth 带递归深度限制的条件解析
+func (f *ConditionFactory) parseConditionWithDepth(data bson.Raw, depth int) (Matcher, error) {
+	// 检查递归深度限制
+	if depth > MaxRecursionDepth {
+		return nil, fmt.Errorf("条件嵌套深度超过限制(%d层)", MaxRecursionDepth)
+	}
+
+	// 检查数据是否为空
+	if len(data) == 0 {
+		return nil, fmt.Errorf("条件数据为空")
+	}
+
 	var baseCondition struct {
 		Type ConditionType `json:"type" bson:"type"`
 	}
 
 	if err := bson.Unmarshal(data, &baseCondition); err != nil {
-		return nil, fmt.Errorf("解析条件类型失败: %v", err)
+		return nil, fmt.Errorf("解析条件类型失败(深度%d): %v", depth, err)
 	}
 
 	switch baseCondition.Type {
 	case SimpleConditionType:
 		var condition SimpleCondition
 		if err := bson.Unmarshal(data, &condition); err != nil {
-			return nil, fmt.Errorf("解析简单条件失败: %v", err)
+			return nil, fmt.Errorf("解析简单条件失败(深度%d): %v", depth, err)
+		}
+		// 验证简单条件
+		if err := validateSimpleCondition(&condition); err != nil {
+			return nil, fmt.Errorf("简单条件验证失败(深度%d): %v", depth, err)
 		}
 		return &condition, nil
 
 	case CompositeConditionType:
 		var condition CompositeCondition
 		if err := bson.Unmarshal(data, &condition); err != nil {
-			return nil, fmt.Errorf("解析复合条件失败: %v", err)
+			return nil, fmt.Errorf("解析复合条件失败(深度%d): %v", depth, err)
+		}
+
+		// 验证复合条件
+		if err := validateCompositeCondition(&condition); err != nil {
+			return nil, fmt.Errorf("复合条件验证失败(深度%d): %v", depth, err)
 		}
 
 		condition.parsedConditions = make([]Matcher, 0, len(condition.Conditions))
-		for _, rawCondition := range condition.Conditions {
-			parsedCondition, err := f.ParseCondition(rawCondition)
+		for i, rawCondition := range condition.Conditions {
+			// 递归解析子条件,深度+1
+			parsedCondition, err := f.parseConditionWithDepth(rawCondition, depth+1)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("解析第%d个子条件失败: %v", i, err)
 			}
 			condition.parsedConditions = append(condition.parsedConditions, parsedCondition)
 		}
@@ -172,7 +304,7 @@ func (f *ConditionFactory) ParseCondition(data bson.Raw) (Matcher, error) {
 		return &condition, nil
 
 	default:
-		return nil, fmt.Errorf("不支持的条件类型: %s", baseCondition.Type)
+		return nil, fmt.Errorf("不支持的条件类型: %s (深度%d)", baseCondition.Type, depth)
 	}
 }
 
@@ -194,22 +326,30 @@ type MongoDBConfig struct {
 	IPGroupCollection string // IP组集合名称
 }
 
+// ipGroupCache IP组缓存结构,用于优化IP查找
+type ipGroupCache struct {
+	exactIPs map[string]bool // 精确IP映射
+	cidrNets []*net.IPNet    // CIDR网络列表
+}
+
 // RuleEngine 规则引擎
 type RuleEngine struct {
-	Rules       []Rule                    `json:"rules"`     // 所有规则列表
-	IPGroups    map[string]*model.IPGroup `json:"ip_groups"` // IP组映射表
-	regexCache  map[string]*regexp.Regexp // 正则表达式缓存
-	factory     ConditionFactory          // 条件工厂
-	mongoConfig *MongoDBConfig            // MongoDB配置
+	Rules         []Rule                    `json:"rules"`     // 所有规则列表
+	IPGroups      map[string]*model.IPGroup `json:"ip_groups"` // IP组映射表
+	ipGroupCaches map[string]*ipGroupCache  // IP组查找缓存
+	regexCache    *regexCache               // 正则表达式缓存（支持 LRU）
+	factory       ConditionFactory          // 条件工厂
+	mongoConfig   *MongoDBConfig            // MongoDB配置
 }
 
 // NewRuleEngine 创建规则引擎
 func NewRuleEngine() *RuleEngine {
 	return &RuleEngine{
-		Rules:    make([]Rule, 0),
-		IPGroups: make(map[string]*model.IPGroup),
-		// TODO: 使用 LRU 优化，设置缓存过期时间，避免缓存过大
-		regexCache: make(map[string]*regexp.Regexp),
+		Rules:         make([]Rule, 0),
+		IPGroups:      make(map[string]*model.IPGroup),
+		ipGroupCaches: make(map[string]*ipGroupCache),
+		// 使用 LRU 缓存，最多缓存 1000 个正则表达式，1 小时过期
+		regexCache: newRegexCache(1000, 1*time.Hour),
 		factory:    ConditionFactory{},
 	}
 }
@@ -270,6 +410,7 @@ func (e *RuleEngine) LoadIPGroupsFromMongoDB() error {
 
 	// 初始化映射表
 	e.IPGroups = make(map[string]*model.IPGroup)
+	e.ipGroupCaches = make(map[string]*ipGroupCache)
 
 	// 填充IP组映射
 	for _, group := range ipGroups {
@@ -279,6 +420,10 @@ func (e *RuleEngine) LoadIPGroupsFromMongoDB() error {
 			}
 		}
 		e.IPGroups[group.Name] = &group
+		// 预先构建缓存
+		if err := e.buildIPGroupCache(group.Name); err != nil {
+			return fmt.Errorf("构建IP组 %s 的缓存失败: %v", group.Name, err)
+		}
 	}
 
 	return nil
@@ -403,26 +548,51 @@ func (e *RuleEngine) AddIPGroup(group model.IPGroup) error {
 }
 
 // LoadRulesFromJSON 从JSON加载规则 - 修改加载逻辑，增加序列号处理
-// BUG type transform error bson raw and json raw
+// 修复: 正确处理 JSON 到 BSON 的转换
 func (e *RuleEngine) LoadRulesFromJSON(data []byte) error {
-	var rules []Rule
-	if err := json.Unmarshal(data, &rules); err != nil {
-		return err
+	// 定义临时结构体，用于 JSON 反序列化
+	type TempRule struct {
+		ID        string           `json:"id,omitempty"`
+		Name      string           `json:"name"`
+		Type      model.RuleType   `json:"type"`
+		Status    model.RuleStatus `json:"status"`
+		Priority  int              `json:"priority"`
+		Condition interface{}      `json:"condition"` // 使用 interface{} 接收 JSON 对象
 	}
 
-	// 设置序列号 - 记录规则在原始配置中的顺序
-	for i := range rules {
-		rules[i].sequence = i
+	var tempRules []TempRule
+	if err := json.Unmarshal(data, &tempRules); err != nil {
+		return fmt.Errorf("JSON 反序列化失败: %v", err)
 	}
 
-	// 解析每个规则的条件
-	for i := range rules {
-		rule := &rules[i]
+	// 转换为 Rule 对象
+	rules := make([]Rule, 0, len(tempRules))
+	for i, tempRule := range tempRules {
+		// 将 condition 转换为 BSON
+		conditionBytes, err := bson.Marshal(tempRule.Condition)
+		if err != nil {
+			return fmt.Errorf("序列化规则 %s 的条件为 BSON 失败: %v", tempRule.Name, err)
+		}
+
+		rule := Rule{
+			MicroRule: model.MicroRule{
+				Name:      tempRule.Name,
+				Type:      tempRule.Type,
+				Status:    tempRule.Status,
+				Priority:  tempRule.Priority,
+				Condition: conditionBytes,
+			},
+			sequence: i, // 设置序列号
+		}
+
+		// 解析条件
 		parsedCondition, err := e.factory.ParseCondition(rule.Condition)
 		if err != nil {
-			return fmt.Errorf("解析规则 %s 的条件失败: %v", rule.ID, err)
+			return fmt.Errorf("解析规则 %s 的条件失败: %v", rule.Name, err)
 		}
 		rule.parsedCondition = parsedCondition
+
+		rules = append(rules, rule)
 	}
 
 	// 按照优先级排序，优先级相同时按照原始顺序排序
@@ -658,46 +828,133 @@ func matchIPFuzzy(ip, pattern string) (bool, error) {
 	return true, nil
 }
 
-// isIPInGroup 检查IP是否在IP组中
-// TODO: 避免使用线性遍历 O(N)，使用 基数树 (Radix Tree/Patricia Trie) 优化
+// isIPInGroup 检查IP是否在IP组中(优化版本:使用缓存)
 func (e *RuleEngine) isIPInGroup(ip, groupName string) (bool, error) {
-	group, exists := e.IPGroups[groupName]
+	// 检查IP组是否存在
+	_, exists := e.IPGroups[groupName]
 	if !exists {
 		return false, fmt.Errorf("IP组不存在: %s", groupName)
 	}
 
-	for _, item := range group.Items {
-		if isValidIP(item) {
-			if ip == item {
-				return true, nil
-			}
-		} else if isValidCIDR(item) {
-			inCIDR, err := isIPInCIDR(ip, item)
-			if err != nil {
-				return false, err
-			}
-			if inCIDR {
-				return true, nil
-			}
-		} else {
-			return false, fmt.Errorf("IP组 %s 包含无效项: %s", groupName, item)
+	// 检查缓存是否存在，如果不存在则构建
+	cache, cacheExists := e.ipGroupCaches[groupName]
+	if !cacheExists {
+		if err := e.buildIPGroupCache(groupName); err != nil {
+			return false, fmt.Errorf("构建IP组缓存失败: %v", err)
+		}
+		cache = e.ipGroupCaches[groupName]
+	}
+
+	// 1. 快速查找：精确IP匹配 O(1)
+	if cache.exactIPs[ip] {
+		return true, nil
+	}
+
+	// 2. CIDR匹配 O(n) - n是CIDR数量，通常远小于IP数量
+	ipAddr := net.ParseIP(ip)
+	if ipAddr == nil {
+		return false, fmt.Errorf("无效的IP地址: %s", ip)
+	}
+
+	for _, ipNet := range cache.cidrNets {
+		if ipNet.Contains(ipAddr) {
+			return true, nil
 		}
 	}
 
 	return false, nil
 }
 
-// matchRegex 正则表达式匹配
+// matchRegex 正则表达式匹配（使用 LRU 缓存）
 func (e *RuleEngine) matchRegex(s, pattern string) (bool, error) {
-	re, exists := e.regexCache[pattern]
+	// 验证正则表达式长度
+	if len(pattern) > MaxRegexLength {
+		return false, fmt.Errorf("正则表达式长度超过限制(%d字符)", MaxRegexLength)
+	}
+
+	// 尝试从缓存获取
+	re, exists := e.regexCache.get(pattern)
 	if !exists {
+		// 编译正则表达式
 		var err error
 		re, err = regexp.Compile(pattern)
 		if err != nil {
-			return false, fmt.Errorf("无效的正则表达式: %s", pattern)
+			return false, fmt.Errorf("无效的正则表达式: %s, 错误: %v", pattern, err)
 		}
-		e.regexCache[pattern] = re
+		// 存入缓存
+		e.regexCache.set(pattern, re)
 	}
 
+	// TODO: 添加正则匹配超时保护(context.WithTimeout)
 	return re.MatchString(s), nil
+}
+
+// validateSimpleCondition 验证简单条件
+func validateSimpleCondition(c *SimpleCondition) error {
+	if c == nil {
+		return fmt.Errorf("条件不能为nil")
+	}
+	if c.Type != SimpleConditionType {
+		return fmt.Errorf("条件类型错误: %s", c.Type)
+	}
+	if c.Target == "" {
+		return fmt.Errorf("目标不能为空")
+	}
+	if c.MatchType == "" {
+		return fmt.Errorf("匹配类型不能为空")
+	}
+	// 大多数匹配类型都需要匹配值
+	if c.MatchValue == "" {
+		return fmt.Errorf("匹配值不能为空")
+	}
+	return nil
+}
+
+// validateCompositeCondition 验证复合条件
+func validateCompositeCondition(c *CompositeCondition) error {
+	if c == nil {
+		return fmt.Errorf("条件不能为nil")
+	}
+	if c.Type != CompositeConditionType {
+		return fmt.Errorf("条件类型错误: %s", c.Type)
+	}
+	if c.Operator != LogicalAND && c.Operator != LogicalOR {
+		return fmt.Errorf("无效的逻辑运算符: %s", c.Operator)
+	}
+	if len(c.Conditions) == 0 {
+		return fmt.Errorf("复合条件至少需要一个子条件")
+	}
+	return nil
+}
+
+// buildIPGroupCache 构建IP组的查找缓存
+func (e *RuleEngine) buildIPGroupCache(groupName string) error {
+	group, exists := e.IPGroups[groupName]
+	if !exists {
+		return fmt.Errorf("IP组不存在: %s", groupName)
+	}
+
+	cache := &ipGroupCache{
+		exactIPs: make(map[string]bool),
+		cidrNets: make([]*net.IPNet, 0),
+	}
+
+	for _, item := range group.Items {
+		if isValidIP(item) {
+			// 精确IP，存入map
+			cache.exactIPs[item] = true
+		} else if isValidCIDR(item) {
+			// CIDR范围，解析并存入列表
+			_, ipNet, err := net.ParseCIDR(item)
+			if err != nil {
+				return fmt.Errorf("解析CIDR失败: %s, 错误: %v", item, err)
+			}
+			cache.cidrNets = append(cache.cidrNets, ipNet)
+		} else {
+			return fmt.Errorf("IP组 %s 包含无效项: %s", groupName, item)
+		}
+	}
+
+	e.ipGroupCaches[groupName] = cache
+	return nil
 }

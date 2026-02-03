@@ -61,7 +61,7 @@ export interface AIRuleSuggestion {
   severity: 'low' | 'medium' | 'high' | 'critical'
   description: string
   recommendation: string
-  ruleContent: any
+  ruleContent: Record<string, unknown>
   status: 'pending' | 'approved' | 'rejected' | 'deployed'
   createdAt: string
   reviewedAt?: string

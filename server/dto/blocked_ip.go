@@ -6,6 +6,12 @@ import (
 	"github.com/mingrenya/AI-Waf/pkg/model"
 )
 
+// BlockedIPDeleteRequest 删除封禁IP请求参数
+// @Description 删除封禁IP的请求参数
+type BlockedIPDeleteRequest struct {
+	IP string `uri:"ip" binding:"required,ip" example:"192.168.1.1"` // IP地址
+}
+
 // BlockedIPListRequest 封禁IP列表请求参数
 // @Description 获取封禁IP列表的请求参数
 type BlockedIPListRequest struct {
@@ -84,6 +90,15 @@ func MapToResponseList(records []model.BlockedIPRecord) []BlockedIPResponse {
 		responses[i].MapFromModel(&record)
 	}
 	return responses
+}
+
+// BlockedIPCreateRequest 创建封禁IP记录请求
+// @Description 创建封禁IP记录的请求参数
+type BlockedIPCreateRequest struct {
+	IP         string `json:"ip" binding:"required,ip" example:"192.168.1.1"`         // IP地址
+	Reason     string `json:"reason" binding:"required" example:"手动封禁可疑IP地址"`         // 封禁原因
+	RequestUri string `json:"requestUri" binding:"omitempty" example:"/api/v1/login"` // 请求URI
+	Duration   int    `json:"duration" binding:"omitempty,min=0" example:"3600"`      // 封禁时长（秒），0表示永久封禁
 }
 
 // BlockedIPCleanupResponse 清理过期封禁IP记录响应

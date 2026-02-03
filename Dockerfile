@@ -76,6 +76,14 @@ RUN mkdir -p /home/mrya/mrya-waf/geo-ip && \
 COPY --from=backend-builder /build/geo-ip/ /home/mrya/mrya-waf/geo-ip/
 RUN chown -R mrya:mrya /home/mrya
 
+# 创建根目录下的HAProxy目录（应用程序需要）
+RUN mkdir -p /haproxy/conf && \
+    mkdir -p /haproxy/cert && \
+    mkdir -p /haproxy/spoe && \
+    mkdir -p /haproxy/conf/transaction && \
+    mkdir -p /haproxy/spoe/transaction && \
+    chown -R mrya:mrya /haproxy
+
 # 🔑 关键步骤：给HAProxy和应用程序添加绑定特权端口的能力
 RUN setcap 'cap_net_bind_service=+ep' /usr/local/sbin/haproxy && \
     setcap 'cap_net_bind_service=+ep' /app/mrya-waf

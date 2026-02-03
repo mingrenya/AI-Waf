@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/joho/godotenv"
 	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/mingrenya/AI-Waf/server/constant"
 	"github.com/mingrenya/AI-Waf/server/utils/jwt"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -114,6 +114,14 @@ func InitConfig() error {
 		if hrs, err := strconv.Atoi(env); err == nil {
 			Global.JWT.ExpirationHrs = hrs
 		}
+	}
+
+	// 强制验证JWT_SECRET - 安全关键配置
+	if Global.JWT.Secret == "" || Global.JWT.Secret == "default-jwt-secret-key" {
+		return fmt.Errorf("CRITICAL: JWT_SECRET must be set to a strong secret key (minimum 32 characters). Never use default values in production")
+	}
+	if len(Global.JWT.Secret) < 32 {
+		return fmt.Errorf("CRITICAL: JWT_SECRET must be at least 32 characters long for security")
 	}
 
 	// 前端配置

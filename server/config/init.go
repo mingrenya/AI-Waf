@@ -41,7 +41,10 @@ func initConfig(db *mongo.Database) error {
 		return fmt.Errorf("failed to count documents: %w", err)
 	}
 
-	// 只有在没有配置记录时才创建默认配置
+	// 检查是否强制重置配置
+	forceReset := os.Getenv("FORCE_RESET_CONFIG") == "true"
+
+	// 只有在没有配置记录时才创建默认配置，或者强制重置时更新配置
 	if count == 0 {
 		defaultConfig := createDefaultConfig()
 		_, err = configCollection.InsertOne(ctx, defaultConfig)
@@ -49,6 +52,26 @@ func initConfig(db *mongo.Database) error {
 			return fmt.Errorf("failed to insert default config: %w", err)
 		}
 		Logger.Info().Msg("Created default configuration")
+	} else if forceReset {
+		Logger.Info().Msg("FORCE_RESET_CONFIG is set, updating existing configuration...")
+		defaultConfig := createDefaultConfig()
+		// 更新第一个配置文档
+		_, err = configCollection.UpdateOne(
+			ctx,
+			bson.M{}, // 匹配第一个文档
+			bson.M{"$set": bson.M{
+				"engine":          defaultConfig.Engine,
+				"haproxy":         defaultConfig.Haproxy,
+				"updatedAt":       defaultConfig.UpdatedAt,
+				"isResponseCheck": defaultConfig.IsResponseCheck,
+				"isDebug":         defaultConfig.IsDebug,
+				"isK8s":           defaultConfig.IsK8s,
+			}},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to update config: %w", err)
+		}
+		Logger.Info().Msg("Configuration updated successfully")
 	} else {
 		Logger.Info().Int64("count", count).Msg("Found existing configuration documents in database, skip initialization")
 	}
@@ -59,9 +82,22 @@ func initConfig(db *mongo.Database) error {
 // 创建默认配置
 func createDefaultConfig() model.Config {
 	now := time.Now()
-	homeDir, err := os.UserHomeDir()
+
+	// 获取项目根目录
+	workDir, err := os.Getwd()
 	if err != nil {
-		Logger.Error().Err(err).Msg("无法获取用户主目录")
+		Logger.Error().Err(err).Msg("无法获取当前工作目录")
+	}
+	projectRoot := filepath.Dir(workDir) // 从 server 目录向上一级到项目根目录
+
+	// 在 K8s 环境中使用容器路径，本地开发使用项目路径
+	var geoIPBase, haproxyBase string
+	if Global.IsK8s {
+		geoIPBase = "/home/mrya/mrya-waf/geo-ip"
+		haproxyBase = "/home/mrya/mrya-waf"
+	} else {
+		geoIPBase = filepath.Join(projectRoot, "geo-ip")
+		haproxyBase = projectRoot
 	}
 
 	return model.Config{
@@ -69,8 +105,8 @@ func createDefaultConfig() model.Config {
 		Engine: model.EngineConfig{
 			Bind:            "127.0.0.1:2342",
 			UseBuiltinRules: true,
-			ASNDBPath:       filepath.Join(homeDir, "ruiqi-waf", "geo-ip", "GeoLite2-ASN.mmdb"),
-			CityDBPath:      filepath.Join(homeDir, "ruiqi-waf", "geo-ip", "GeoLite2-City.mmdb"),
+			ASNDBPath:       filepath.Join(geoIPBase, "GeoLite2-ASN.mmdb"),
+			CityDBPath:      filepath.Join(geoIPBase, "GeoLite2-City.mmdb"),
 			FlowController:  model.GetDefaultFlowControlConfig(),
 			AppConfig: []model.AppConfig{
 				{
@@ -98,7 +134,7 @@ SecRuleUpdateTargetById 933120 !ARGS:json.engine.appConfig.0.directives`,
 			},
 		},
 		Haproxy: model.HaproxyConfig{
-			ConfigBaseDir: filepath.Join(homeDir, "ruiqi-waf"),
+			ConfigBaseDir: haproxyBase,
 			HaproxyBin:    "haproxy",
 			BackupsNumber: 5,
 			SpoeAgentAddr: "127.0.0.1",

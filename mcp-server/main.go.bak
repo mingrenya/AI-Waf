@@ -1,0 +1,493 @@
+// AI-Waf MCP Server
+// 提供MCP协议接口，让AI应用（如Claude Desktop）能够访问WAF功能
+package main
+
+import (
+	"context"
+	"log"
+	"os"
+
+	"github.com/mingrenya/AI-Waf/mcp-server/tools"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+)
+
+func main() {
+	// 获取环境变量配置
+	backendURL := os.Getenv("WAF_BACKEND_URL")
+	if backendURL == "" {
+		backendURL = "http://mrya:2333"
+	}
+
+	apiToken := os.Getenv("WAF_API_TOKEN")
+	if apiToken == "" {
+		log.Fatal("错误: WAF_API_TOKEN 环境变量未设置，MCP Server 无法启动")
+	}
+	// 基础格式验证：JWT应该有两个点且长度合理
+	if len(apiToken) < 50 {
+		log.Fatalf("错误: WAF_API_TOKEN 格式不正确（长度: %d < 50），请检查Token", len(apiToken))
+	}
+	log.Printf("[认证] Token已加载 (长度: %d 字符)", len(apiToken))
+
+	// 创建后端API客户端
+	client := tools.NewAPIClient(backendURL, apiToken)
+
+	// 创建MCP Server
+	server := mcp.NewServer(&mcp.Implementation{
+		Name:    "ai-waf",
+		Version: "v1.0.0",
+	}, nil)
+
+	// 注册所有工具
+	log.Println("注册MCP工具...")
+
+	// 1. 日志查询工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_list_attack_logs",
+		Description: "Query WAF attack logs with filtering options (time range, attack type, source IP). Supports pagination for large result sets.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateListAttackLogs(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_log_stats",
+		Description: "Get statistical summary of attack logs including total counts, attack type distribution, and top source IPs.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGetLogStats(client))
+
+	// 2. 规则管理工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_list_micro_rules",
+		Description: "List all MicroRule rules with optional filtering by rule type, status, and name. Returns rule configurations and metadata.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateListMicroRules(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_create_micro_rule",
+		Description: "Create a new MicroRule to block/allow traffic based on conditions (IP, URL pattern, headers, etc.). Returns the created rule ID.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": false,
+		},
+	}, tools.CreateCreateMicroRule(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_update_micro_rule",
+		Description: "Update an existing MicroRule by ID. Can modify rule conditions, actions, priority, and enabled status.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateUpdateMicroRule(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_delete_micro_rule",
+		Description: "Delete a MicroRule by ID. This is a destructive operation that cannot be undone.",
+		Annotations: map[string]interface{}{
+			"destructiveHint": true,
+			"idempotentHint":  true,
+		},
+	}, tools.CreateDeleteMicroRule(client))
+
+	// 3. IP封禁管理工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_list_blocked_ips",
+		Description: "List all currently blocked IP addresses with block reasons, timestamps, and expiration times. Supports filtering and pagination.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateListBlockedIPs(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_blocked_ip_stats",
+		Description: "Get statistics about blocked IPs including total count, geographic distribution, and top blocked IPs by attack frequency.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGetBlockedIPStats(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_block_ip",
+		Description: "Block a specific IP address with optional duration and reason.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateBlockIP(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_unblock_ip",
+		Description: "Unblock a previously blocked IP address.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateUnblockIP(client))
+
+	// 4. 站点管理工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_list_sites",
+		Description: "List all protected sites/domains with their configuration status, protection level, and associated rules count.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateListSites(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_site_details",
+		Description: "Get detailed information about a specific site including protection rules, SSL configuration, and traffic statistics.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGetSiteDetails(client))
+
+	// 5. AI分析器工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_list_attack_patterns",
+		Description: "List detected attack patterns identified by AI analysis. Shows pattern signatures, frequency, severity scores, and affected targets.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateListAttackPatterns(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_list_generated_rules",
+		Description: "List rules automatically generated by AI based on detected attack patterns. Shows rule status (pending/approved/deployed).",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateListGeneratedRules(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_trigger_analysis",
+		Description: "Manually trigger AI-powered attack pattern analysis on recent logs. Analysis typically completes in 2-5 minutes.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": false,
+		},
+	}, tools.CreateTriggerAIAnalysis(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_review_rule",
+		Description: "Review and approve/reject an AI-generated rule. Provide feedback on rule quality and effectiveness.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateReviewRule(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_deploy_rule",
+		Description: "Deploy an approved AI-generated rule to production environment. Rule takes effect immediately.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateDeployRule(client))
+
+	// 6. 配置管理工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_config",
+		Description: "Get current WAF configuration including protection mode, rate limiting settings, and global rules.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGetWAFConfig(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_update_config",
+		Description: "Update WAF global configuration. Changes take effect immediately and may impact all protected sites.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateUpdateWAFConfig(client))
+
+	// 7. 批量操作工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_batch_block_ips",
+		Description: "Block multiple IP addresses in a single operation. Supports optional block duration and reason. Returns success/failure count.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateBatchBlockIPs(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_batch_unblock_ips",
+		Description: "Unblock multiple IP addresses in a single operation. Returns success/failure count for each IP.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateBatchUnblockIPs(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_batch_create_rules",
+		Description: "Create multiple MicroRules in a single transaction. All rules are validated before creation. Supports rollback on error.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": false,
+		},
+	}, tools.CreateBatchCreateRules(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_batch_delete_rules",
+		Description: "Delete multiple rules by their IDs. This is a destructive operation that cannot be undone. Returns deletion status for each rule.",
+		Annotations: map[string]interface{}{
+			"destructiveHint": true,
+			"idempotentHint":  true,
+		},
+	}, tools.CreateBatchDeleteRules(client))
+
+	// 8. 实时监控工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_realtime_qps",
+		Description: "Get real-time queries per second (QPS) data showing current request rate across all protected sites.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": false,
+			"openWorldHint":  true,
+		},
+	}, tools.CreateGetRealtimeQPS(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_time_series_data",
+		Description: "Get time-series monitoring data including request counts, error rates, response times, and blocked attacks over a specified period.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGetTimeSeriesData(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_security_metrics",
+		Description: "Get comprehensive security metrics including attack statistics, threat levels, rule effectiveness, and security score.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGetSecurityMetrics(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_system_health",
+		Description: "Get system health status including service availability, resource utilization (CPU, memory), and component status.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": false,
+			"openWorldHint":  true,
+		},
+	}, tools.CreateGetSystemHealth(client))
+
+	// 9. 高级AI分析工具
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_analyze_attack_patterns",
+		Description: "Use machine learning algorithms (clustering, anomaly detection) to identify attack patterns and automatically generate protection rules from historical logs.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   false,
+			"idempotentHint": false,
+		},
+	}, tools.CreateAnalyzeAttackPatterns(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_generate_rule_from_pattern",
+		Description: "Automatically generate protection rules (MicroRule or ModSecurity format) from detected attack patterns. Supports automatic review and approval.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": false,
+		},
+	}, tools.CreateGenerateRuleFromPattern(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_evaluate_rule_effectiveness",
+		Description: "Evaluate deployed rule effectiveness by calculating false positive rate, true positive rate, performance impact, and security effectiveness. Provides optimization recommendations.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateEvaluateRuleEffectiveness(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_optimize_rule",
+		Description: "Optimize existing rules based on historical data and effectiveness evaluation. Automatically tunes rule parameters to improve accuracy and performance.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateOptimizeRule(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_compare_rules",
+		Description: "Compare effectiveness of two rules side-by-side including performance metrics, security impact, and false positive rates. Helps select the best rule.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateCompareRules(client))
+
+	// 10. 高级规则管理工具（新增）
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_export_rules",
+		Description: "Export rules in JSON/YAML format. Supports filtering by rule type, status, or name for selective export.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateExportRules(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_import_rules",
+		Description: "Import rules from JSON/YAML files. Supports multiple merge modes: replace (overwrite existing), merge (combine with existing), or skip (ignore duplicates).",
+		Annotations: map[string]interface{}{
+			"idempotentHint": false,
+		},
+	}, tools.CreateImportRules(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_batch_update_rules",
+		Description: "Batch update multiple rules' fields (priority, status, etc.). Supports transaction rollback on failure to maintain consistency.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateBatchUpdateRules(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_test_rule",
+		Description: "Test a rule using test cases to verify effectiveness without deploying to production. Returns match results and performance metrics.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateTestRule(client))
+
+	// 11. 扩展工具（新增）
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_generate_security_report",
+		Description: "Generate comprehensive security posture report including attack statistics, rule effectiveness, security recommendations. Supports multiple formats (JSON/HTML/PDF).",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateGenerateSecurityReport(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_predict_threats",
+		Description: "Predict future threat trends based on historical data. Provides risk scores and preventive recommendations using predictive analytics.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": false,
+		},
+	}, tools.CreatePredictThreats(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_auto_remediate",
+		Description: "Automatically execute or suggest remediation actions (block IPs, create rules) based on detected threat patterns. Can run in audit or enforcement mode.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": false,
+		},
+	}, tools.CreateAutoRemediate(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_export_audit_log",
+		Description: "Export complete audit trail of all operations for compliance purposes. Supports multiple formats (CSV/JSON/XLSX) with customizable date ranges.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateExportAuditLog(client))
+
+	// 12. 额外扩展工具（新增，共6个）
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_smart_rule_suggestion",
+		Description: "AI-powered rule recommendations considering effectiveness, false positive rate, and performance impact. Suggests optimal rules based on current threat landscape.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": false,
+		},
+	}, tools.CreateSmartRuleSuggestion(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_setup_alert_policy",
+		Description: "Configure alert policies for security events. Supports multiple notification channels (Webhook/Email/Slack) with customizable thresholds and conditions.",
+		Annotations: map[string]interface{}{
+			"idempotentHint": true,
+		},
+	}, tools.CreateSetupAlertPolicy(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_get_incident_status",
+		Description: "Get real-time status of active security incidents including risk scores, affected resources, and recommended response actions.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": false,
+			"openWorldHint":  true,
+		},
+	}, tools.CreateGetIncidentStatus(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_compliance_check",
+		Description: "Verify WAF configuration compliance with security standards (OWASP Top 10, PCI-DSS, ISO27001, GDPR). Returns compliance score and remediation steps.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateComplianceCheck(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_audit_trail_validation",
+		Description: "Validate audit log integrity and consistency. Generates compliance certificates and detects any tampering or gaps in the audit trail.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateAuditTrailValidation(client))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "ai_waf_capacity_planning",
+		Description: "Predict future capacity needs based on traffic patterns and growth trends. Provides scaling recommendations and cost analysis.",
+		Annotations: map[string]interface{}{
+			"readOnlyHint":   true,
+			"idempotentHint": true,
+		},
+	}, tools.CreateCapacityPlanning(client))
+
+	// 添加中间件（可选，用于调试和追踪）
+	// 注意：stdio 模式下，日志会输出到 stderr，不会干扰 JSON-RPC 通信
+	if os.Getenv("MCP_DEBUG") == "1" {
+		server.AddReceivingMiddleware(createLoggingMiddleware())
+		log.Println("[MCP] Debug mode enabled")
+	}
+	if os.Getenv("MCP_TRACK") == "1" {
+		server.AddReceivingMiddleware(createTrackingMiddleware(client))
+		log.Println("[MCP] Tracking mode enabled")
+	}
+
+	// 通过stdio与MCP客户端通信
+	log.Println("================================")
+	log.Println("AI-Waf MCP Server 启动成功")
+	log.Printf("后端URL: %s\n", backendURL)
+	log.Println("已注册49个MCP工具:")
+	log.Println("  📋 日志查询: 2个")
+	log.Println("  📝 规则管理: 8个 (导入/导出/批量更新/测试)")
+	log.Println("  🚫 IP封禁管理: 2个")
+	log.Println("  🏢 站点管理: 2个")
+	log.Println("  🤖 AI分析器: 5个")
+	log.Println("  ⚙️  配置管理: 2个")
+	log.Println("  📦 批量操作: 4个")
+	log.Println("  📊 实时监控: 4个")
+	log.Println("  🧠 高级AI分析: 5个")
+	log.Println("  📈 扩展工具: 14个")
+	log.Println("    ├─ 安全报告/指标聚合/审计导出 (3个)")
+	log.Println("    ├─ AI预测/自动响应/智能建议 (3个)")
+	log.Println("    ├─ 告警配置/事件状态 (2个)")
+	log.Println("    ├─ 合规检查/审计验证 (2个)")
+	log.Println("    └─ 容量规划 (1个)")
+	log.Println("等待MCP客户端连接...")
+	log.Println("提示: 看到JSON-RPC消息(如 {\"jsonrpc\":\"2.0\"...}) 即表示客户端已成功连接")
+	log.Println("================================")
+
+	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
+		log.Fatal(err)
+	}
+}

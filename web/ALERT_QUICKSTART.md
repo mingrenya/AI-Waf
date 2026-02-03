@@ -153,25 +153,25 @@ npm run dev
 ### 端点说明
 ```typescript
 // 通道管理
-GET    /alert/channel          // 获取通道列表
-POST   /alert/channel          // 创建通道
-GET    /alert/channel/:id      // 获取通道详情
-PUT    /alert/channel/:id      // 更新通道
-DELETE /alert/channel/:id      // 删除通道
-POST   /alert/channel/:id/test // 测试通道
+GET    /alerts/channels          // 获取通道列表
+POST   /alerts/channels          // 创建通道
+GET    /alerts/channels/:id      // 获取通道详情
+PUT    /alerts/channels/:id      // 更新通道
+DELETE /alerts/channels/:id      // 删除通道
+POST   /alerts/channels/:id/test // 测试通道
 
 // 规则管理
-GET    /alert/rule             // 获取规则列表
-POST   /alert/rule             // 创建规则
-GET    /alert/rule/:id         // 获取规则详情
-PUT    /alert/rule/:id         // 更新规则
-DELETE /alert/rule/:id         // 删除规则
+GET    /alerts/rules             // 获取规则列表
+POST   /alerts/rules             // 创建规则
+GET    /alerts/rules/:id         // 获取规则详情
+PUT    /alerts/rules/:id         // 更新规则
+DELETE /alerts/rules/:id         // 删除规则
 
 // 历史管理
-GET    /alert/history          // 获取历史列表
-GET    /alert/history/:id      // 获取历史详情
-POST   /alert/history/:id/acknowledge  // 确认告警
-GET    /alert/history/stats    // 获取统计信息
+GET    /alerts/history          // 获取历史列表
+GET    /alerts/history/:id      // 获取历史详情
+POST   /alerts/history/:id/acknowledge  // 确认告警
+GET    /alerts/statistics       // 获取统计信息
 ```
 
 ### 使用示例

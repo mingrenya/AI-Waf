@@ -1,0 +1,21 @@
+# MCP工具审计 - 快速验证
+
+## 已注册工具统计
+总数: 49个工具
+
+## 命名映射验证
+
+以下是需要特殊处理的工具名称映射：
+
+1. ai_waf_batch_block_ips -> CreateBatchBlockIPs (IPs缩写)
+2. ai_waf_batch_unblock_ips -> CreateBatchUnblockIPs (IPs缩写)
+3. ai_waf_get_blocked_ip_stats -> CreateGetBlockedIPStats (IP缩写)
+4. ai_waf_list_blocked_ips -> CreateListBlockedIPs (IPs缩写)
+5. ai_waf_get_realtime_qps -> CreateGetRealtimeQPS (QPS缩写)
+6. ai_waf_get_config -> CreateGetWAFConfig (WAF前缀)
+7. ai_waf_update_config -> CreateUpdateWAFConfig (WAF前缀)
+8. ai_waf_trigger_analysis -> CreateTriggerAIAnalysis (AI前缀)
+
+## 实际函数名验证
+
+让我们手动检查这些函数是否存在：

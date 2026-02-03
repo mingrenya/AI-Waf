@@ -1,0 +1,129 @@
+{
+  "list_attack_logs": {
+    "name": "查询攻击日志",
+    "description": "查询WAF攻击日志，支持按时间范围、攻击类型、严重程度过滤",
+    "fields": {
+      "page": "页码（默认：1）",
+      "pageSize": "每页数量（默认：20，最大：100）",
+      "ruleId": "按规则ID过滤",
+      "srcIp": "按来源IP地址过滤",
+      "dstIp": "按目标IP地址过滤",
+      "domain": "按域名过滤",
+      "startTime": "查询起始时间（ISO8601格式）",
+      "endTime": "查询结束时间（ISO8601格式）"
+    }
+  },
+  "get_log_stats": {
+    "name": "获取攻击统计",
+    "description": "获取攻击日志统计信息，包括攻击类型分布、来源IP统计等",
+    "fields": {
+      "page": "页码（默认：1）",
+      "pageSize": "每页数量（默认：20）",
+      "srcIp": "按来源IP地址过滤",
+      "dstIp": "按目标IP地址过滤",
+      "domain": "按域名过滤",
+      "startTime": "查询起始时间（ISO8601格式）",
+      "endTime": "查询结束时间（ISO8601格式）"
+    }
+  },
+  "list_micro_rules": {
+    "name": "列出规则",
+    "description": "列出所有MicroRule防火墙规则",
+    "fields": {
+      "page": "页码（默认：1）",
+      "size": "每页数量（默认：20）"
+    }
+  },
+  "create_micro_rule": {
+    "name": "创建规则",
+    "description": "创建新的MicroRule规则，用于自定义访问控制",
+    "fields": {
+      "name": "规则名称",
+      "type": "规则类型：黑名单(blacklist)或白名单(whitelist)",
+      "status": "规则状态：启用(enabled)或禁用(disabled)",
+      "priority": "优先级（100-1000，数字越大优先级越高）",
+      "condition": "规则条件对象，包含match_type和patterns等"
+    }
+  },
+  "list_blocked_ips": {
+    "name": "列出封禁IP",
+    "description": "列出所有被封禁的IP地址及封禁原因",
+    "fields": {
+      "page": "页码（默认：1）",
+      "size": "每页数量（默认：20）"
+    }
+  },
+  "get_qps_data": {
+    "name": "获取QPS数据",
+    "description": "获取实时QPS（每秒查询数）数据",
+    "fields": {
+      "limit": "返回的数据点数量（默认：30，最大：60）"
+    }
+  },
+  "batch_block_ips": {
+    "name": "批量封禁IP",
+    "description": "一次性封禁多个IP地址",
+    "fields": {
+      "ips": "要封禁的IP地址列表",
+      "reason": "封禁原因",
+      "duration": "封禁时长（秒），0表示永久",
+      "force": "强制封禁，即使已被封禁（默认：false）"
+    }
+  },
+  "batch_update_rules": {
+    "name": "批量更新规则",
+    "description": "一次性更新多个规则",
+    "fields": {
+      "rule_ids": "要更新的规则ID列表",
+      "updates": "要更新的字段，如 {\"status\":\"disabled\",\"priority\":200}",
+      "rollback": "失败时是否回滚（默认：false）"
+    }
+  },
+  "generate_security_report": {
+    "name": "生成安全报告",
+    "description": "生成综合安全分析报告",
+    "fields": {
+      "date_range": "日期范围：最近7天(last_7d)、最近30天(last_30d)、最近90天(last_90d)、自定义(custom)",
+      "include_recommendations": "包含安全建议（默认：true）",
+      "export_format": "导出格式：pdf、html、json（默认：json）"
+    }
+  },
+  "predict_threats": {
+    "name": "威胁预测",
+    "description": "使用AI分析预测潜在安全威胁",
+    "fields": {
+      "analysis_window": "分析时间窗口：24小时(24h)、7天(7d)、30天(30d)（默认：7d）",
+      "prediction_horizon": "预测时间范围：24小时(24h)、7天(7d)、30天(30d)（默认：24h）",
+      "threat_types": "要分析的威胁类型（空=所有类型）",
+      "confidence_threshold": "最低置信度阈值（0.0-1.0，默认：0.7）"
+    }
+  },
+  "auto_respond_threat": {
+    "name": "自动响应威胁",
+    "description": "自动响应检测到的威胁模式",
+    "fields": {
+      "threat_pattern_id": "威胁模式ID",
+      "action": "响应动作：自动(auto)、建议(propose)、手动(manual)（默认：propose）",
+      "severity_threshold": "严重性阈值：严重(critical)、高(high)、中(medium)、低(low)（默认：high）",
+      "scope": "响应范围：保守(conservative)、适中(moderate)、激进(aggressive)（默认：moderate）",
+      "rollback_enabled": "启用自动回滚（默认：true）"
+    }
+  },
+  "compliance_check": {
+    "name": "合规检查",
+    "description": "检查WAF配置是否符合安全标准",
+    "fields": {
+      "standards": "要检查的合规标准：OWASP_TOP_10、PCI_DSS_3.2.1、ISO_27001、NIST_CSF",
+      "detailed_report": "生成详细报告（默认：true）"
+    }
+  },
+  "analyze_traffic_baseline": {
+    "name": "分析流量基线",
+    "description": "建立正常流量基线模式，用于异常检测",
+    "fields": {
+      "time_range": "分析时间范围：7天(7d)、30天(30d)、90天(90d)（默认：30d）",
+      "granularity": "数据粒度：每小时(hourly)、每天(daily)、每周(weekly)（默认：hourly）",
+      "dimensions": "要包含的分析维度"
+    }
+  }
+}

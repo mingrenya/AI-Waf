@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/public"
-	"github.com/gin-gonic/gin"
 )
 
 // SetStaticFileRouter 设置静态文件路由
@@ -39,7 +39,7 @@ func SetStaticFileRouter(router *gin.Engine) {
 		logger.Info().Msg("使用嵌入的前端资源")
 		err := initFSRouter(router, public.Public.(fs.ReadDirFS), ".")
 		if err != nil {
-			panic(err)
+			logger.Fatal().Err(err).Msg("初始化嵌入文件系统路由失败")
 		}
 		fs := http.FS(public.Public)
 		router.NoRoute(newIndexNoRouteHandler(fs))
@@ -48,12 +48,12 @@ func SetStaticFileRouter(router *gin.Engine) {
 		logger.Info().Msg("使用外部前端资源路径")
 		absPath, err := filepath.Abs(config.Global.WebPath)
 		if err != nil {
-			panic(err)
+			logger.Fatal().Err(err).Msg("获取绝对路径失败")
 		}
 		logger.Info().Str("path", absPath).Msg("使用外部前端资源路径")
 		err = initFSRouter(router, os.DirFS(absPath).(fs.ReadDirFS), ".")
 		if err != nil {
-			panic(err)
+			logger.Fatal().Err(err).Msg("初始化外部文件系统路由失败")
 		}
 		router.NoRoute(newDynamicNoRouteHandler(http.Dir(absPath)))
 	}

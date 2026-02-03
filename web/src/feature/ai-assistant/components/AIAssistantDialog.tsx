@@ -1,7 +1,3 @@
-/**
- * AI助手对话框组件
- * 提供与AI助手交互的界面
- */
 import { useState, useRef, useEffect } from 'react'
 import {
   Dialog,
@@ -16,7 +12,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Send, Loader2, Bot, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { sendChatMessage } from '@/api/mcp'
+import { useToast } from '@/hooks/use-toast'
 import type { AIAssistantMessage } from '@/types/mcp'
+
+interface ChatMessageResponse {
+  message: string
+  toolCalls?: string[]
+  timestamp: string
+}
 
 interface AIAssistantDialogProps {
   open: boolean
@@ -24,6 +28,7 @@ interface AIAssistantDialogProps {
 }
 
 export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps) {
+  const { toast } = useToast()
   const [messages, setMessages] = useState<AIAssistantMessage[]>([
     {
       id: '1',
@@ -62,21 +67,63 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const currentInput = input
     setInput('')
     setIsLoading(true)
 
-    // TODO: 调用MCP API发送消息
-    // 这里是模拟响应
-    setTimeout(() => {
+    try {
+      // 构建历史消息
+      const historyMessages = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }))
+
+      // 调用后端API
+      const response = await sendChatMessage({
+        message: currentInput,
+        messages: historyMessages,
+        stream: false
+      })
+
+      // response是ChatMessageResponse类型: { message, toolCalls, timestamp }
+      const chatData: ChatMessageResponse = response.data
+      const aiMessage = chatData?.message || '无响应'
+      const aiToolCalls = chatData?.toolCalls || []
+
       const assistantMessage: AIAssistantMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `我收到了你的请求："${input}"。正在通过MCP工具处理...`,
+        content: aiMessage,
+        timestamp: new Date().toISOString(),
+        toolCalls: aiToolCalls.length > 0 ? aiToolCalls.map((tool: string) => ({
+          id: Date.now().toString(),
+          toolName: tool,
+          timestamp: new Date().toISOString(),
+          duration: 0,
+          success: true
+        })) : undefined
+      }
+
+      setMessages((prev) => [...prev, assistantMessage])
+    } catch (error) {
+      console.error('Chat error:', error)
+      toast({
+        title: '错误',
+        description: error instanceof Error ? error.message : '发送消息失败，请检查DEEPSEEK_API_KEY配置',
+        variant: 'destructive'
+      })
+      
+      // 添加错误消息
+      const errorMessage: AIAssistantMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '抱歉，我现在无法处理您的请求。请确保已配置DEEPSEEK_API_KEY环境变量。',
         timestamp: new Date().toISOString(),
       }
-      setMessages((prev) => [...prev, assistantMessage])
+      setMessages((prev) => [...prev, errorMessage])
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleSuggestionClick = (suggestion: string) => {

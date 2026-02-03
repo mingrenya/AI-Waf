@@ -36,7 +36,9 @@ export const useCreateIPGroup = () => {
             queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('ipGroup.toast.createFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('ipGroup.toast.createFailed'), error)
+            }
             setError(error.message || t('ipGroup.toast.createError'))
             toast({
                 title: t('ipGroup.toast.createFailed'),
@@ -70,7 +72,9 @@ export const useDeleteIPGroup = () => {
             queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('ipGroup.toast.deleteFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('ipGroup.toast.deleteFailed'), error)
+            }
             setError(error.message || t('ipGroup.toast.deleteError'))
             toast({
                 title: t('ipGroup.toast.deleteFailed'),
@@ -105,7 +109,9 @@ export const useUpdateIPGroup = () => {
             queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('ipGroup.toast.updateFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('ipGroup.toast.updateFailed'), error)
+            }
             setError(error.message || t('ipGroup.toast.updateError'))
             toast({
                 title: t('ipGroup.toast.updateFailed'),
@@ -139,7 +145,9 @@ export const useBlockIP = () => {
             queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('ipGroup.toast.blockFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('ipGroup.toast.blockFailed'), error)
+            }
             setError(error.message || t('ipGroup.toast.blockError'))
             toast({
                 title: t('ipGroup.toast.blockFailed'),

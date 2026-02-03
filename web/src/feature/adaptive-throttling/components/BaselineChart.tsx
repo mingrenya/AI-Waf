@@ -21,7 +21,9 @@ export function BaselineChart() {
             const response = await adaptiveThrottlingApi.getBaselines({})
             setBaselines(response.results)
         } catch (error) {
-            console.error('Failed to fetch baselines:', error)
+            if (import.meta.env.DEV) {
+                console.error('Failed to fetch baselines:', error)
+            }
         } finally {
             setLoading(false)
         }
@@ -121,7 +123,7 @@ export function BaselineChart() {
 
     return (
         <div className="space-y-6">
-            <Tabs value={activeType} onValueChange={(v) => setActiveType(v as any)}>
+            <Tabs value={activeType} onValueChange={(v) => setActiveType(v as 'visit' | 'attack' | 'error')}>
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="visit">
                         {t('adaptiveThrottling.baseline.visit', '访问基线')}

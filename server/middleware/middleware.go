@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/mingrenya/AI-Waf/server/config"
@@ -10,6 +12,37 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
+
+// 辅助函数：获取环境变量或默认值
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+// 辅助函数：分割并去除空格
+func splitAndTrim(s string, sep string) []string {
+	parts := strings.Split(s, sep)
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
+// 辅助函数：检查slice是否包含某元素
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
+}
 
 // Logger middleware logs the request/response details
 func Logger() gin.HandlerFunc {
@@ -52,13 +85,36 @@ func Logger() gin.HandlerFunc {
 	}
 }
 
-// Cors middleware handles CORS requests
+// Cors middleware handles CORS requests with configurable origins
 func Cors() gin.HandlerFunc {
+	// 从环境变量获取允许的源，默认为localhost开发环境
+	allowedOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173")
+	origins := splitAndTrim(allowedOrigins, ",")
+
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
+		requestOrigin := c.Request.Header.Get("Origin")
+
+		// 检查请求源是否在允许列表中
+		allowed := false
+		for _, origin := range origins {
+			if origin == requestOrigin || origin == "*" {
+				allowed = true
+				break
+			}
+		}
+
+		if allowed {
+			if requestOrigin != "" {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", requestOrigin)
+			} else if contains(origins, "*") {
+				c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+			}
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+			c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length, X-Request-ID")
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Set("Access-Control-Max-Age", "43200") // 12小时
+		}
 
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)

@@ -19,14 +19,43 @@ export default function ConfigPage() {
 
     const [config, setConfig] = useState<AIAnalyzerConfig>({
         enabled: false,
-        patternDetection: {},
-        ruleGeneration: {},
+        patternDetection: {
+            enabled: false,
+            minSamples: 100,
+            anomalyThreshold: 2.0,
+            clusteringMethod: "kmeans",
+            timeWindow: 24,
+        },
+        ruleGeneration: {
+            enabled: false,
+            confidenceThreshold: 0.7,
+            autoDeploy: false,
+            reviewRequired: true,
+            defaultAction: "block",
+        },
         analysisInterval: 30,
     })
 
     useEffect(() => {
-        if (data?.data) {
-            setConfig(data.data)
+        if (data) {
+            setConfig({
+                enabled: data.enabled ?? false,
+                patternDetection: {
+                    enabled: data.patternDetection?.enabled ?? false,
+                    minSamples: data.patternDetection?.minSamples ?? 100,
+                    anomalyThreshold: data.patternDetection?.anomalyThreshold ?? 2.0,
+                    clusteringMethod: data.patternDetection?.clusteringMethod ?? "kmeans",
+                    timeWindow: data.patternDetection?.timeWindow ?? 24,
+                },
+                ruleGeneration: {
+                    enabled: data.ruleGeneration?.enabled ?? false,
+                    confidenceThreshold: data.ruleGeneration?.confidenceThreshold ?? 0.7,
+                    autoDeploy: data.ruleGeneration?.autoDeploy ?? false,
+                    reviewRequired: data.ruleGeneration?.reviewRequired ?? true,
+                    defaultAction: data.ruleGeneration?.defaultAction ?? "block",
+                },
+                analysisInterval: data.analysisInterval ?? 30,
+            })
         }
     }, [data])
 
@@ -38,7 +67,7 @@ export default function ConfigPage() {
                     description: "AI分析器配置已更新",
                 })
             },
-            onError: (error: any) => {
+            onError: (error: Error) => {
                 toast({
                     title: "保存失败",
                     description: error?.message || "配置更新失败，请重试",
@@ -56,7 +85,7 @@ export default function ConfigPage() {
                     description: "AI分析任务已开始执行",
                 })
             },
-            onError: (error: any) => {
+            onError: (error: Error) => {
                 toast({
                     title: "触发失败",
                     description: error?.message || "触发分析失败，请重试",
@@ -90,7 +119,7 @@ export default function ConfigPage() {
                 <div className="flex gap-2">
                     <Button
                         onClick={handleTrigger}
-                        disabled={triggerMutation.isPending || !config.enabled}
+                        disabled={triggerMutation.isPending || !config?.enabled}
                         variant="outline"
                     >
                         {triggerMutation.isPending ? (

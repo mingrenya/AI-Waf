@@ -1,4 +1,10 @@
 import { get, post, put, del } from "./index"
+import type { 
+    AttackPattern, 
+    GeneratedRule, 
+    AIAnalyzerConfig, 
+    MCPConversation 
+} from "@/types/ai-analyzer"
 
 export const aiAnalyzerApi = {
     // 攻击模式
@@ -9,9 +15,9 @@ export const aiAnalyzerApi = {
         attackType?: string
         startTime?: string
         endTime?: string
-    }) => get<{ list: any[], total: number }>("/ai-analyzer/patterns", { params }),
+    }) => get<{ list: AttackPattern[], total: number }>("/ai-analyzer/patterns", { params }),
 
-    getAttackPattern: (id: string) => get(`/ai-analyzer/patterns/${id}`),
+    getAttackPattern: (id: string) => get<AttackPattern>(`/ai-analyzer/patterns/${id}`),
 
     deleteAttackPattern: (id: string) => del(`/ai-analyzer/patterns/${id}`),
 
@@ -22,9 +28,9 @@ export const aiAnalyzerApi = {
         status?: string
         ruleType?: string
         patternId?: string
-    }) => get<{ list: any[], total: number }>("/ai-analyzer/rules", { params }),
+    }) => get<{ list: GeneratedRule[], total: number }>("/ai-analyzer/rules", { params }),
 
-    getGeneratedRule: (id: string) => get(`/ai-analyzer/rules/${id}`),
+    getGeneratedRule: (id: string) => get<GeneratedRule>(`/ai-analyzer/rules/${id}`),
 
     deleteGeneratedRule: (id: string) => del(`/ai-analyzer/rules/${id}`),
 
@@ -32,20 +38,20 @@ export const aiAnalyzerApi = {
         post("/ai-analyzer/rules/review", params),
 
     getPendingRules: (params: { page: number; size: number }) =>
-        get<{ list: any[], total: number }>("/ai-analyzer/rules/pending", { params }),
+        get<{ list: GeneratedRule[], total: number }>("/ai-analyzer/rules/pending", { params }),
 
     deployRule: (id: string) => post(`/ai-analyzer/rules/${id}/deploy`),
 
     // AI分析器配置
-    getAnalyzerConfig: () => get<any>("/ai-analyzer/config"),
+    getAnalyzerConfig: () => get<AIAnalyzerConfig>("/ai-analyzer/config"),
 
-    updateAnalyzerConfig: (config: any) => put("/ai-analyzer/config", config),
+    updateAnalyzerConfig: (config: AIAnalyzerConfig) => put("/ai-analyzer/config", config),
 
     // MCP对话
     listMCPConversations: (params: { patternId?: string; page: number; size: number }) =>
-        get<{ list: any[], total: number }>("/ai-analyzer/conversations", { params }),
+        get<{ list: MCPConversation[], total: number }>("/ai-analyzer/conversations", { params }),
 
-    getMCPConversation: (id: string) => get(`/ai-analyzer/conversations/${id}`),
+    getMCPConversation: (id: string) => get<MCPConversation>(`/ai-analyzer/conversations/${id}`),
 
     deleteMCPConversation: (id: string) => del(`/ai-analyzer/conversations/${id}`),
 

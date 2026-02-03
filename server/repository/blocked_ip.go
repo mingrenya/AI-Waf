@@ -24,6 +24,7 @@ type BlockedIPRepository interface {
 	GetBlockedIPStats(ctx context.Context) (*dto.BlockedIPStatsResponse, error)
 	CreateBlockedIP(ctx context.Context, record *model.BlockedIPRecord) error
 	DeleteExpiredBlockedIPs(ctx context.Context) (int64, error)
+	DeleteBlockedIPByIP(ctx context.Context, ip string) (int64, error)
 }
 
 // MongoBlockedIPRepository MongoDB实现的封禁IP仓库
@@ -215,6 +216,23 @@ func (r *MongoBlockedIPRepository) DeleteExpiredBlockedIPs(ctx context.Context) 
 	}
 
 	r.logger.Info().Int64("count", result.DeletedCount).Msg("已删除过期封禁IP记录")
+	return result.DeletedCount, nil
+}
+
+// DeleteBlockedIPByIP 根据IP删除封禁记录
+func (r *MongoBlockedIPRepository) DeleteBlockedIPByIP(ctx context.Context, ip string) (int64, error) {
+	filter := bson.D{{Key: "ip", Value: ip}}
+
+	result, err := r.collection.DeleteMany(ctx, filter)
+	if err != nil {
+		r.logger.Error().Err(err).Str("ip", ip).Msg("根据IP删除封禁记录时出错")
+		return 0, err
+	}
+
+	if result.DeletedCount > 0 {
+		r.logger.Info().Str("ip", ip).Int64("count", result.DeletedCount).Msg("已根据IP删除封禁记录")
+	}
+
 	return result.DeletedCount, nil
 }
 

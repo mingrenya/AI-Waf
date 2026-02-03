@@ -1,5 +1,8 @@
 # 构建产物
 ruiqi-waf
+mrya-waf
+ai-waf-server
+test-build
 *.exe
 *.exe~
 *.dll

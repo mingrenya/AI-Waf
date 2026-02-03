@@ -12,7 +12,7 @@ interface PatternDetectionCardProps {
 }
 
 export function PatternDetectionCard({ config, onConfigChange }: PatternDetectionCardProps) {
-    const patternDetection = config.patternDetection || {}
+    const patternDetection = config?.patternDetection || {}
 
     return (
         <Card>
@@ -32,7 +32,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
                         </div>
                     </div>
                     <Switch
-                        checked={patternDetection.enabled}
+                        checked={patternDetection.enabled ?? false}
                         onCheckedChange={(checked) =>
                             onConfigChange({
                                 ...config,
@@ -42,7 +42,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
                                 },
                             })
                         }
-                        disabled={!config.enabled}
+                        disabled={!config?.enabled}
                     />
                 </div>
 
@@ -64,7 +64,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
                             }
                             min={10}
                             max={10000}
-                            disabled={!config.enabled || !patternDetection.enabled}
+                            disabled={!config?.enabled || !(patternDetection.enabled ?? false)}
                         />
                         <div className="flex items-start gap-2 text-xs text-muted-foreground">
                             <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
@@ -90,7 +90,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
                             }
                             min={0.5}
                             max={10}
-                            disabled={!config.enabled || !patternDetection.enabled}
+                            disabled={!config?.enabled || !(patternDetection.enabled ?? false)}
                         />
                         <div className="flex items-start gap-2 text-xs text-muted-foreground">
                             <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
@@ -113,7 +113,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
                                     },
                                 })
                             }
-                            disabled={!config.enabled || !patternDetection.enabled}
+                            disabled={!config?.enabled || !(patternDetection.enabled ?? false)}
                         >
                             <SelectTrigger id="clustering-method">
                                 <SelectValue />
@@ -146,7 +146,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
                             }
                             min={1}
                             max={168}
-                            disabled={!config.enabled || !patternDetection.enabled}
+                            disabled={!config?.enabled || !(patternDetection.enabled ?? false)}
                         />
                         <div className="flex items-start gap-2 text-xs text-muted-foreground">
                             <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />

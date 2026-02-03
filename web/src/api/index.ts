@@ -61,8 +61,17 @@ apiClient.interceptors.request.use(
     (config) => {
         const token = useAuthStore.getState().token
 
+        // 公开API列表（不需要token）
+        const publicApis = ['/auth/login', '/auth/register', '/auth/forgot-password', '/health']
+        const isPublicApi = publicApis.some(api => config.url?.includes(api))
+
         if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`
+        } else if (!token && !isPublicApi) {
+            // 调试：只对需要认证的API记录警告
+            if (import.meta.env.DEV) {
+                console.warn('⚠️ API请求未携带token:', config.url)
+            }
         }
 
         return config
@@ -77,6 +86,25 @@ apiClient.interceptors.response.use(
     (response) => {
         // 检查响应格式是否符合API标准格式
         const data = response.data as APIResponse
+
+        // 特殊处理401：即使HTTP状态码是200，如果data.code是401也要跳转登录
+        if (data && data.code === 401) {
+            if (import.meta.env.DEV) {
+                console.error('❌ 401未授权（业务状态码）:', {
+                    url: response.config.url,
+                    message: data.message || '请先登录',
+                    httpStatus: response.status
+                })
+            }
+            useAuthStore.getState().logout()
+            window.location.href = '/login'
+            throw new ApiError(
+                data.message || '未授权访问',
+                401,
+                data.requestId,
+                data.error
+            )
+        }
 
         // 如果响应中有success字段且为false，视为业务逻辑错误
         if (data && data.success === false) {
@@ -94,8 +122,13 @@ apiClient.interceptors.response.use(
         const status = error.response?.status
         const errorData = error.response?.data
 
-        // 处理401未授权错误
+        // 处理401未授权错误（HTTP状态码级别）
         if (status === 401) {
+            console.error('❌ 401未授权（HTTP状态码）:', {
+                url: error.config?.url,
+                message: errorData?.message || '请先登录',
+                hasToken: !!error.config?.headers?.Authorization
+            })
             useAuthStore.getState().logout()
             window.location.href = '/login'
         }
@@ -157,8 +190,49 @@ const withRetry = async <T>(
  */
 export const get = <T = ApiResponseData>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     return apiClient.get<APIResponse<T>>(url, config)
-        .then((response: AxiosResponse<APIResponse<T>>) => {
-            return response.data.data as T
+        .then((response: AxiosResponse<APIResponse<T>>): T => {
+            // 检查响应是否存在
+            if (!response) {
+                if (import.meta.env.DEV) {
+                    console.error('GET响应对象为null:', url)
+                }
+                throw new Error('服务器无响应')
+            }
+            
+            const data = response.data
+            
+            // 检查响应数据是否存在
+            if (!data) {
+                if (import.meta.env.DEV) {
+                    console.error('GET响应数据为空:', url)
+                }
+                throw new Error('服务器无响应')
+            }
+            
+            // 检查是否为空字符串（后端可能返回空字符串）
+            if (typeof data === 'string' && (data as string).trim() === '') {
+                if (import.meta.env.DEV) {
+                    console.error('GET响应体为空字符串:', url, {
+                    status: response.status,
+                    dataType: typeof data
+                })
+                }
+                throw new Error('后端返回空数据，请检查数据是否已初始化')
+            }
+            
+            // 如果后端返回标准格式 {success, data, message}，提取data字段
+            // 如果后端直接返回数据(如{total, items})，直接使用
+            const responseData = data as { data?: T }
+            if (responseData.data !== undefined) {
+                return responseData.data as T
+            }
+            
+            // 兼容直接返回数据的情况
+            return data as T
+        })
+        .catch((error) => {
+            console.error('GET请求失败:', url, error)
+            throw error
         })
 }
 
@@ -172,7 +246,21 @@ export const get = <T = ApiResponseData>(url: string, config?: AxiosRequestConfi
 export const post = <T = ApiResponseData>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
     return apiClient.post<APIResponse<T>>(url, data, config)
         .then((response: AxiosResponse<APIResponse<T>>) => {
-            return response.data.data as T
+            // 安全处理：检查response.data是否存在
+            if (!response.data) {
+                if (import.meta.env.DEV) {
+                    console.error('POST响应数据为空:', url)
+                }
+                throw new Error('服务器返回空响应')
+            }
+            
+            // 如果后端返回标准格式，提取data字段，否则直接使用
+            const responseData = response.data as { data?: T }
+            if (responseData.data !== undefined) {
+                return responseData.data as T
+            }
+            
+            return response.data as T
         })
 }
 
@@ -186,7 +274,14 @@ export const post = <T = ApiResponseData>(url: string, data?: unknown, config?: 
 export const put = <T = ApiResponseData>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
     return apiClient.put<APIResponse<T>>(url, data, config)
         .then((response: AxiosResponse<APIResponse<T>>) => {
-            return response.data.data as T
+            if (!response.data) {
+                if (import.meta.env.DEV) {
+                    console.error('PUT响应数据为空:', url)
+                }
+                throw new Error('服务器返回空响应')
+            }
+            const responseData = response.data as { data?: T }
+            return responseData.data !== undefined ? responseData.data as T : response.data as T
         })
 }
 
@@ -213,7 +308,14 @@ export const patch = <T = ApiResponseData>(url: string, data?: unknown, config?:
 export const del = <T = ApiResponseData>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     return apiClient.delete<APIResponse<T>>(url, config)
         .then((response: AxiosResponse<APIResponse<T>>) => {
-            return response.data.data as T
+            if (!response.data) {
+                if (import.meta.env.DEV) {
+                    console.error('DELETE响应数据为空:', url)
+                }
+                throw new Error('服务器返回空响应')
+            }
+            const responseData = response.data as { data?: T }
+            return responseData.data !== undefined ? responseData.data as T : response.data as T
         })
 }
 

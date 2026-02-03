@@ -28,9 +28,11 @@ export default function GlobalSettingPage() {
     // 当页面加载时获取最新配置
     useEffect(() => {
         // 页面加载时，获取最新配置和状态
+        // 移除依赖数组以避免无限循环，只在组件挂载时执行一次
         refetchConfig()
         refetchStatus()
-    }, [refetchConfig, refetchStatus])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     // 运行器控制处理函数
     const handleStart = () => {

@@ -62,7 +62,7 @@ export const useSecurityDashboard = () => {
                 clearInterval(pollingTimerRef.current)
             }
         }
-    }, [overviewStats.refetch])
+    }, [overviewStats.refetch, overviewStats])
 
     // 过滤有地理位置信息的攻击事件，用于实时攻击列表
     const realtimeAttacks = useMemo(() => {

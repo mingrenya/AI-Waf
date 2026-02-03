@@ -22,8 +22,8 @@ import { Card } from "@/components/ui/card"
 import { useQueryClient } from "@tanstack/react-query"
 
 export function AttackPatternTable() {
-    const [page, _setPage] = useState(1)
-    const [size, _setSize] = useState(20)
+    const [page] = useState(1)
+    const [size] = useState(20)
     const [detailDialogOpen, setDetailDialogOpen] = useState(false)
     const [selectedPattern, setSelectedPattern] = useState<AttackPattern | null>(null)
     
@@ -63,7 +63,7 @@ export function AttackPatternTable() {
             header: "严重程度",
             cell: ({ row }) => {
                 const severity = row.original.severity
-                const variants: Record<string, any> = {
+                const variants: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
                     critical: "destructive",
                     high: "destructive",
                     medium: "default",

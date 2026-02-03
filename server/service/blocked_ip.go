@@ -23,6 +23,7 @@ type BlockedIPService interface {
 	GetBlockedIPStats(ctx context.Context) (*dto.BlockedIPStatsResponse, error)
 	CreateBlockedIP(ctx context.Context, record *model.BlockedIPRecord) error
 	CleanupExpiredBlockedIPs(ctx context.Context) (int64, error)
+	DeleteBlockedIP(ctx context.Context, ip string) error
 }
 
 // BlockedIPServiceImpl 封禁IP服务实现
@@ -152,6 +153,20 @@ func (s *BlockedIPServiceImpl) CleanupExpiredBlockedIPs(ctx context.Context) (in
 
 	s.logger.Info().Int64("deleted_count", deletedCount).Msg("清理过期封禁IP记录完成")
 	return deletedCount, nil
+}
+
+// DeleteBlockedIP 删除封禁IP
+func (s *BlockedIPServiceImpl) DeleteBlockedIP(ctx context.Context, ip string) error {
+	count, err := s.blockedIPRepo.DeleteBlockedIPByIP(ctx, ip)
+	if err != nil {
+		s.logger.Error().Err(err).Str("ip", ip).Msg("删除封禁IP失败")
+		return err
+	}
+	if count == 0 {
+		return ErrBlockedIPNotFound
+	}
+	s.logger.Info().Str("ip", ip).Msg("成功删除封禁IP")
+	return nil
 }
 
 // validatePaginationParams 验证分页参数

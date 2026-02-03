@@ -26,7 +26,7 @@ export function LanguageSelector() {
             setLanguage(savedLanguage)
             i18n.changeLanguage(savedLanguage) // 确保应用当前语言
         }
-    }, []) // 只在组件挂载时执行一次
+    }, [i18n, language]) // 添加依赖项
 
     return (
         <Select value={language} onValueChange={handleLanguageChange}>

@@ -542,7 +542,9 @@
             "conditionGroup": "条件组",
             "addSimpleCondition": "添加条件",
             "addCompositeCondition": "添加条件组",
-            "addNestedCondition": "添加嵌套条件"
+            "addNestedCondition": "添加嵌套条件",
+            "maxDepthWarning": "已达到最大嵌套深度限制({{max}}层),无法继续添加条件组",
+            "maxDepthReached": "已达到最大嵌套深度"
         },
         "matchTypes": {
             "equal": "等于",

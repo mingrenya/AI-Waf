@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react"
+import { Plus, Trash2, ChevronDown, ChevronRight, AlertCircle } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { LogicalOperator, TargetType, MicroRuleCreateRequest, CompositeCondition, SimpleCondition, MatchType } from "@/types/rule"
 import { cn } from "@/lib/utils"
@@ -12,8 +12,17 @@ import { TARGET_MATCH_TYPES } from "@/types/rule"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
 import type { FieldPath, UseFormReturn } from "react-hook-form"
 import { Badge } from "@/components/ui/badge"
-import { TFunction } from "i18next"
 import { AnimatedButton } from "@/components/ui/animation/components/animated-button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+
+// 最大嵌套深度限制
+const MAX_NESTING_DEPTH = 7
+
+// 计算当前路径的深度
+const calculateDepth = (path: string): number => {
+    const matches = path.match(/conditions/g)
+    return matches ? matches.length : 0
+}
 
 interface ConditionBuilderProps {
     form: UseFormReturn<MicroRuleCreateRequest>
@@ -23,6 +32,7 @@ interface ConditionBuilderProps {
     showConnector?: boolean
     parentOperator?: LogicalOperator
     isLast?: boolean
+    depth?: number  // 新增: 传递当前深度
 }
 
 // Extracted reusable components
@@ -43,31 +53,6 @@ const OperatorBadge = ({ operator, onClick, className = "" }: { operator: Logica
     )
 }
 
-const ActionButtons = ({ addSimpleCondition, addCompositeCondition, t }: { addSimpleCondition: () => void, addCompositeCondition: () => void, t: TFunction }) => (
-    <div className="flex flex-wrap gap-2 mt-6 pt-2 relative z-10">
-        <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addSimpleCondition}
-            className="text-teal-600 dark:text-teal-400 border-teal-300 dark:border-teal-800"
-        >
-            <Plus className="h-4 w-4 mr-1" />
-            {t("microRule.condition.addSimpleCondition")}
-        </Button>
-        <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addCompositeCondition}
-            className="text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-800"
-        >
-            <Plus className="h-4 w-4 mr-1" />
-            {t("microRule.condition.addCompositeCondition")}
-        </Button>
-    </div>
-)
-
 export function ConditionBuilder({
     form,
     path,
@@ -76,9 +61,16 @@ export function ConditionBuilder({
     showConnector = false,
     parentOperator = "AND",
     isLast = false,
+    depth = 0,
 }: ConditionBuilderProps) {
     const { t } = useTranslation()
     const [expanded, setExpanded] = useState(true)
+
+    // 计算当前深度(如果未传递)
+    const currentDepth = useMemo(() => depth || calculateDepth(path), [depth, path])
+    
+    // 检查是否达到最大深度
+    const isMaxDepth = currentDepth >= MAX_NESTING_DEPTH
 
     // Common styles
     const shadowTextStyles = "dark:text-shadow-glow-white"
@@ -93,11 +85,13 @@ export function ConditionBuilder({
     // If simple condition, get target and match type
     const target = form.watch(`${path}.target` as FieldPath<MicroRuleCreateRequest>) as TargetType
 
-    // Get available match types
-    const availableMatchTypes = target ? TARGET_MATCH_TYPES[target] || [] : []
+    // Get available match types - 使用useMemo缓存计算结果
+    const availableMatchTypes = useMemo(() => 
+        target ? TARGET_MATCH_TYPES[target] || [] : []
+    , [target])
 
-    // Add simple condition
-    const addSimpleCondition = () => {
+    // Add simple condition - 使用useCallback缓存函数
+    const addSimpleCondition = useCallback(() => {
         if (conditionType !== "composite") return
 
         const currentConditions = (form.getValues(`${path}.conditions` as FieldPath<MicroRuleCreateRequest>) || []) as (SimpleCondition | CompositeCondition)[]
@@ -110,11 +104,19 @@ export function ConditionBuilder({
                 match_value: "",
             },
         ])
-    }
+    }, [conditionType, form, path])
 
-    // Add composite condition
-    const addCompositeCondition = () => {
+    // Add composite condition - 使用useCallback并检查深度
+    const addCompositeCondition = useCallback(() => {
         if (conditionType !== "composite") return
+        
+        // 检查深度限制
+        if (currentDepth >= MAX_NESTING_DEPTH - 1) {
+            if (import.meta.env.DEV) {
+                console.warn(`已达到最大嵌套深度限制: ${MAX_NESTING_DEPTH}层`)
+            }
+            return
+        }
 
         const currentConditions = (form.getValues(`${path}.conditions` as FieldPath<MicroRuleCreateRequest>) || []) as (SimpleCondition | CompositeCondition)[]
         // Use opposite operator for easier complex logic building
@@ -135,17 +137,17 @@ export function ConditionBuilder({
                 ],
             },
         ])
-    }
+    }, [conditionType, currentDepth, form, operator, path])
 
-    // Toggle operator
-    const toggleOperator = () => {
+    // Toggle operator - 使用useCallback
+    const toggleOperator = useCallback(() => {
         if (conditionType !== "composite") return
         const newOperator = operator === "AND" ? "OR" : "AND"
         form.setValue(`${path}.operator` as FieldPath<MicroRuleCreateRequest>, newOperator)
-    }
+    }, [conditionType, form, operator, path])
 
-    // Remove child condition
-    const removeCondition = (index: number) => {
+    // Remove child condition - 使用useCallback
+    const removeCondition = useCallback((index: number) => {
         if (conditionType !== "composite") return
 
         const currentConditions = form.getValues(`${path}.conditions` as FieldPath<MicroRuleCreateRequest>) as (SimpleCondition | CompositeCondition)[]
@@ -158,7 +160,7 @@ export function ConditionBuilder({
 
         currentConditions.splice(index, 1)
         form.setValue(`${path}.conditions` as FieldPath<MicroRuleCreateRequest>, currentConditions)
-    }
+    }, [conditionType, form, isRoot, onRemove, path])
 
     // Render simple condition
     if (conditionType === "simple") {
@@ -327,6 +329,16 @@ export function ConditionBuilder({
 
                 {expanded && (
                     <>
+                        {/* 深度警告 */}
+                        {isMaxDepth && (
+                            <Alert variant="destructive" className="mb-4">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>
+                                    {t("microRule.condition.maxDepthWarning", { max: MAX_NESTING_DEPTH })}
+                                </AlertDescription>
+                            </Alert>
+                        )}
+                        
                         {/* Child conditions list */}
                         <div className="pl-10 mt-4 space-y-4 relative">
                             {conditions.map((_, index) => (
@@ -338,16 +350,36 @@ export function ConditionBuilder({
                                     showConnector={index > 0}
                                     parentOperator={operator}
                                     isLast={index === conditions.length - 1}
+                                    depth={currentDepth + 1}
                                 />
                             ))}
                         </div>
 
                         {/* Action buttons - moved outside the connector's range */}
-                        <ActionButtons
-                            addSimpleCondition={addSimpleCondition}
-                            addCompositeCondition={addCompositeCondition}
-                            t={t}
-                        />
+                        <div className="flex flex-wrap gap-2 mt-6 pt-2 relative z-10">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={addSimpleCondition}
+                                className="text-teal-600 dark:text-teal-400 border-teal-300 dark:border-teal-800"
+                            >
+                                <Plus className="h-4 w-4 mr-1" />
+                                {t("microRule.condition.addSimpleCondition")}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={addCompositeCondition}
+                                className="text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-800"
+                                disabled={isMaxDepth}
+                                title={isMaxDepth ? t("microRule.condition.maxDepthReached") : ""}
+                            >
+                                <Plus className="h-4 w-4 mr-1" />
+                                {t("microRule.condition.addCompositeCondition")}
+                            </Button>
+                        </div>
                     </>
                 )}
             </div>

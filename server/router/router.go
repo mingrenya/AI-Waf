@@ -1,13 +1,16 @@
 package router
 
 import (
+	"context"
+	"time"
+
+	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/controller"
 	"github.com/mingrenya/AI-Waf/server/middleware"
 	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/mingrenya/AI-Waf/server/service"
 	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
-	"github.com/mingrenya/AI-Waf/server/config"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -56,9 +59,25 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	adaptiveThrottlingService := service.NewAdaptiveThrottlingService(adaptiveThrottlingRepo)
 	aiAnalyzerService := service.NewAIAnalyzerService(attackPatternRepo, generatedRuleRepo, aiAnalyzerConfigRepo, mcpConversationRepo)
 	mcpService := service.NewMCPService(mcpRepo)
-	
+	aiChatService := service.NewAIChatService()
+
+	// 增强规则管理服务
+	ruleTemplateService := service.NewRuleTemplateService(db)
+	ruleEffectivenessService := service.NewRuleEffectivenessService(db)
+	protectionProfileService := service.NewProtectionProfileService(db, ruleTemplateService)
+
 	// 启动告警后台任务
 	logger := config.GetServiceLogger("router")
+
+	// 初始化OWASP模板和保护配置文件
+	bgCtx := context.Background()
+	if err := ruleTemplateService.InitializeOWASPTemplates(bgCtx); err != nil {
+		logger.Warn().Err(err).Msg("Failed to initialize OWASP templates")
+	}
+	if err := protectionProfileService.InitializeDefaultProfiles(bgCtx); err != nil {
+		logger.Warn().Err(err).Msg("Failed to initialize protection profiles")
+	}
+
 	alertCleanup, err := alertChecker.Start(alertService, logger)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to start alert checker")
@@ -69,7 +88,7 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		// 实际应用中，应该在 main.go 中管理清理函数
 		_ = alertCleanup // 保留引用避免未使用变量错误
 	}
-	
+
 	// 创建控制器
 	authController := controller.NewAuthController(authService)
 	siteController := controller.NewSiteController(siteService)
@@ -85,6 +104,9 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	adaptiveThrottlingController := controller.NewAdaptiveThrottlingController(adaptiveThrottlingService)
 	aiAnalyzerController := controller.NewAIAnalyzerController(aiAnalyzerService)
 	mcpController := controller.NewMCPController(mcpService)
+	aiChatController := controller.NewAIChatController(aiChatService)
+	ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateService, ruleEffectivenessService, protectionProfileService)
+
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
 		c.Set("userRepo", userRepo)
@@ -103,7 +125,11 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	// 认证相关路由 - 不需要权限检查
 	auth := api.Group("/auth")
 	{
-		auth.POST("/login", authController.Login)
+		// 登录接口添加限流：5次/分钟，防止暴力破解
+		auth.POST("/login", middleware.RateLimit(5, time.Minute), authController.Login)
+
+		// 服务账号登录接口（生成90天长期Token）- 同样限流
+		auth.POST("/login-service", middleware.RateLimit(5, time.Minute), authController.LoginServiceAccount)
 
 		// 需要认证的路由
 		authRequired := auth.Group("")
@@ -187,6 +213,26 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		ruleRoutes.DELETE("/:id", middleware.HasPermission(model.PermConfigUpdate), ruleController.DeleteMicroRule)
 	}
 
+	// 增强规则管理路由 - OWASP Top 10 模板、评分、配置文件
+	ruleEnhancedRoutes := authenticated.Group("/rules")
+	{
+		// 规则模板管理
+		ruleEnhancedRoutes.GET("/templates", middleware.HasPermission(model.PermConfigRead), ruleEnhancedController.ListRuleTemplates)
+		ruleEnhancedRoutes.GET("/templates/:id", middleware.HasPermission(model.PermConfigRead), ruleEnhancedController.GetRuleTemplate)
+		ruleEnhancedRoutes.POST("/templates/create-rule", middleware.HasPermission(model.PermConfigUpdate), ruleEnhancedController.CreateRuleFromTemplate)
+
+		// 规则有效性评分
+		ruleEnhancedRoutes.GET("/effectiveness", middleware.HasPermission(model.PermConfigRead), ruleEnhancedController.ListRuleScores)
+		ruleEnhancedRoutes.GET("/effectiveness/:id", middleware.HasPermission(model.PermConfigRead), ruleEnhancedController.GetRuleScore)
+		ruleEnhancedRoutes.POST("/effectiveness/calculate", middleware.HasPermission(model.PermConfigUpdate), ruleEnhancedController.CalculateRuleScore)
+		ruleEnhancedRoutes.POST("/effectiveness/batch-calculate", middleware.HasPermission(model.PermConfigUpdate), ruleEnhancedController.BatchCalculateScores)
+
+		// 保护配置文件
+		ruleEnhancedRoutes.GET("/profiles", middleware.HasPermission(model.PermConfigRead), ruleEnhancedController.ListProtectionProfiles)
+		ruleEnhancedRoutes.GET("/profiles/:id", middleware.HasPermission(model.PermConfigRead), ruleEnhancedController.GetProtectionProfile)
+		ruleEnhancedRoutes.POST("/profiles/apply", middleware.HasPermission(model.PermConfigUpdate), ruleEnhancedController.ApplyProtectionProfile)
+	}
+
 	// 日志
 	wafLogRoutes := authenticated.Group("/log")
 	{
@@ -233,8 +279,10 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 	blockedIPRoutes := authenticated.Group("/blocked-ips")
 	{
 		blockedIPRoutes.GET("", middleware.HasPermission(model.PermConfigRead), blockedIPController.GetBlockedIPs)
+		blockedIPRoutes.POST("", middleware.HasPermission(model.PermConfigUpdate), blockedIPController.CreateBlockedIP)
 		blockedIPRoutes.GET("/stats", middleware.HasPermission(model.PermConfigRead), blockedIPController.GetBlockedIPStats)
 		blockedIPRoutes.DELETE("/cleanup", middleware.HasPermission(model.PermConfigUpdate), blockedIPController.CleanupExpiredBlockedIPs)
+		blockedIPRoutes.DELETE("/:ip", middleware.HasPermission(model.PermConfigUpdate), blockedIPController.DeleteBlockedIP)
 	}
 
 	// 自适应限流模块
@@ -244,13 +292,13 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		adaptiveThrottlingRoutes.GET("", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetConfig)
 		adaptiveThrottlingRoutes.PUT("", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.UpdateConfig)
 		adaptiveThrottlingRoutes.DELETE("", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.DeleteConfig)
-		
+
 		// 数据查询
 		adaptiveThrottlingRoutes.GET("/patterns", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetTrafficPatterns)
 		adaptiveThrottlingRoutes.GET("/baselines", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetBaselines)
 		adaptiveThrottlingRoutes.GET("/logs", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetAdjustmentLogs)
 		adaptiveThrottlingRoutes.GET("/stats", middleware.HasPermission(model.PermConfigRead), adaptiveThrottlingController.GetStats)
-		
+
 		// 操作
 		adaptiveThrottlingRoutes.POST("/recalculate-baseline", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.RecalculateBaseline)
 		adaptiveThrottlingRoutes.POST("/reset-learning", middleware.HasPermission(model.PermConfigUpdate), adaptiveThrottlingController.ResetLearning)
@@ -277,7 +325,7 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		// 告警历史查询
 		alertRoutes.GET("/history", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetAlertHistory)
 		alertRoutes.POST("/history/:id/acknowledge", middleware.HasPermission(model.PermAlertHistoryRead), alertController.AcknowledgeAlert)
-		
+
 		// 告警统计
 		alertRoutes.GET("/statistics", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetStatistics)
 	}
@@ -309,9 +357,16 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 
 		// 统计分析
 		aiAnalyzerRoutes.GET("/stats", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetAnalyzerStats)
-		
+
 		// 手动触发AI分析
 		aiAnalyzerRoutes.POST("/trigger", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.TriggerAnalysis)
+	}
+
+	// AI聊天助手模块
+	aiChatRoutes := authenticated.Group("/ai")
+	{
+		aiChatRoutes.POST("/chat", aiChatController.Chat)
+		aiChatRoutes.POST("/chat/stream", aiChatController.ChatStream)
 	}
 
 	// MCP 服务模块

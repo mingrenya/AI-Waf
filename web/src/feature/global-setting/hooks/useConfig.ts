@@ -12,7 +12,15 @@ import { useTranslation } from 'react-i18next'
 export const useConfigQuery = () => {
     const query = useQuery({
         queryKey: ['config'],
-        queryFn: configApi.getConfig
+        queryFn: configApi.getConfig,
+        // 添加重试策略，提高数据加载可靠性
+        retry: 2,
+        // 减少staleTime，确保页面切换时能获取最新数据
+        staleTime: 1000 * 60, // 1分钟
+        // 窗口重新聚焦时重新获取数据
+        refetchOnWindowFocus: true,
+        // 确保在挂载时总是获取数据
+        refetchOnMount: 'always'
     })
 
     return {
@@ -41,7 +49,9 @@ export const useUpdateConfig = () => {
             queryClient.invalidateQueries({ queryKey: ['config'] })
         },
         onError: (error: ApiError) => {
-            console.error('更新配置失败:', error)
+            if (import.meta.env.DEV) {
+                console.error('更新配置失败:', error)
+            }
             setError(error)
             toast({
                 title: t("globalSetting.config.updateFailed", "更新失败"),

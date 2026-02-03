@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -18,26 +18,28 @@ export function AdjustmentHistory() {
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(0)
 
-    useEffect(() => {
-        fetchLogs()
-    }, [filterType, page])
-
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async () => {
         try {
             setLoading(true)
             const response = await adaptiveThrottlingApi.getAdjustmentLogs({
-                type: filterType === 'all' ? undefined : filterType as any,
+                type: filterType === 'all' ? undefined : (filterType as 'visit' | 'attack' | 'error'),
                 page,
                 pageSize: 10
             })
             setLogs(response.results)
             setTotalPages(response.totalPages)
         } catch (error) {
-            console.error('Failed to fetch adjustment logs:', error)
+            if (import.meta.env.DEV) {
+                console.error('Failed to fetch adjustment logs:', error)
+            }
         } finally {
             setLoading(false)
         }
-    }
+    }, [filterType, page])
+
+    useEffect(() => {
+        fetchLogs()
+    }, [fetchLogs])
 
     const getAdjustmentColor = (ratio: number) => {
         if (ratio > 1) return 'text-green-600'

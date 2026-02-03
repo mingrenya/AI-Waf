@@ -66,11 +66,20 @@ func (s *MicroRuleServiceImpl) CreateMicroRule(ctx context.Context, req *dto.Mic
 	// 将JSON条件转换为BSON
 	var condition bson.Raw
 	if len(req.Condition) > 0 {
-		// 使用JSON解析器将JSON解析为interface{}
+		// 首先尝试解析JSON，如果condition是字符串格式的JSON，先解析一次
 		var anyValue interface{}
 		if err := json.Unmarshal(req.Condition, &anyValue); err != nil {
-			s.logger.Error().Err(err).Msg("解析JSON条件失败")
+			s.logger.Error().Err(err).Str("condition", string(req.Condition)).Msg("解析JSON条件失败")
 			return nil, err
+		}
+
+		// 如果anyValue是字符串，说明是双重编码的JSON，需要再解析一次
+		if strValue, ok := anyValue.(string); ok {
+			s.logger.Info().Msg("检测到字符串格式的condition，进行二次解析")
+			if err := json.Unmarshal([]byte(strValue), &anyValue); err != nil {
+				s.logger.Error().Err(err).Str("condition", strValue).Msg("二次解析JSON条件失败")
+				return nil, err
+			}
 		}
 
 		// 将interface{}转换为BSON
@@ -178,11 +187,20 @@ func (s *MicroRuleServiceImpl) UpdateMicroRule(ctx context.Context, id bson.Obje
 		rule.Priority = *req.Priority
 	}
 	if len(req.Condition) > 0 {
-		// 使用JSON解析器将JSON解析为interface{}
+		// 首先尝试解析JSON，如果condition是字符串格式的JSON，先解析一次
 		var anyValue interface{}
 		if err := json.Unmarshal(req.Condition, &anyValue); err != nil {
-			s.logger.Error().Err(err).Msg("解析JSON条件失败")
+			s.logger.Error().Err(err).Str("condition", string(req.Condition)).Msg("解析JSON条件失败")
 			return nil, err
+		}
+
+		// 如果anyValue是字符串，说明是双重编码的JSON，需要再解析一次
+		if strValue, ok := anyValue.(string); ok {
+			s.logger.Info().Msg("检测到字符串格式的condition，进行二次解析")
+			if err := json.Unmarshal([]byte(strValue), &anyValue); err != nil {
+				s.logger.Error().Err(err).Str("condition", strValue).Msg("二次解析JSON条件失败")
+				return nil, err
+			}
 		}
 
 		// 将interface{}转换为BSON

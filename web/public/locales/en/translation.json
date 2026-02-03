@@ -490,7 +490,9 @@
             "conditionGroup": "Condition Group",
             "addSimpleCondition": "Add Condition",
             "addCompositeCondition": "Add Condition Group",
-            "addNestedCondition": "Add Nested Condition"
+            "addNestedCondition": "Add Nested Condition",
+            "maxDepthWarning": "Maximum nesting depth limit ({{max}} levels) reached. Cannot add more condition groups.",
+            "maxDepthReached": "Maximum nesting depth reached"
         },
         "matchTypes": {
             "equal": "Equal",

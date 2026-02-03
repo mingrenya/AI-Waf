@@ -39,7 +39,7 @@ export const useDeleteAttackPattern = () => {
         description: "攻击模式已删除",
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "删除失败",
         description: error.message || "请稍后重试",
@@ -89,7 +89,7 @@ export const useDeleteGeneratedRule = () => {
         description: "规则已删除",
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "删除失败",
         description: error.message || "请稍后重试",
@@ -115,7 +115,7 @@ export const useReviewRule = () => {
         description: `规则已${variables.action === "approve" ? "批准" : "拒绝"}`,
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "审核失败",
         description: error.message || "请稍后重试",
@@ -139,7 +139,7 @@ export const useDeployRule = () => {
         description: "规则已部署到生产环境",
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "部署失败",
         description: error.message || "请稍后重试",
@@ -172,7 +172,7 @@ export const useUpdateAnalyzerConfig = () => {
         description: "AI分析器配置已保存",
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "配置更新失败",
         description: error.message || "请稍后重试",
@@ -214,7 +214,7 @@ export const useDeleteMCPConversation = () => {
         description: "对话记录已删除",
       })
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "删除失败",
         description: error.message || "请稍后重试",
@@ -253,7 +253,7 @@ export const useTriggerAnalysis = () => {
         queryClient.invalidateQueries({ queryKey: ["analyzer-stats"] })
       }, 5000)
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "触发失败",
         description: error.message || "请检查系统状态后重试",

@@ -207,7 +207,7 @@ export function BlockedIPTable() {
         }
         // 触发过滤器动画
         triggerFilterAnimation()
-    }, [triggerFilterAnimation])
+    }, [setFilters, setIpInputValue, triggerFilterAnimation])
 
     // 清除过滤器
     const clearFilters = useCallback(() => {
@@ -337,7 +337,7 @@ export function BlockedIPTable() {
                 }
             }))
         }
-    }, [filters.page, filters.size])
+    }, [filters.page, filters.size, setFilters])
 
     // 初始化表格
     const table = useReactTable({

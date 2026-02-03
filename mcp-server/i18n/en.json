@@ -1,0 +1,129 @@
+{
+  "list_attack_logs": {
+    "name": "Query Attack Logs",
+    "description": "Query WAF attack logs with filters for time range, attack type, and severity",
+    "fields": {
+      "page": "Page number (default: 1)",
+      "pageSize": "Items per page (default: 20, max: 100)",
+      "ruleId": "Filter by rule ID",
+      "srcIp": "Filter by source IP address",
+      "dstIp": "Filter by destination IP address",
+      "domain": "Filter by domain name",
+      "startTime": "Query start time (ISO8601 format)",
+      "endTime": "Query end time (ISO8601 format)"
+    }
+  },
+  "get_log_stats": {
+    "name": "Get Attack Statistics",
+    "description": "Get attack log statistics including attack type distribution and source IP ranking",
+    "fields": {
+      "page": "Page number (default: 1)",
+      "pageSize": "Items per page (default: 20)",
+      "srcIp": "Filter by source IP address",
+      "dstIp": "Filter by destination IP address",
+      "domain": "Filter by domain name",
+      "startTime": "Query start time (ISO8601 format)",
+      "endTime": "Query end time (ISO8601 format)"
+    }
+  },
+  "list_micro_rules": {
+    "name": "List Rules",
+    "description": "List all MicroRule firewall rules",
+    "fields": {
+      "page": "Page number (default: 1)",
+      "size": "Items per page (default: 20)"
+    }
+  },
+  "create_micro_rule": {
+    "name": "Create Rule",
+    "description": "Create a new MicroRule for custom access control",
+    "fields": {
+      "name": "Rule name",
+      "type": "Rule type: blacklist or whitelist",
+      "status": "Rule status: enabled or disabled",
+      "priority": "Priority level (100-1000, higher number means higher priority)",
+      "condition": "Rule condition object containing match_type and patterns"
+    }
+  },
+  "list_blocked_ips": {
+    "name": "List Blocked IPs",
+    "description": "List all blocked IP addresses and block reasons",
+    "fields": {
+      "page": "Page number (default: 1)",
+      "size": "Items per page (default: 20)"
+    }
+  },
+  "get_qps_data": {
+    "name": "Get QPS Data",
+    "description": "Get real-time QPS (Queries Per Second) data",
+    "fields": {
+      "limit": "Number of data points to return (default: 30, max: 60)"
+    }
+  },
+  "batch_block_ips": {
+    "name": "Batch Block IPs",
+    "description": "Block multiple IP addresses at once",
+    "fields": {
+      "ips": "List of IP addresses to block",
+      "reason": "Block reason",
+      "duration": "Block duration in seconds (0 = permanent)",
+      "force": "Force block even if already blocked (default: false)"
+    }
+  },
+  "batch_update_rules": {
+    "name": "Batch Update Rules",
+    "description": "Update multiple rules at once",
+    "fields": {
+      "rule_ids": "List of rule IDs to update",
+      "updates": "Fields to update (e.g., {\"status\":\"disabled\",\"priority\":200})",
+      "rollback": "Whether to rollback on failure (default: false)"
+    }
+  },
+  "generate_security_report": {
+    "name": "Generate Security Report",
+    "description": "Generate comprehensive security analysis report",
+    "fields": {
+      "date_range": "Date range: last_7d, last_30d, last_90d, custom",
+      "include_recommendations": "Include security recommendations (default: true)",
+      "export_format": "Export format: pdf, html, json (default: json)"
+    }
+  },
+  "predict_threats": {
+    "name": "Threat Prediction",
+    "description": "Predict potential security threats using AI analysis",
+    "fields": {
+      "analysis_window": "Analysis time window: 24h, 7d, 30d (default: 7d)",
+      "prediction_horizon": "Prediction time horizon: 24h, 7d, 30d (default: 24h)",
+      "threat_types": "Threat types to analyze (empty = all types)",
+      "confidence_threshold": "Minimum confidence threshold (0.0-1.0, default: 0.7)"
+    }
+  },
+  "auto_respond_threat": {
+    "name": "Auto-Respond to Threat",
+    "description": "Automatically respond to detected threat patterns",
+    "fields": {
+      "threat_pattern_id": "Threat pattern ID",
+      "action": "Response action: auto, propose, manual (default: propose)",
+      "severity_threshold": "Severity threshold: critical, high, medium, low (default: high)",
+      "scope": "Response scope: conservative, moderate, aggressive (default: moderate)",
+      "rollback_enabled": "Enable automatic rollback (default: true)"
+    }
+  },
+  "compliance_check": {
+    "name": "Compliance Check",
+    "description": "Check WAF configuration compliance against security standards",
+    "fields": {
+      "standards": "Compliance standards to check: OWASP_TOP_10, PCI_DSS_3.2.1, ISO_27001, NIST_CSF",
+      "detailed_report": "Generate detailed report (default: true)"
+    }
+  },
+  "analyze_traffic_baseline": {
+    "name": "Analyze Traffic Baseline",
+    "description": "Establish normal traffic baseline patterns for anomaly detection",
+    "fields": {
+      "time_range": "Analysis time range: 7d, 30d, 90d (default: 30d)",
+      "granularity": "Data granularity: hourly, daily, weekly (default: hourly)",
+      "dimensions": "Analysis dimensions to include"
+    }
+  }
+}

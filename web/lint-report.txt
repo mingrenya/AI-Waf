@@ -1,0 +1,100 @@
+
+> waf@0.0.0 lint /Users/duheling/Downloads/AI-Waf/web
+> eslint .
+
+
+/Users/duheling/Downloads/AI-Waf/web/src/api/alert.ts
+  161:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/api/index.ts
+  225:42  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  258:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  283:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  317:51  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/components/ui/badge.tsx
+  36:17  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/duheling/Downloads/AI-Waf/web/src/components/ui/button.tsx
+  57:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/duheling/Downloads/AI-Waf/web/src/components/ui/form.tsx
+  168:3  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/adaptive-throttling/components/AdaptiveConfigForm.tsx
+  88:11  warning  The 'fetchConfig' function makes the dependencies of useEffect Hook (at line 105) change on every render. To fix this, wrap the definition of 'fetchConfig' in its own useCallback() Hook  react-hooks/exhaustive-deps
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/adaptive-throttling/components/AdjustmentHistory.tsx
+  21:11  warning  The 'fetchLogs' function makes the dependencies of useEffect Hook (at line 42) change on every render. Move it inside the useEffect callback. Alternatively, wrap the definition of 'fetchLogs' in its own useCallback() Hook  react-hooks/exhaustive-deps
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/adaptive-throttling/components/BaselineChart.tsx
+  126:79  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/ai-analyzer/components/AttackPatternTable.tsx
+  66:48  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/ai-analyzer/hooks/useAIAnalyzer.ts
+   42:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   92:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  142:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  175:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  217:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  256:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/alert/components/ChannelForm.tsx
+  78:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  92:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/alert/components/TestChannelDialog.tsx
+  38:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/alert/components/index.ts
+  12:34  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  13:35  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:41  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  18:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  19:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/global-setting/components/ConfigForm.tsx
+  97:8  warning  React Hook useEffect has a missing dependency: 'form'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/micro-rule/components/ProtectionProfileDialog.tsx
+  32:6   warning  React Hook useEffect has a missing dependency: 'fetchProfiles'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  39:21  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+  67:21  error    Unexpected any. Specify a different type                                                                          @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/micro-rule/components/RuleEffectivenessCell.tsx
+  41:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/micro-rule/components/RuleTemplateDialog.tsx
+   51:21  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   68:13  error  'total' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   80:21  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  122:21  error  Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/security-dashboard/component/SecurityDashboardLayout.tsx
+  157:8  warning  React Hook useEffect has missing dependencies: 'attackIPs' and 'realtimeAttacks'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/security-dashboard/hooks/useSecurityDashboard.ts
+  65:8  warning  React Hook useEffect has a missing dependency: 'overviewStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/duheling/Downloads/AI-Waf/web/src/feature/site/hooks/useSites.ts
+  73:50  error  Parsing error: ';' expected
+
+/Users/duheling/Downloads/AI-Waf/web/src/pages/ai-analyzer/pages/config/page.tsx
+  59:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/types/ai-analyzer.ts
+  73:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  74:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/types/mcp.ts
+  64:16  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/duheling/Downloads/AI-Waf/web/src/types/rule-enhanced.ts
+  11:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 44 problems (35 errors, 9 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

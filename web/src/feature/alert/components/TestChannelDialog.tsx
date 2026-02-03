@@ -35,7 +35,7 @@ export function TestChannelDialog({ open, onOpenChange, channel }: TestChannelDi
             toast({ title: 'Success', description: t('alert.testChannelSuccess') })
             onOpenChange(false)
         },
-        onError: (error: any) => {
+        onError: (error: Error & { response?: { data?: { message?: string } } }) => {
             toast({ title: 'Error', description: error?.response?.data?.message || t('alert.testChannelFailed'), variant: 'destructive' })
         }
     })

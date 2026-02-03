@@ -87,8 +87,8 @@ export function AttackEventFilter({
     }
 
     useEffect(() => {
-        const subscription = form.watch((value) => {
-            console.log('Form Values Changed:', value)
+        const subscription = form.watch(() => {
+            // Form values changed
         })
         return () => subscription.unsubscribe()
     }, [form])

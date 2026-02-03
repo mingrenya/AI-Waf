@@ -3,18 +3,20 @@ package controller
 import (
 	"errors"
 	"net/http"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mingrenya/AI-Waf/server/dto"
 	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/service"
 	"github.com/mingrenya/AI-Waf/server/utils/response"
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // AuthController 认证控制器
 type AuthController interface {
 	Login(ctx *gin.Context)
+	LoginServiceAccount(ctx *gin.Context) // 新增：服务账号登录（长期Token）
 	ResetPassword(ctx *gin.Context)
 	CreateUser(ctx *gin.Context)
 	GetUsers(ctx *gin.Context)
@@ -69,6 +71,46 @@ func (c *AuthControllerImpl) Login(ctx *gin.Context) {
 	response.Success(ctx, "登录成功", gin.H{
 		"token": token,
 		"user":  user,
+	})
+}
+
+// LoginServiceAccount 服务账号登录（生成长期Token）
+//
+//	@Summary		服务账号登录
+//	@Description	用于MCP、CLI等服务端工具，生成90天有效期的JWT令牌
+//	@Tags			认证
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		dto.UserLoginRequest								true	"登录信息"
+//	@Success		200		{object}	model.SuccessResponse{data=dto.LoginResponseData}	"登录成功"
+//	@Failure		400		{object}	model.ErrResponse									"请求参数错误"
+//	@Failure		401		{object}	model.ErrResponseDontShowError						"用户名或密码错误"
+//	@Failure		500		{object}	model.ErrResponseDontShowError						"服务器内部错误"
+//	@Router			/auth/login-service [post]
+func (c *AuthControllerImpl) LoginServiceAccount(ctx *gin.Context) {
+	var req dto.UserLoginRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	// 使用90天有效期登录
+	token, user, err := c.authService.LoginWithCustomExpiration(ctx, req, 90*24*time.Hour)
+	if err != nil {
+		if errors.Is(err, service.ErrUserNotFound) || errors.Is(err, service.ErrInvalidPassword) {
+			response.Error(ctx, model.NewAPIError(http.StatusBadRequest, "用户名或密码错误", err), false)
+			return
+		}
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+
+	// 返回令牌和用户信息（带过期时间提示）
+	response.Success(ctx, "服务账号Token生成成功", gin.H{
+		"token":      token,
+		"user":       user,
+		"expires_in": "90天",
+		"note":       "此Token仅用于服务端工具（MCP/CLI），请妥善保管",
 	})
 }
 
@@ -144,20 +186,20 @@ func (c *AuthControllerImpl) CreateUser(ctx *gin.Context) {
 	}
 
 	// 从上下文中获取管理员ID
-	adminID, exists := ctx.Get("userID")
+	adminIDStr, exists := ctx.Get("userID")
 	if !exists {
 		response.Unauthorized(ctx, nil)
 		return
 	}
 
-	adminID, err := bson.ObjectIDFromHex(adminID.(string))
+	adminID, err := bson.ObjectIDFromHex(adminIDStr.(string))
 	if err != nil {
 		response.Unauthorized(ctx, nil)
 		return
 	}
 
 	// 创建用户
-	user, err := c.authService.CreateUser(ctx, adminID.(bson.ObjectID), req)
+	user, err := c.authService.CreateUser(ctx, adminID, req)
 	if err != nil {
 		if errors.Is(err, service.ErrUserAlreadyExist) {
 			response.Error(ctx, model.NewAPIError(http.StatusConflict, "用户名已存在", err), false)

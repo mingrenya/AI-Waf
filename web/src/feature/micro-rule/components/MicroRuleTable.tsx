@@ -9,7 +9,7 @@ import { ruleApi } from '@/api/rule'
 import { MicroRule } from '@/types/rule'
 import { Button } from '@/components/ui/button'
 import {
-    MoreHorizontal, Plus, Trash2, RefreshCcw, Pencil, ShieldCheck, ShieldOff
+    MoreHorizontal, Plus, Trash2, RefreshCcw, Pencil, ShieldCheck, ShieldOff, FileText, Shield
 } from 'lucide-react'
 import {
     DropdownMenu, DropdownMenuContent,
@@ -20,6 +20,9 @@ import { MicroRuleDialog } from './MicroRuleDialog'
 import { Loader2 } from 'lucide-react'
 import { DataTable } from '@/components/table/motion-data-table'
 import { DeleteMicroRuleDialog } from './DeleteMicroRuleDialog'
+import { RuleTemplateDialog } from './RuleTemplateDialog'
+import { ProtectionProfileDialog } from './ProtectionProfileDialog'
+import { RuleEffectivenessCell } from './RuleEffectivenessCell'
 import { useTranslation } from 'react-i18next'
 import { AnimatedIcon } from '@/components/ui/animation/components/animated-icon'
 import { AnimatedButton } from '@/components/ui/animation/components/animated-button'
@@ -31,6 +34,8 @@ export function MicroRuleTable() {
     // 状态管理
     const [ruleDialogOpen, setRuleDialogOpen] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [templateDialogOpen, setTemplateDialogOpen] = useState(false)
+    const [profileDialogOpen, setProfileDialogOpen] = useState(false)
     const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null)
     const sentinelRef = useRef<HTMLDivElement>(null)
     const [dialogMode, setDialogMode] = useState<'create' | 'update'>('create')
@@ -179,6 +184,13 @@ export function MicroRuleTable() {
             cell: ({ row }) => <div className="dark:text-shadow-glow-white">{row.original.priority}</div>,
         },
         {
+            id: 'effectiveness',
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">规则评分</div>,
+            cell: ({ row }) => (
+                <RuleEffectivenessCell ruleId={row.original.id} ruleName={row.original.name} />
+            ),
+        },
+        {
             id: 'actions',
             cell: ({ row }) => (
                 <DropdownMenu>
@@ -222,6 +234,28 @@ export function MicroRuleTable() {
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-primary dark:text-white">{t("microRule.title")}</h2>
                     <div className="flex gap-2">
+                        <AnimatedButton>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setTemplateDialogOpen(true)}
+                                className="flex items-center gap-2 justify-center dark:text-shadow-glow-white"
+                            >
+                                <FileText className="h-4 w-4" />
+                                OWASP 模板
+                            </Button>
+                        </AnimatedButton>
+                        <AnimatedButton>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setProfileDialogOpen(true)}
+                                className="flex items-center gap-2 justify-center dark:text-shadow-glow-white"
+                            >
+                                <Shield className="h-4 w-4" />
+                                保护配置
+                            </Button>
+                        </AnimatedButton>
                         <AnimatedButton>
                             <Button
                                 variant="outline"
@@ -279,6 +313,20 @@ export function MicroRuleTable() {
                 onOpenChange={setRuleDialogOpen}
                 mode={dialogMode}
                 rule={selectedRule}
+            />
+
+            {/* OWASP 模板对话框 */}
+            <RuleTemplateDialog
+                open={templateDialogOpen}
+                onOpenChange={setTemplateDialogOpen}
+                onSuccess={() => refetch()}
+            />
+
+            {/* 保护配置对话框 */}
+            <ProtectionProfileDialog
+                open={profileDialogOpen}
+                onOpenChange={setProfileDialogOpen}
+                onSuccess={() => refetch()}
             />
 
             {/* 删除对话框 */}

@@ -26,7 +26,7 @@ export function AIConfigCard({ config, onConfigChange }: AIConfigCardProps) {
                         </div>
                     </div>
                     <Switch
-                        checked={config.enabled}
+                        checked={config.enabled ?? false}
                         onCheckedChange={(checked) =>
                             onConfigChange({ ...config, enabled: checked })
                         }
@@ -47,7 +47,7 @@ export function AIConfigCard({ config, onConfigChange }: AIConfigCardProps) {
                         }
                         min={5}
                         max={1440}
-                        disabled={!config.enabled}
+                        disabled={!config?.enabled}
                     />
                     <div className="flex items-start gap-2 text-xs text-muted-foreground">
                         <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />

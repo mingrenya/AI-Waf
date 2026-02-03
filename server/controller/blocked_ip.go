@@ -2,12 +2,14 @@ package controller
 
 import (
 	"errors"
+	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/dto"
 	"github.com/mingrenya/AI-Waf/server/service"
 	"github.com/mingrenya/AI-Waf/server/utils/response"
-	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )
 
@@ -16,6 +18,8 @@ type BlockedIPController interface {
 	GetBlockedIPs(ctx *gin.Context)
 	GetBlockedIPStats(ctx *gin.Context)
 	CleanupExpiredBlockedIPs(ctx *gin.Context)
+	CreateBlockedIP(ctx *gin.Context)
+	DeleteBlockedIP(ctx *gin.Context)
 }
 
 // BlockedIPControllerImpl 封禁IP控制器实现
@@ -155,4 +159,107 @@ func (c *BlockedIPControllerImpl) CleanupExpiredBlockedIPs(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, "清理完成", cleanupResponse)
+}
+
+// CreateBlockedIP 创建封禁IP记录
+//
+//	@Summary		创建封禁IP记录
+//	@Description	手动添加一个封禁IP记录
+//	@Tags			封禁IP管理
+//	@Accept			json
+//	@Produce		json
+//	@Param			blockedIP	body	dto.BlockedIPCreateRequest	true	"封禁IP信息"
+//	@Security		BearerAuth
+//	@Success		200	{object}	model.SuccessResponse{data=dto.BlockedIPResponse}	"封禁IP创建成功"
+//	@Failure		400	{object}	model.ErrResponse									"请求参数错误"
+//	@Failure		401	{object}	model.ErrResponseDontShowError						"未授权访问"
+//	@Failure		403	{object}	model.ErrResponseDontShowError						"禁止访问"
+//	@Failure		500	{object}	model.ErrResponseDontShowError						"服务器内部错误"
+//	@Router			/api/v1/blocked-ips [post]
+func (c *BlockedIPControllerImpl) CreateBlockedIP(ctx *gin.Context) {
+	var req dto.BlockedIPCreateRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		c.logger.Warn().Err(err).Msg("请求参数绑定失败")
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	c.logger.Info().
+		Str("ip", req.IP).
+		Str("reason", req.Reason).
+		Int("duration", req.Duration).
+		Msg("创建封禁IP记录请求")
+
+	// 计算封禁结束时间
+	now := time.Now()
+	var blockedUntil time.Time
+	if req.Duration == 0 {
+		// 永久封禁，设置为100年后
+		blockedUntil = now.AddDate(100, 0, 0)
+	} else {
+		blockedUntil = now.Add(time.Duration(req.Duration) * time.Second)
+	}
+
+	// 创建封禁记录
+	record := &model.BlockedIPRecord{
+		IP:           req.IP,
+		Reason:       req.Reason,
+		RequestUri:   req.RequestUri,
+		BlockedAt:    now,
+		BlockedUntil: blockedUntil,
+	}
+
+	err := c.blockedIPService.CreateBlockedIP(ctx, record)
+	if err != nil {
+		c.logger.Error().Err(err).Msg("创建封禁IP记录失败")
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+
+	// 转换为响应DTO
+	var resp dto.BlockedIPResponse
+	resp.MapFromModel(record)
+
+	c.logger.Info().
+		Str("ip", req.IP).
+		Time("blocked_until", blockedUntil).
+		Msg("封禁IP记录创建成功")
+
+	response.Success(ctx, "封禁IP创建成功", resp)
+}
+
+// DeleteBlockedIP 删除封禁IP
+//
+//	@Summary		删除封禁IP
+//	@Description	根据IP地址解除封禁
+//	@Tags			封禁IP管理
+//	@Accept			json
+//	@Produce		json
+//	@Param			ip	path	string	true	"IP地址"
+//	@Security		BearerAuth
+//	@Success		200	{object}	model.SuccessResponse	"解除封禁成功"
+//	@Failure		400	{object}	model.ErrResponse		"请求参数错误"
+//	@Failure		404	{object}	model.ErrResponse		"封禁记录不存在"
+//	@Failure		500	{object}	model.ErrResponseDontShowError	"服务器内部错误"
+//	@Router			/api/v1/blocked-ips/{ip} [delete]
+func (c *BlockedIPControllerImpl) DeleteBlockedIP(ctx *gin.Context) {
+	var req dto.BlockedIPDeleteRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		c.logger.Warn().Err(err).Msg("请求参数绑定失败")
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	err := c.blockedIPService.DeleteBlockedIP(ctx, req.IP)
+	if err != nil {
+		if err == service.ErrBlockedIPNotFound {
+			response.NotFound(ctx, errors.New("封禁记录不存在"))
+			return
+		}
+		c.logger.Error().Err(err).Str("ip", req.IP).Msg("删除封禁IP失败")
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+
+	response.Success(ctx, "解除封禁成功", nil)
 }

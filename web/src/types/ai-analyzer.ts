@@ -70,8 +70,8 @@ export interface MCPConversation {
   pattern_id?: string
   role: "user" | "assistant" | "system"
   content: string
-  tool_calls?: any[]
-  metadata?: Record<string, any>
+  tool_calls?: Record<string, unknown>[]
+  metadata?: Record<string, unknown>
   created_at: string
 }
 

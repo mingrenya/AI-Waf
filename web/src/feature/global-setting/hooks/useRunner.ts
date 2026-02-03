@@ -43,7 +43,9 @@ export const useRunnerControl = () => {
             queryClient.invalidateQueries({ queryKey: ['runner-status'] })
         },
         onError: (error: ApiError) => {
-            console.error('控制运行器失败:', error)
+            if (import.meta.env.DEV) {
+                console.error('控制运行器失败:', error)
+            }
             setError(error.message || "控制运行器时出现错误")
             toast({
                 title: t("globalSetting.engine.operationFailed", "操作失败"),

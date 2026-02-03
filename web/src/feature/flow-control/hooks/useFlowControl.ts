@@ -23,7 +23,9 @@ export const useUpdateFlowControlConfig = () => {
             queryClient.invalidateQueries({ queryKey: ['config'] })
         },
         onError: (error: ApiError) => {
-            console.error('更新流量控制配置失败:', error)
+            if (import.meta.env.DEV) {
+                console.error('更新流量控制配置失败:', error)
+            }
             setError(error.message || t('flowControl.toast.updateError', '更新配置时出现错误'))
             toast({
                 title: t('flowControl.toast.updateFailed', '更新失败'),

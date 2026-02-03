@@ -75,10 +75,12 @@ func GetInstance(runner daemon.ServiceRunner, targetList []string) (*CronJobServ
 	return instance, nil
 }
 
-// MustGetInstance 获取单例实例，如果不存在或出错则panic
+// MustGetInstance 获取单例实例，如果不存在则返回nil
+// 推荐使用GetInstance代替，以获得更好的错误处理
 func MustGetInstance() *CronJobService {
 	if instance == nil {
-		panic("CronJobService instance not initialized, call GetInstance first")
+		config.Logger.Error().Msg("CronJobService实例未初始化，请先调用GetInstance")
+		return nil
 	}
 	return instance
 }

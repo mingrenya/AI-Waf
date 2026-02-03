@@ -75,7 +75,7 @@ export function ChannelForm({
             toast({ title: 'Success', description: t('alert.createSuccess') })
             onSuccess?.()
         },
-        onError: (error: any) => {
+        onError: (error: Error & { response?: { data?: { message?: string } } }) => {
             toast({ title: 'Error', description: error?.response?.data?.message || t('alert.createFailed'), variant: 'destructive' })
         }
     })
@@ -89,7 +89,7 @@ export function ChannelForm({
             toast({ title: 'Success', description: t('alert.updateSuccess') })
             onSuccess?.()
         },
-        onError: (error: any) => {
+        onError: (error: Error & { response?: { data?: { message?: string } } }) => {
             toast({ title: 'Error', description: error?.response?.data?.message || t('alert.updateFailed'), variant: 'destructive' })
         }
     })

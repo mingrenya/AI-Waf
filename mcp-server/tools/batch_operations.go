@@ -6,23 +6,24 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 // BatchBlockIPsInput 批量封禁IP的输入参数
 type BatchBlockIPsInput struct {
-	IPs      []string `json:"ips" jsonschema:"要封禁的IP地址列表"`
-	Reason   string   `json:"reason" jsonschema:"封禁原因"`
-	Duration int      `json:"duration,omitempty" jsonschema:"封禁时长(秒),0表示永久"`
+	IPs      []string `json:"ips" jsonschema:"List of IP addresses to block"`
+	Reason   string   `json:"reason" jsonschema:"Reason for blocking"`
+	Duration int      `json:"duration,omitempty" jsonschema:"Block duration in seconds (0 for permanent)"`
 }
 
 // BatchBlockIPsOutput 批量封禁IP输出
 type BatchBlockIPsOutput struct {
-	SuccessCount int      `json:"successCount" jsonschema:"成功封禁的IP数量"`
-	FailedCount  int      `json:"failedCount" jsonschema:"失败的IP数量"`
-	FailedIPs    []string `json:"failedIPs,omitempty" jsonschema:"失败的IP列表"`
-	Message      string   `json:"message" jsonschema:"操作结果消息"`
+	SuccessCount int      `json:"successCount" jsonschema:"Number of successfully blocked IPs"`
+	FailedCount  int      `json:"failedCount" jsonschema:"Number of failed IP blocks"`
+	FailedIPs    []string `json:"failedIPs,omitempty" jsonschema:"List of failed IP addresses"`
+	Message      string   `json:"message" jsonschema:"Operation result message"`
 }
 
 // CreateBatchBlockIPs 创建批量封禁IP的工具函数
@@ -30,39 +31,57 @@ func CreateBatchBlockIPs(client *APIClient) func(context.Context, *mcp.CallToolR
 	return func(ctx context.Context, req *mcp.CallToolRequest, input BatchBlockIPsInput) (*mcp.CallToolResult, BatchBlockIPsOutput, error) {
 		logger := NewToolLogger("batch_block_ips")
 		logger.LogInput(input)
-		
+
 		if len(input.IPs) == 0 {
 			logger.LogWarning("IP列表为空")
 			return nil, BatchBlockIPsOutput{
-				Message: "IP列表不能为空",
-			}, fmt.Errorf("IP列表为空")
+					Message: "IP列表不能为空",
+				}, NewValidationErrorWithSuggestion(
+					"ips",
+					"IP列表不能为空",
+					"请提供至少一个需要封禁的 IP 地址。批量操作最多支持 100 个 IP。",
+				)
 		}
 
 		successCount := 0
 		failedCount := 0
 		var failedIPs []string
+		var mu sync.Mutex // 保护共享变量
+		var wg sync.WaitGroup
 
-		// 逐个封禁IP（因为后端可能没有批量接口，我们在MCP层面实现批量）
+		// 并发封禁IP以提升性能，最多10个并发，使用context进行超时控制
+		semaphore := make(chan struct{}, 10)
 		for _, ip := range input.IPs {
-			blockData := map[string]interface{}{
-				"ip":       ip,
-				"reason":   input.Reason,
-				"duration": input.Duration,
-			}
-			
-			_, err := client.Post("/api/v1/blocked-ips", blockData)
-			if err != nil {
-				failedCount++
-				failedIPs = append(failedIPs, ip)
-				logger.LogWarning(fmt.Sprintf("封禁IP %s 失败: %v", ip, err))
-			} else {
-				successCount++
-			}
+			wg.Add(1)
+			go func(targetIP string) {
+				defer wg.Done()
+				semaphore <- struct{}{}        // 获取信号量
+				defer func() { <-semaphore }() // 释放信号量
+
+				blockData := map[string]interface{}{
+					"ip":       targetIP,
+					"reason":   input.Reason,
+					"duration": input.Duration,
+				}
+
+				// 使用带超时的context
+				_, err := client.PostWithContext(ctx, "/api/v1/blocked-ips", blockData)
+				mu.Lock()
+				if err != nil {
+					failedCount++
+					failedIPs = append(failedIPs, targetIP)
+					logger.LogWarning(fmt.Sprintf("封禁IP %s 失败: %v", targetIP, err))
+				} else {
+					successCount++
+				}
+				mu.Unlock()
+			}(ip)
 		}
+		wg.Wait() // 等待所有goroutine完成
 
 		message := fmt.Sprintf("批量封禁完成: 成功 %d 个, 失败 %d 个", successCount, failedCount)
 		logger.LogSuccess(message)
-		
+
 		return nil, BatchBlockIPsOutput{
 			SuccessCount: successCount,
 			FailedCount:  failedCount,
@@ -74,15 +93,15 @@ func CreateBatchBlockIPs(client *APIClient) func(context.Context, *mcp.CallToolR
 
 // BatchUnblockIPsInput 批量解封IP的输入参数
 type BatchUnblockIPsInput struct {
-	IPs []string `json:"ips" jsonschema:"要解封的IP地址列表"`
+	IPs []string `json:"ips" jsonschema:"List of IP addresses to unblock"`
 }
 
 // BatchUnblockIPsOutput 批量解封IP输出
 type BatchUnblockIPsOutput struct {
-	SuccessCount int      `json:"successCount" jsonschema:"成功解封的IP数量"`
-	FailedCount  int      `json:"failedCount" jsonschema:"失败的IP数量"`
-	FailedIPs    []string `json:"failedIPs,omitempty" jsonschema:"失败的IP列表"`
-	Message      string   `json:"message" jsonschema:"操作结果消息"`
+	SuccessCount int      `json:"successCount" jsonschema:"Number of successfully unblocked IPs"`
+	FailedCount  int      `json:"failedCount" jsonschema:"Number of failed IP unblocks"`
+	FailedIPs    []string `json:"failedIPs,omitempty" jsonschema:"List of failed IP addresses"`
+	Message      string   `json:"message" jsonschema:"Operation result message"`
 }
 
 // CreateBatchUnblockIPs 创建批量解封IP的工具函数
@@ -90,33 +109,51 @@ func CreateBatchUnblockIPs(client *APIClient) func(context.Context, *mcp.CallToo
 	return func(ctx context.Context, req *mcp.CallToolRequest, input BatchUnblockIPsInput) (*mcp.CallToolResult, BatchUnblockIPsOutput, error) {
 		logger := NewToolLogger("batch_unblock_ips")
 		logger.LogInput(input)
-		
+
 		if len(input.IPs) == 0 {
 			logger.LogWarning("IP列表为空")
 			return nil, BatchUnblockIPsOutput{
-				Message: "IP列表不能为空",
-			}, fmt.Errorf("IP列表为空")
+					Message: "IP列表不能为空",
+				}, NewValidationErrorWithSuggestion(
+					"ips",
+					"IP列表不能为空",
+					"请提供至少一个需要解封的 IP 地址。批量操作最多支持 100 个 IP。",
+				)
 		}
 
 		successCount := 0
 		failedCount := 0
 		var failedIPs []string
+		var mu sync.Mutex // 保护共享变量
+		var wg sync.WaitGroup
 
-		// 逐个解封IP
+		// 并发解封IP以提升性能，最多10个并发，使用context进行超时控制
+		semaphore := make(chan struct{}, 10)
 		for _, ip := range input.IPs {
-			err := client.Delete(fmt.Sprintf("/api/v1/blocked-ips/%s", ip))
-			if err != nil {
-				failedCount++
-				failedIPs = append(failedIPs, ip)
-				logger.LogWarning(fmt.Sprintf("解封IP %s 失败: %v", ip, err))
-			} else {
-				successCount++
-			}
+			wg.Add(1)
+			go func(targetIP string) {
+				defer wg.Done()
+				semaphore <- struct{}{}        // 获取信号量
+				defer func() { <-semaphore }() // 释放信号量
+
+				// 使用带超时的context
+				err := client.DeleteWithContext(ctx, fmt.Sprintf("/api/v1/blocked-ips/%s", targetIP))
+				mu.Lock()
+				if err != nil {
+					failedCount++
+					failedIPs = append(failedIPs, targetIP)
+					logger.LogWarning(fmt.Sprintf("解封IP %s 失败: %v", targetIP, err))
+				} else {
+					successCount++
+				}
+				mu.Unlock()
+			}(ip)
 		}
+		wg.Wait() // 等待所有goroutine完成
 
 		message := fmt.Sprintf("批量解封完成: 成功 %d 个, 失败 %d 个", successCount, failedCount)
 		logger.LogSuccess(message)
-		
+
 		return nil, BatchUnblockIPsOutput{
 			SuccessCount: successCount,
 			FailedCount:  failedCount,
@@ -128,26 +165,25 @@ func CreateBatchUnblockIPs(client *APIClient) func(context.Context, *mcp.CallToo
 
 // BatchCreateRulesInput 批量创建规则的输入参数
 type BatchCreateRulesInput struct {
-	Rules []RuleCreateRequest `json:"rules" jsonschema:"要创建的规则列表"`
+	Rules []RuleCreateRequest `json:"rules" jsonschema:"List of rules to create"`
 }
 
 // RuleCreateRequest 单个规则创建请求
 type RuleCreateRequest struct {
-	Name        string      `json:"name" jsonschema:"规则名称"`
-	Condition   interface{} `json:"condition" jsonschema:"规则条件"`
-	Action      string      `json:"action" jsonschema:"规则动作：allow,deny,log"`
-	Priority    int         `json:"priority,omitempty" jsonschema:"优先级,数字越大优先级越高"`
-	Enabled     bool        `json:"enabled" jsonschema:"是否启用"`
-	Description string      `json:"description,omitempty" jsonschema:"规则描述"`
+	Name      string      `json:"name" jsonschema:"Rule name"`
+	Type      string      `json:"type" jsonschema:"Rule type (whitelist or blacklist)"`
+	Status    string      `json:"status" jsonschema:"Rule status (enabled or disabled)"`
+	Priority  int         `json:"priority" jsonschema:"Priority level (higher number = higher priority)"`
+	Condition interface{} `json:"condition" jsonschema:"Rule condition as JSON object"`
 }
 
 // BatchCreateRulesOutput 批量创建规则输出
 type BatchCreateRulesOutput struct {
-	SuccessCount int      `json:"successCount" jsonschema:"成功创建的规则数量"`
-	FailedCount  int      `json:"failedCount" jsonschema:"失败的规则数量"`
-	FailedRules  []string `json:"failedRules,omitempty" jsonschema:"失败的规则名称列表"`
-	CreatedIDs   []string `json:"createdIds,omitempty" jsonschema:"创建成功的规则ID列表"`
-	Message      string   `json:"message" jsonschema:"操作结果消息"`
+	SuccessCount int      `json:"successCount" jsonschema:"Number of successfully created rules"`
+	FailedCount  int      `json:"failedCount" jsonschema:"Number of failed rule creations"`
+	FailedRules  []string `json:"failedRules,omitempty" jsonschema:"List of failed rule names"`
+	CreatedIDs   []string `json:"createdIds,omitempty" jsonschema:"List of successfully created rule IDs"`
+	Message      string   `json:"message" jsonschema:"Operation result message"`
 }
 
 // CreateBatchCreateRules 创建批量创建规则的工具函数
@@ -155,12 +191,16 @@ func CreateBatchCreateRules(client *APIClient) func(context.Context, *mcp.CallTo
 	return func(ctx context.Context, req *mcp.CallToolRequest, input BatchCreateRulesInput) (*mcp.CallToolResult, BatchCreateRulesOutput, error) {
 		logger := NewToolLogger("batch_create_rules")
 		logger.LogInput(fmt.Sprintf("创建 %d 个规则", len(input.Rules)))
-		
+
 		if len(input.Rules) == 0 {
 			logger.LogWarning("规则列表为空")
 			return nil, BatchCreateRulesOutput{
-				Message: "规则列表不能为空",
-			}, fmt.Errorf("规则列表为空")
+					Message: "规则列表不能为空",
+				}, NewValidationErrorWithSuggestion(
+					"rules",
+					"规则列表不能为空",
+					"请提供至少一个需要创建的规则。批量操作最多支持 50 个规则。",
+				)
 		}
 
 		successCount := 0
@@ -177,7 +217,7 @@ func CreateBatchCreateRules(client *APIClient) func(context.Context, *mcp.CallTo
 				logger.LogWarning(fmt.Sprintf("创建规则 %s 失败: %v", rule.Name, err))
 				continue
 			}
-			
+
 			// 解析返回的规则ID
 			var result struct {
 				Data struct {
@@ -187,13 +227,13 @@ func CreateBatchCreateRules(client *APIClient) func(context.Context, *mcp.CallTo
 			if err := json.Unmarshal(data, &result); err == nil && result.Data.ID != "" {
 				createdIDs = append(createdIDs, result.Data.ID)
 			}
-			
+
 			successCount++
 		}
 
 		message := fmt.Sprintf("批量创建规则完成: 成功 %d 个, 失败 %d 个", successCount, failedCount)
 		logger.LogSuccess(message)
-		
+
 		return nil, BatchCreateRulesOutput{
 			SuccessCount: successCount,
 			FailedCount:  failedCount,
@@ -206,15 +246,15 @@ func CreateBatchCreateRules(client *APIClient) func(context.Context, *mcp.CallTo
 
 // BatchDeleteRulesInput 批量删除规则的输入参数
 type BatchDeleteRulesInput struct {
-	RuleIDs []string `json:"ruleIds" jsonschema:"要删除的规则ID列表"`
+	RuleIDs []string `json:"ruleIds" jsonschema:"List of rule IDs to delete"`
 }
 
 // BatchDeleteRulesOutput 批量删除规则输出
 type BatchDeleteRulesOutput struct {
-	SuccessCount int      `json:"successCount" jsonschema:"成功删除的规则数量"`
-	FailedCount  int      `json:"failedCount" jsonschema:"失败的规则数量"`
-	FailedIDs    []string `json:"failedIds,omitempty" jsonschema:"失败的规则ID列表"`
-	Message      string   `json:"message" jsonschema:"操作结果消息"`
+	SuccessCount int      `json:"successCount" jsonschema:"Number of successfully deleted rules"`
+	FailedCount  int      `json:"failedCount" jsonschema:"Number of failed rule deletions"`
+	FailedIDs    []string `json:"failedIDs,omitempty" jsonschema:"List of failed rule IDs"`
+	Message      string   `json:"message" jsonschema:"Operation result message"`
 }
 
 // CreateBatchDeleteRules 创建批量删除规则的工具函数
@@ -222,12 +262,16 @@ func CreateBatchDeleteRules(client *APIClient) func(context.Context, *mcp.CallTo
 	return func(ctx context.Context, req *mcp.CallToolRequest, input BatchDeleteRulesInput) (*mcp.CallToolResult, BatchDeleteRulesOutput, error) {
 		logger := NewToolLogger("batch_delete_rules")
 		logger.LogInput(fmt.Sprintf("删除 %d 个规则", len(input.RuleIDs)))
-		
+
 		if len(input.RuleIDs) == 0 {
 			logger.LogWarning("规则ID列表为空")
 			return nil, BatchDeleteRulesOutput{
-				Message: "规则ID列表不能为空",
-			}, fmt.Errorf("规则ID列表为空")
+					Message: "规则ID列表不能为空",
+				}, NewValidationErrorWithSuggestion(
+					"ruleIds",
+					"规则ID列表不能为空",
+					"请提供至少一个需要删除的规则 ID。批量操作最多支持 50 个规则。",
+				)
 		}
 
 		successCount := 0
@@ -248,7 +292,7 @@ func CreateBatchDeleteRules(client *APIClient) func(context.Context, *mcp.CallTo
 
 		message := fmt.Sprintf("批量删除规则完成: 成功 %d 个, 失败 %d 个", successCount, failedCount)
 		logger.LogSuccess(message)
-		
+
 		return nil, BatchDeleteRulesOutput{
 			SuccessCount: successCount,
 			FailedCount:  failedCount,

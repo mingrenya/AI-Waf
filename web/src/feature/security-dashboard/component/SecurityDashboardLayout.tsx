@@ -101,7 +101,6 @@ export const SecurityDashboardLayout: React.FC = () => {
         const statsChanged = JSON.stringify(currentStats) !== JSON.stringify(prevStats)
 
         if (statsChanged) {
-            console.log('统计数据发生变化，更新状态...')
             prevDataRef.current.overviewStats = currentStats || null
             setStatsData(currentStats || null)
         }
@@ -121,7 +120,6 @@ export const SecurityDashboardLayout: React.FC = () => {
             return // 数据没有变化，不更新
         }
 
-        console.log('攻击事件数据发生变化，更新3D地球和攻击IP列表,实时攻击列表...')
         prevDataRef.current.attackEvents = currentAttackEvents
 
         if (!currentAttackEvents?.results || currentAttackEvents?.results?.length === 0) {
@@ -156,7 +154,7 @@ export const SecurityDashboardLayout: React.FC = () => {
         // 更新攻击IP列表数据
         setAttackIPsData(attackIPs)
         setRealtimeAttacksData(realtimeAttacks)
-    }, [attackEvents.data])
+    }, [attackEvents.data, attackIPs, realtimeAttacks])
 
     return (
         <div

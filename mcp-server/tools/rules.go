@@ -12,76 +12,158 @@ import (
 
 // ListMicroRulesInput 列出规则的输入参数
 type ListMicroRulesInput struct {
-	Page int `json:"page,omitempty" jsonschema:"页码,默认1"`
-	Size int `json:"size,omitempty" jsonschema:"每页数量,默认20"`
+	Page int `json:"page,omitempty" jsonschema:"Page number for pagination starting from 1"`
+	Size int `json:"size,omitempty" jsonschema:"Number of rules to return per page (1-100)"`
+}
+
+// Validate 实现 Validator 接口
+func (input *ListMicroRulesInput) Validate() error {
+	if input.Page < 0 {
+		return NewValidationErrorWithSuggestion(
+			"page",
+			"必须大于等于0",
+			"页码从 0 或 1 开始（取决于 API 版本）。请使用非负整数。",
+		)
+	}
+	if input.Size > 100 {
+		return NewValidationErrorWithSuggestion(
+			"size",
+			"不能超过100",
+			"每页最多返回 100 条规则。对于更多数据，请使用分页获取。",
+		)
+	}
+	return nil
 }
 
 // ListMicroRulesOutput 规则列表输出
 type ListMicroRulesOutput struct {
-	Total int           `json:"total" jsonschema:"规则总数"`
-	Rules []interface{} `json:"rules" jsonschema:"规则列表"`
+	Total int           `json:"total" jsonschema:"Total count of all MicroRules in the system"`
+	Rules []interface{} `json:"rules" jsonschema:"Array of MicroRule objects containing rule configurations and conditions and actions"`
 }
 
 // CreateListMicroRules 创建列出规则的工具函数
+//
+// 功能说明：
+//   - 列出所有 MicroRule 防火墙规则
+//   - 支持分页查询
+//
+// 参数说明：
+//   - page: 页码，从1开始，默认1
+//   - size: 每页数量，默认20，最大1000
+//
+// 返回数据：
+//   - total: 总规则数
+//   - rules: 规则列表
 func CreateListMicroRules(client *APIClient) func(context.Context, *mcp.CallToolRequest, ListMicroRulesInput) (*mcp.CallToolResult, ListMicroRulesOutput, error) {
 	return func(ctx context.Context, req *mcp.CallToolRequest, input ListMicroRulesInput) (*mcp.CallToolResult, ListMicroRulesOutput, error) {
-		logger := NewToolLogger("list_micro_rules")
+		logger := NewToolLoggerWithClient("list_micro_rules", client)
 		logger.LogInput(input)
-		
-		if input.Page == 0 {
-			input.Page = 1
-		}
-		if input.Size == 0 {
-			input.Size = 20
+
+		// 验证输入
+		if err := ValidateInput(&input); err != nil {
+			logger.LogError(err)
+			return nil, ListMicroRulesOutput{}, err
 		}
 
-		// 使用实际的API路径 /api/v1/micro-rules
-		path := fmt.Sprintf("/api/v1/micro-rules?page=%d&pageSize=%d", input.Page, input.Size)
-		data, err := client.Get(path)
+		// 验证并规范化分页参数
+		pagination := ValidatePagination(input.Page, input.Size)
+		input.Page = pagination.Page
+		input.Size = pagination.Size
+
+		// 使用 URLBuilder 构建路径
+		path := NewURLBuilder("/api/v1/micro-rules").
+			AddParam("page", input.Page).
+			AddParam("pageSize", input.Size).
+			Build()
+
+		data, err := client.GetWithContext(ctx, path)
 		if err != nil {
 			logger.LogError(err)
-			return nil, ListMicroRulesOutput{}, fmt.Errorf("查询规则失败: %w", err)
+			return nil, ListMicroRulesOutput{}, WrapError(err, "查询规则")
 		}
 
 		var result struct {
 			Data struct {
-				List  []interface{} `json:"list"`
-				Total int           `json:"total"`
+				Items []interface{} `json:"items"`
+				Total int64         `json:"total"`
 			} `json:"data"`
 		}
 		if err := json.Unmarshal(data, &result); err != nil {
-			return nil, ListMicroRulesOutput{}, fmt.Errorf("解析响应失败: %w", err)
+			logger.LogError(err)
+			return nil, ListMicroRulesOutput{}, FormatParseError("响应", err)
 		}
 
+		logger.LogSuccess(fmt.Sprintf("返回 %d 条规则(共%d条)", len(result.Data.Items), result.Data.Total))
 		return nil, ListMicroRulesOutput{
-			Total: result.Data.Total,
-			Rules: result.Data.List,
+			Total: int(result.Data.Total),
+			Rules: result.Data.Items,
 		}, nil
 	}
 }
 
 // CreateMicroRuleInput 创建规则的输入参数
 type CreateMicroRuleInput struct {
-	Name        string      `json:"name" jsonschema:"规则名称"`
-	Description string      `json:"description,omitempty" jsonschema:"规则描述"`
-	Type        string      `json:"type" jsonschema:"规则类型: blacklist或whitelist"`
-	Enabled     bool        `json:"enabled" jsonschema:"是否启用"`
-	Priority    int         `json:"priority,omitempty" jsonschema:"优先级,数字越大优先级越高"`
-	Conditions  interface{} `json:"conditions" jsonschema:"规则条件,JSON格式"`
+	Name      string      `json:"name" jsonschema:"Unique rule name for identification"`
+	Type      string      `json:"type" jsonschema:"Rule type (blacklist or whitelist)"`
+	Status    string      `json:"status" jsonschema:"Rule activation status (enabled or disabled)"`
+	Priority  int         `json:"priority" jsonschema:"Priority level (100-1000, higher number = higher priority)"`
+	Condition interface{} `json:"condition" jsonschema:"Rule condition object containing match_type and patterns for IP, URL, or header matching"`
+}
+
+// Validate 实现 Validator 接口
+func (input *CreateMicroRuleInput) Validate() error {
+	if input.Name == "" {
+		return NewValidationError("name", "规则名称不能为空")
+	}
+	if input.Type != "blacklist" && input.Type != "whitelist" {
+		return NewValidationError("type", "必须为 blacklist 或 whitelist")
+	}
+	if input.Status != "enabled" && input.Status != "disabled" {
+		return NewValidationError("status", "必须为 enabled 或 disabled")
+	}
+	if input.Priority < 100 || input.Priority > 1000 {
+		return NewValidationError("priority", "必须在10100-1000之间")
+	}
+	if input.Condition == nil {
+		return NewValidationError("condition", "规则条件不能为空")
+	}
+	return nil
 }
 
 // CreateMicroRuleOutput 创建规则的输出
 type CreateMicroRuleOutput struct {
-	RuleID  string `json:"ruleId" jsonschema:"创建的规则ID"`
-	Message string `json:"message" jsonschema:"创建结果消息"`
+	ID      string `json:"id" jsonschema:"Unique identifier of the newly created rule"`
+	Message string `json:"message" jsonschema:"Success message confirming rule creation"`
 }
 
 // CreateCreateMicroRule 创建新规则的工具函数
+//
+// 功能说明：
+//   - 创建MicroRule防火墙规则
+//   - 支持黑名单和白名单两种类型
+//   - 支持优先级设置(100-1000)
+//
+// 参数说明：
+//   - name: 规则名称（必填）
+//   - type: blacklist(黑名单) 或 whitelist(白名单)
+//   - status: enabled(启用) 或 disabled(禁用)
+//   - priority: 优先级(100-1000)，数字越大优先级越高
+//   - condition: 规则条件对象
 func CreateCreateMicroRule(client *APIClient) func(context.Context, *mcp.CallToolRequest, CreateMicroRuleInput) (*mcp.CallToolResult, CreateMicroRuleOutput, error) {
 	return func(ctx context.Context, req *mcp.CallToolRequest, input CreateMicroRuleInput) (*mcp.CallToolResult, CreateMicroRuleOutput, error) {
-		data, err := client.Post("/api/rules/micro-rule", input)
+		logger := NewToolLoggerWithClient("create_micro_rule", client)
+		logger.LogInput(input)
+
+		// 验证输入
+		if err := ValidateInput(&input); err != nil {
+			logger.LogError(err)
+			return nil, CreateMicroRuleOutput{}, err
+		}
+
+		data, err := client.PostWithContext(ctx, "/api/v1/micro-rules", input)
 		if err != nil {
-			return nil, CreateMicroRuleOutput{}, fmt.Errorf("创建规则失败: %w", err)
+			logger.LogError(err)
+			return nil, CreateMicroRuleOutput{}, WrapError(err, "创建规则")
 		}
 
 		var result struct {
@@ -90,11 +172,13 @@ func CreateCreateMicroRule(client *APIClient) func(context.Context, *mcp.CallToo
 			} `json:"data"`
 		}
 		if err := json.Unmarshal(data, &result); err != nil {
-			return nil, CreateMicroRuleOutput{}, fmt.Errorf("解析响应失败: %w", err)
+			logger.LogError(err)
+			return nil, CreateMicroRuleOutput{}, FormatParseError("响应", err)
 		}
 
+		logger.LogSuccess(fmt.Sprintf("创建规则成功: %s", result.Data.ID))
 		return nil, CreateMicroRuleOutput{
-			RuleID:  result.Data.ID,
+			ID:      result.Data.ID,
 			Message: "规则创建成功",
 		}, nil
 	}
@@ -102,28 +186,33 @@ func CreateCreateMicroRule(client *APIClient) func(context.Context, *mcp.CallToo
 
 // UpdateMicroRuleInput 更新规则的输入参数
 type UpdateMicroRuleInput struct {
-	RuleID      string      `json:"ruleId" jsonschema:"要更新的规则ID"`
-	Name        string      `json:"name,omitempty" jsonschema:"规则名称"`
-	Description string      `json:"description,omitempty" jsonschema:"规则描述"`
-	Enabled     *bool       `json:"enabled,omitempty" jsonschema:"是否启用"`
-	Priority    *int        `json:"priority,omitempty" jsonschema:"优先级"`
-	Conditions  interface{} `json:"conditions,omitempty" jsonschema:"规则条件"`
+	RuleID    string      `json:"ruleId" jsonschema:"required,Rule ID to update"`
+	Name      string      `json:"name,omitempty" jsonschema:"Rule name"`
+	Type      string      `json:"type,omitempty" jsonschema:"Rule type (blacklist or whitelist)"`
+	Status    string      `json:"status,omitempty" jsonschema:"Rule status (enabled or disabled)"`
+	Priority  *int        `json:"priority,omitempty" jsonschema:"Priority level"`
+	Condition interface{} `json:"condition,omitempty" jsonschema:"Rule condition object"`
 }
 
 // UpdateMicroRuleOutput 更新规则的输出
 type UpdateMicroRuleOutput struct {
-	Message string `json:"message" jsonschema:"更新结果消息"`
+	Message string `json:"message" jsonschema:"Update result message"`
 }
 
 // CreateUpdateMicroRule 创建更新规则的工具函数
 func CreateUpdateMicroRule(client *APIClient) func(context.Context, *mcp.CallToolRequest, UpdateMicroRuleInput) (*mcp.CallToolResult, UpdateMicroRuleOutput, error) {
 	return func(ctx context.Context, req *mcp.CallToolRequest, input UpdateMicroRuleInput) (*mcp.CallToolResult, UpdateMicroRuleOutput, error) {
-		path := fmt.Sprintf("/api/rules/micro-rule/%s", input.RuleID)
+		logger := NewToolLogger("update_micro_rule")
+		logger.LogInput(input)
+
+		path := fmt.Sprintf("/api/v1/micro-rules/%s", input.RuleID)
 		_, err := client.Put(path, input)
 		if err != nil {
-			return nil, UpdateMicroRuleOutput{}, fmt.Errorf("更新规则失败: %w", err)
+			logger.LogError(err)
+			return nil, UpdateMicroRuleOutput{}, WrapError(err, "更新规则")
 		}
 
+		logger.LogSuccess(fmt.Sprintf("更新规则成功: %s", input.RuleID))
 		return nil, UpdateMicroRuleOutput{
 			Message: "规则更新成功",
 		}, nil
@@ -132,23 +221,28 @@ func CreateUpdateMicroRule(client *APIClient) func(context.Context, *mcp.CallToo
 
 // DeleteMicroRuleInput 删除规则的输入参数
 type DeleteMicroRuleInput struct {
-	RuleID string `json:"ruleId" jsonschema:"要删除的规则ID"`
+	RuleID string `json:"ruleId" jsonschema:"Rule ID to delete"`
 }
 
 // DeleteMicroRuleOutput 删除规则的输出
 type DeleteMicroRuleOutput struct {
-	Message string `json:"message" jsonschema:"删除结果消息"`
+	Message string `json:"message" jsonschema:"Delete result message"`
 }
 
 // CreateDeleteMicroRule 创建删除规则的工具函数
 func CreateDeleteMicroRule(client *APIClient) func(context.Context, *mcp.CallToolRequest, DeleteMicroRuleInput) (*mcp.CallToolResult, DeleteMicroRuleOutput, error) {
 	return func(ctx context.Context, req *mcp.CallToolRequest, input DeleteMicroRuleInput) (*mcp.CallToolResult, DeleteMicroRuleOutput, error) {
-		path := fmt.Sprintf("/api/rules/micro-rule/%s", input.RuleID)
+		logger := NewToolLogger("delete_micro_rule")
+		logger.LogInput(input)
+
+		path := fmt.Sprintf("/api/v1/micro-rules/%s", input.RuleID)
 		err := client.Delete(path)
 		if err != nil {
-			return nil, DeleteMicroRuleOutput{}, fmt.Errorf("删除规则失败: %w", err)
+			logger.LogError(err)
+			return nil, DeleteMicroRuleOutput{}, WrapError(err, "删除规则")
 		}
 
+		logger.LogSuccess(fmt.Sprintf("删除规则成功: %s", input.RuleID))
 		return nil, DeleteMicroRuleOutput{
 			Message: "规则删除成功",
 		}, nil

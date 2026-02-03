@@ -55,7 +55,16 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         queryFn: ({ pageParam }) => alertChannelApi.getChannels(pageParam as number, PAGE_SIZE),
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {
-            const fetchedItemsCount = allPages.reduce((total, page) => total + page.items.length, 0)
+            if (!lastPage || typeof lastPage.total === 'undefined') {
+                return undefined
+            }
+
+            if (!allPages) {
+                return undefined
+            }
+
+            // 安全访问page.items防止undefined错误
+            const fetchedItemsCount = allPages.reduce((total, page) => total + (page?.items?.length || 0), 0)
             return fetchedItemsCount < lastPage.total ? allPages.length + 1 : undefined
         },
     })

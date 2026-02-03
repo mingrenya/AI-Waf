@@ -21,7 +21,9 @@ export const useCreateMicroRule = () => {
             queryClient.invalidateQueries({ queryKey: ['microRules'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('microRule.toast.createFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('microRule.toast.createFailed'), error)
+            }
             setError(error.message || t('microRule.toast.createError'))
             toast({
                 title: t('microRule.toast.createFailed'),
@@ -55,7 +57,9 @@ export const useDeleteMicroRule = () => {
             queryClient.invalidateQueries({ queryKey: ['microRules'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('microRule.toast.deleteFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('microRule.toast.deleteFailed'), error)
+            }
             setError(error.message || t('microRule.toast.deleteError'))
             toast({
                 title: t('microRule.toast.deleteFailed'),
@@ -90,7 +94,9 @@ export const useUpdateMicroRule = () => {
             queryClient.invalidateQueries({ queryKey: ['microRules'] })
         },
         onError: (error: ApiError) => {
-            console.error(t('microRule.toast.updateFailed'), error)
+            if (import.meta.env.DEV) {
+                console.error(t('microRule.toast.updateFailed'), error)
+            }
             setError(error.message || t('microRule.toast.updateError'))
             toast({
                 title: t('microRule.toast.updateFailed'),

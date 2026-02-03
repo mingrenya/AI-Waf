@@ -6,9 +6,8 @@ services:
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example # 请替换为您的实际密码
-      # 可选：指定初始数据库名称
-      MONGO_INITDB_DATABASE: waf_db
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-example}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE:-waf_db}
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb # 添加配置数据卷
@@ -24,15 +23,22 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mrya-waf # 容器名小写
+    container_name: mrya-waf
     restart: always
     depends_on:
       - mongodb
+    env_file:
+      - .env
     environment:
-      DB_URI: mongodb://root:example@mongodb:27017 # 请替换为您的实际密码
-      JWT_SECRET: ffffffffffffffffffffffffffffff
-      IS_PRODUCTION: "false"
-      VITE_API_BASE_URL: http://localhost:2333/api/v1
+      DB_URI: mongodb://root:${MONGO_ROOT_PASSWORD:-example}@mongodb:27017
+      JWT_SECRET: ${JWT_SECRET}
+      IS_PRODUCTION: ${IS_PRODUCTION:-false}
+      IS_K8S: "true"  # 容器环境标识，使用容器内路径
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+      # DeepSeek AI助手配置
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
     ports:
       - "2333:2333"
       - "8080:8080"
@@ -42,6 +48,7 @@ services:
       - "8404:8404"
     volumes:
       - mrya_data:/app/data
+      - ./geo-ip:/home/mrya/mrya-waf/geo-ip:ro
     networks:
       - waf-network
 
@@ -49,7 +56,7 @@ services:
   mcp-server:
     build:
       context: .
-      dockerfile: Dockerfile.mcp.new
+      dockerfile: Dockerfile.mcp
     container_name: ai-waf-mcp-server
     restart: always
     depends_on:

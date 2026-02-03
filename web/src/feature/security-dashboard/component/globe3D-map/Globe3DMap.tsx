@@ -5,6 +5,7 @@ import ThreeGlobe from "three-globe"
 import countries from "./globe-data-min.json"
 import type { FeatureCollection, GeoJsonProperties, Geometry } from "./geojson"
 import { WAFAttackTrajectory, WAF_ATTACK_TRAJECTORY_COLORS } from "./types"
+import logger from "@/utils/logger"
 
 // WAF安全仪表板全局Globe实例管理 - 避免StrictMode重复创建问题
 const wafSecurityGlobeInstance: {
@@ -46,11 +47,11 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
         isMountedRef.current = true
         wafSecurityGlobeInstance.componentCount++
 
-        console.log(`Globe component mounted, count: ${wafSecurityGlobeInstance.componentCount}`)
+        logger.debug(`Globe component mounted, count: ${wafSecurityGlobeInstance.componentCount}`)
 
         // 如果正在创建中，等待创建完成
         if (wafSecurityGlobeInstance.isCreating) {
-            console.log('WebGL context is being created, waiting...')
+            logger.debug('WebGL context is being created, waiting...')
             const checkInterval = setInterval(() => {
                 if (!wafSecurityGlobeInstance.isCreating && wafSecurityGlobeInstance.isInitialized) {
                     clearInterval(checkInterval)
@@ -62,7 +63,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
 
         // 如果全局实例已存在且有效，重用它
         if (wafSecurityGlobeInstance.isInitialized && wafSecurityGlobeInstance.renderer) {
-            console.log('Reusing existing WebGL context...')
+            if (import.meta.env.DEV) {
+                console.log('Reusing existing WebGL context...')
+            }
             attachToElement(el)
             return
         }
@@ -72,7 +75,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
 
         // 清理函数
         return () => {
-            console.log(`Globe component unmounting, count: ${wafSecurityGlobeInstance.componentCount}`)
+            if (import.meta.env.DEV) {
+                console.log(`Globe component unmounting, count: ${wafSecurityGlobeInstance.componentCount}`)
+            }
             isMountedRef.current = false
             wafSecurityGlobeInstance.componentCount--
 
@@ -81,7 +86,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
                 setTimeout(() => {
                     // 再次检查是否真的没有组件在使用
                     if (wafSecurityGlobeInstance.componentCount <= 0) {
-                        console.log('No components using global instance, cleaning up...')
+                        if (import.meta.env.DEV) {
+                            console.log('No components using global instance, cleaning up...')
+                        }
                         cleanupGlobalInstance()
                     }
                 }, 1000) // 延迟清理，给路由切换一些时间
@@ -97,7 +104,10 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
 
         // 如果canvas不在当前容器中，移动它
         if (!el.contains(wafSecurityGlobeInstance.renderer.domElement)) {
-            el.innerHTML = ''
+            // 使用更安全的方式清空DOM
+            while (el.firstChild) {
+                el.removeChild(el.firstChild)
+            }
             el.appendChild(wafSecurityGlobeInstance.renderer.domElement)
             wafSecurityGlobeInstance.elementRef = el
         }
@@ -128,13 +138,18 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
             return
         }
 
-        console.log('Creating new global WebGL context...')
+        if (import.meta.env.DEV) {
+            console.log('Creating new global WebGL context...')
+        }
         wafSecurityGlobeInstance.isCreating = true
 
         const rect = el.getBoundingClientRect()
-        el.innerHTML = ''
+        // 使用更安全的方式清空DOM
+        while (el.firstChild) {
+            el.removeChild(el.firstChild)
+        }
 
-        try {
+        try{
             // 创建新的Three.js实例
             const renderer = new WebGLRenderer({
                 antialias: true,
@@ -185,7 +200,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
             controls.maxPolarAngle = Math.PI - Math.PI / 5
 
             // 创建地球
-            console.log('Creating globe instance...')
+            if (import.meta.env.DEV) {
+                console.log('Creating globe instance...')
+            }
             const globe = new ThreeGlobe({ waitForGlobeReady: true, animateIn: true })
             scene.add(globe)
 
@@ -222,7 +239,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
 
             // 设置 onGlobeReady 回调（只设置一次）
             globe.onGlobeReady(() => {
-                console.log('Globe is ready!')
+                if (import.meta.env.DEV) {
+                    console.log('Globe is ready!')
+                }
                 // 在地球准备好后设置旋转角度
                 // globe.rotation.y = -Math.PI * (95 / 180)  // -95度
                 // globe.rotation.z = -Math.PI / 8  // 轻微倾斜以获得更好的视角
@@ -253,7 +272,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
                 wafSecurityGlobeInstance.animationId = requestAnimationFrame(animate)
             }
 
-            console.log('Starting animation loop...')
+            if (import.meta.env.DEV) {
+                console.log('Starting animation loop...')
+            }
             animate()
 
             // 窗口大小变化处理

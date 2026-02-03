@@ -28,7 +28,9 @@ export const useCreateSite = () => {
             queryClient.invalidateQueries({ queryKey: ['sites'] })
         },
         onError: (error: ApiError) => {
-            console.error('创建站点失败:', error)
+            if (import.meta.env.DEV) {
+                console.error('创建站点失败:', error)
+            }
             setError(error.message || "创建站点时出现错误")
             toast({
                 title: t("site.toast.createFailed", "创建失败"),
@@ -65,7 +67,9 @@ export const useDeleteSite = () => {
             queryClient.invalidateQueries({ queryKey: ['sites'] })
         },
         onError: (error: ApiError) => {
-            console.error('删除站点失败:', error)
+            if (import.meta.env.DEV) {
+                console.error('删除站点失败:', error)
+            }
             setError(error.message || "删除站点时出现错误")
             toast({
                 title: t("site.toast.deleteFailed", "删除失败"),
@@ -103,7 +107,9 @@ export const useUpdateSite = () => {
             queryClient.invalidateQueries({ queryKey: ['sites'] })
         },
         onError: (error: ApiError) => {
-            console.error('更新站点失败:', error)
+            if (import.meta.env.DEV) {
+                console.error('更新站点失败:', error)
+            }
             setError(error.message || "更新站点时出现错误")
             toast({
                 title: t("site.toast.updateFailed", "更新失败"),

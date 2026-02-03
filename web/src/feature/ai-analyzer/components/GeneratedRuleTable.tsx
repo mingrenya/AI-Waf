@@ -23,8 +23,8 @@ import { Card } from "@/components/ui/card"
 import { useQueryClient } from "@tanstack/react-query"
 
 export function GeneratedRuleTable() {
-    const [page, _setPage] = useState(1)
-    const [size, _setSize] = useState(20)
+    const [page] = useState(1)
+    const [size] = useState(20)
     const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
     const [detailDialogOpen, setDetailDialogOpen] = useState(false)
     const [selectedRule, setSelectedRule] = useState<GeneratedRule | null>(null)

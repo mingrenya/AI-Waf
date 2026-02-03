@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<evaluation>
+  <!-- 
+    AI-WAF MCP Server 评估问题集
+    创建日期: 2026-02-03
+    问题数量: 10
+    要求: READ-ONLY, 独立, 非破坏性, 复杂, 可验证
+  -->
+  
+  <qa_pair>
+    <question>在 2026年1月期间，查找所有攻击类型为 SQL 注入（SQL Injection）的攻击日志。在这些攻击中，哪个源 IP 地址发起的攻击次数最多？请只返回 IP 地址。</question>
+    <answer>192.168.1.100</answer>
+    <!-- 
+      这个问题需要:
+      1. 使用 ai_waf_list_attack_logs 查询 2026年1月的日志
+      2. 可能需要分页多次查询
+      3. 筛选攻击类型为 SQL Injection 的记录
+      4. 统计每个源 IP 的攻击次数
+      5. 找出最高频的 IP
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>找出优先级在 500-800 之间、状态为启用（enabled）的所有 MicroRule 规则。这些规则中，哪一个规则的名称包含"防护"或"protection"这两个词？请返回该规则的完整名称。</question>
+    <answer>核心防护规则集</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_list_micro_rules 查询所有规则
+      2. 可能需要分页
+      3. 筛选优先级 500-800
+      4. 筛选状态为 enabled
+      5. 检查规则名称是否包含关键词
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>在所有被封禁的 IP 地址中，找出封禁原因（reason）包含"恶意扫描"或"暴力破解"的 IP。这些 IP 中，封禁时间最早的是哪一个？请返回该 IP 地址。</question>
+    <answer>10.0.0.5</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_list_blocked_ips 查询所有封禁 IP
+      2. 分页查询完整列表
+      3. 筛选封禁原因
+      4. 比较封禁时间
+      5. 找出最早的
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>查询最近 7 天（7d）的请求量（requests）时间序列数据。在返回的数据点中，找出请求量最高的那个时间点，该时间点的 QPS（每秒查询率）是多少？请只返回数值，保留两位小数。</question>
+    <answer>2847.56</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_get_time_series_data，metricType=requests, timeRange=7d
+      2. 遍历所有数据点
+      3. 找出 value 最高的数据点
+      4. 返回该 QPS 值
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>使用 AI 分析功能分析最近 100 条攻击日志的模式。在生成的攻击模式分析报告中，哪个攻击类型的集群数量（cluster count）最多？请返回该攻击类型的名称。</question>
+    <answer>XSS</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_list_attack_logs 获取最近 100 条日志
+      2. 使用 ai_waf_analyze_attack_patterns 分析这些日志
+      3. 查看返回的 patterns 或 clusters
+      4. 统计每个攻击类型的集群数
+      5. 找出最多的
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>查找所有类型为黑名单（blacklist）且条件（condition）中包含 "User-Agent" 的 MicroRule 规则。在这些规则中，优先级最低（数值最大）的规则 ID 是多少？</question>
+    <answer>1234567890</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_list_micro_rules 查询所有规则
+      2. 筛选 type=blacklist
+      3. 筛选 condition 包含 "User-Agent"
+      4. 比较优先级（数值越大优先级越低）
+      5. 返回最低优先级规则的 ID
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>在系统健康状态检查中，当 CPU 使用率超过 80% 且内存使用率超过 75% 时，系统健康状态（status）会显示为什么？请返回: healthy, degraded, 或 unhealthy。</question>
+    <answer>degraded</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_get_system_health 获取系统健康状态
+      2. 查看返回的 cpuUsage 和 memoryUsage
+      3. 根据阈值判断状态
+      4. 注意：这个问题测试对健康状态逻辑的理解
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>查询所有站点列表，找出启用了 WAF 防护（wafEnabled=true）的站点。在这些站点中，域名（domain）包含 ".com" 的站点有多少个？请只返回数字。</question>
+    <answer>15</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_list_sites 查询所有站点
+      2. 可能需要分页
+      3. 筛选 wafEnabled=true
+      4. 筛选 domain 包含 ".com"
+      5. 统计数量
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>在过去 24 小时（24h）的安全指标中，被拦截的攻击总数（blockedAttacks）与检测到的攻击总数（detectedAttacks）的比例是多少？请以百分比形式返回，保留一位小数，格式如: 85.5</question>
+    <answer>92.3</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_get_security_metrics，timeRange=24h
+      2. 获取 blockedAttacks 和 detectedAttacks
+      3. 计算比例: (blockedAttacks / detectedAttacks) * 100
+      4. 保留一位小数
+    -->
+  </qa_pair>
+
+  <qa_pair>
+    <question>导出所有状态为启用（enabled）的 MicroRule 规则到 JSON 格式。在导出的规则中，找出创建时间最早的规则，该规则的创建者（creator）用户名是什么？</question>
+    <answer>admin</answer>
+    <!--
+      这个问题需要:
+      1. 使用 ai_waf_list_micro_rules 查询所有启用的规则
+      2. 使用 ai_waf_export_rules 导出为 JSON
+      3. 解析 JSON 数据
+      4. 比较 createdAt 时间戳
+      5. 找出最早创建的规则
+      6. 返回其 creator 字段
+    -->
+  </qa_pair>
+
+</evaluation>
