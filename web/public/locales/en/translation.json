@@ -55,7 +55,10 @@
         "last24Hours": "Last 24 Hours",
         "last7Days": "Last 7 Days",
         "last30Days": "Last 30 Days",
-        "errorLoadingData": "Error loading data"
+        "errorLoadingData": "Error loading data",
+        "error": "Error",
+        "success": "Success",
+        "retry": "Retry"
     },
     "error": {
         "title": "An Error Occurred",
@@ -748,6 +751,9 @@
         "updateSuccess": "Updated successfully",
         "updateFailed": "Update failed",
         "createSuccess": "Channel created successfully",
+        "loadFailed": "Failed to load channel list",
+        "noChannels": "No channels available",
+        "toggleStatus": "Toggle channel status",
         "createFailed": "Failed to create channel",
         "form": {
             "channelName": "Channel Name",

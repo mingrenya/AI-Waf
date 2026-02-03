@@ -55,7 +55,10 @@
         "last24Hours": "最近24小时",
         "last7Days": "最近7天",
         "last30Days": "最近30天",
-        "errorLoadingData": "加载数据失败"
+        "errorLoadingData": "加载数据失败",
+        "error": "错误",
+        "success": "成功",
+        "retry": "重试"
     },
     "error": {
         "title": "发生了错误",
@@ -764,6 +767,9 @@
         "updateFailed": "更新失败",
         "createSuccess": "通道创建成功",
         "createFailed": "通道创建失败",
+        "loadFailed": "加载通道列表失败",
+        "noChannels": "暂无通道数据",
+        "toggleStatus": "切换通道状态",
         "form": {
             "channelName": "通道名称",
             "channelNamePlaceholder": "请输入通道名称",
