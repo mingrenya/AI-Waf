@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import { useNavigate } from "react-router"
 import { Card } from "@/components/ui/card"
 import {
@@ -6,6 +6,8 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     useReactTable,
+    PaginationState,
+    Updater,
 } from "@tanstack/react-table"
 import { DataTable } from "@/components/table/motion-data-table"
 import { DataTablePagination } from "@/components/table/pagination"
@@ -37,7 +39,12 @@ export default function EventsPage() {
 
     const { data, isPending, error, isError, refetch } = useAttackEvents(queryParams)
 
-    // 设置轮询
+    // 设置轮询 - 使用 useRef 存储 refetch 避免依赖变化
+    const refetchRef = useRef(refetch)
+    useEffect(() => {
+        refetchRef.current = refetch
+    }, [refetch])
+
     useEffect(() => {
         // 清除现有的轮询
         if (pollingTimerRef.current !== null) {
@@ -48,7 +55,7 @@ export default function EventsPage() {
         // 如果启用了轮询，设置新的轮询
         if (enablePolling) {
             pollingTimerRef.current = window.setInterval(() => {
-                refetch()
+                refetchRef.current()
             }, pollingInterval * 1000)
         }
 
@@ -58,18 +65,18 @@ export default function EventsPage() {
                 clearInterval(pollingTimerRef.current)
             }
         }
-    }, [enablePolling, pollingInterval, refetch])
+    }, [enablePolling, pollingInterval])
 
-    const handleFilter = (values: AttackEventQueryFormValues) => {
+    const handleFilter = useCallback((values: AttackEventQueryFormValues) => {
         setQueryParams(values)
-    }
+    }, [])
 
-    const handlePollingChange = (enabled: boolean, interval: number) => {
+    const handlePollingChange = useCallback((enabled: boolean, interval: number) => {
         setEnablePolling(enabled)
         setPollingInterval(interval)
-    }
+    }, [])
 
-    const navigateToLogs = (domain: string, srcIp: string) => {
+    const navigateToLogs = useCallback((domain: string, srcIp: string) => {
         const params = new URLSearchParams()
         params.append('domain', domain)
         params.append('srcIp', srcIp)
@@ -83,9 +90,9 @@ export default function EventsPage() {
         }
 
         navigate(`/logs/protect?${params.toString()}`)
-    }
+    }, [navigate, queryParams.startTime, queryParams.endTime])
 
-    const columns: ColumnDef<AttackEventAggregateResult>[] = [
+    const columns: ColumnDef<AttackEventAggregateResult>[] = useMemo(() => [
         {
             accessorKey: "domain",
             header: () => <div className="whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('domain')}</div>,
@@ -169,7 +176,7 @@ export default function EventsPage() {
                 )
             }
         }
-    ]
+    ], [t, navigateToLogs])
 
     const table = useReactTable({
         data: data?.results ?? [],
@@ -184,7 +191,7 @@ export default function EventsPage() {
                 pageSize: queryParams.pageSize || 10
             }
         },
-        onPaginationChange: (updater) => {
+        onPaginationChange: useCallback((updater: Updater<PaginationState>) => {
             if (typeof updater === 'function') {
                 const oldPagination = {
                     pageIndex: (queryParams.page || 1) - 1,
@@ -206,9 +213,8 @@ export default function EventsPage() {
                     }
                 }))
             }
-        }
+        }, [queryParams.page, queryParams.pageSize])
     })
-
 
     return (
         <Card className="flex flex-col h-full p-0 border-none shadow-none">

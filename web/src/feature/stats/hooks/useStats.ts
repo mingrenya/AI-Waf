@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { statsApi } from '@/api/services'
 import { TimeRange } from '@/types/stats'
 import { useState, useRef, useEffect } from 'react'
+import { queryKeys } from '@/lib/query-keys'
 
 const REFRESH_INTERVAL = 60000 // 60秒
 const QPS_REFRESH_INTERVAL = 5000 // 5秒
@@ -16,9 +17,9 @@ export interface QPSDataPoint {
 // 统计概览数据hook
 export const useOverviewStats = (timeRange: TimeRange) => {
     return useQuery({
-        queryKey: ['stats', 'overview', timeRange],
+        queryKey: queryKeys.stats.overview(timeRange),
         queryFn: () => statsApi.getOverviewStats(timeRange),
-        refetchInterval: REFRESH_INTERVAL, // 使用常量
+        refetchInterval: REFRESH_INTERVAL,
     })
 }
 
@@ -32,12 +33,12 @@ export const useRealtimeQPS = (limit: number = 30) => {
 
     // 查询API数据
     const queryResult = useQuery({
-        queryKey: ['stats', 'realtimeQPS', limit],
+        queryKey: queryKeys.stats.realtimeQPS(limit),
         queryFn: () => statsApi.getRealtimeQPS(limit),
-        refetchInterval: QPS_REFRESH_INTERVAL, // 使用常量
-        refetchIntervalInBackground: true, // 页面不活跃时也继续更新
-        staleTime: QPS_STALETIME, // 数据保持新鲜状态的时间
-        refetchOnWindowFocus: false, // 窗口获得焦点时不自动刷新
+        refetchInterval: QPS_REFRESH_INTERVAL,
+        refetchIntervalInBackground: true,
+        staleTime: QPS_STALETIME,
+        refetchOnWindowFocus: false,
     })
 
     // 数据处理
@@ -98,18 +99,18 @@ export const useRealtimeQPS = (limit: number = 30) => {
 // 流量时间序列数据hook
 export const useTrafficTimeSeriesData = (timeRange: TimeRange) => {
     return useQuery({
-        queryKey: ['stats', 'trafficTimeSeries', timeRange],
+        queryKey: queryKeys.stats.trafficTimeSeries(timeRange),
         queryFn: () => statsApi.getTrafficTimeSeriesData(timeRange),
-        refetchInterval: REFRESH_INTERVAL, // 使用常量
+        refetchInterval: REFRESH_INTERVAL,
     })
 }
 
 // 请求和拦截组合时间序列数据hook
 export const useCombinedTimeSeriesData = (timeRange: TimeRange) => {
     return useQuery({
-        queryKey: ['stats', 'combinedTimeSeries', timeRange],
+        queryKey: queryKeys.stats.combinedTimeSeries(timeRange),
         queryFn: () => statsApi.getCombinedTimeSeriesData(timeRange),
-        refetchInterval: REFRESH_INTERVAL, // 使用常量
+        refetchInterval: REFRESH_INTERVAL,
     })
 }
 

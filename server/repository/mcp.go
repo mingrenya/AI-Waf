@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"time"
-	
+
 	pkgModel "github.com/mingrenya/AI-Waf/pkg/model"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -64,16 +64,17 @@ func (r *MCPRepository) GetToolCallHistory(ctx context.Context, limit, offset in
 }
 
 // RecordToolCall 记录工具调用
-func (r *MCPRepository) RecordToolCall(ctx context.Context, toolName string, duration int64, success bool, errorMsg string) error {
+func (r *MCPRepository) RecordToolCall(ctx context.Context, toolName string, duration int64, success bool, errorMsg string, parentMessageUUID string) error {
 	var callModel pkgModel.MCPToolCall
 	collection := r.db.Collection(callModel.GetCollectionName())
 
 	call := pkgModel.MCPToolCall{
-		ToolName:  toolName,
-		Timestamp: time.Now(),
-		Duration:  duration,
-		Success:   success,
-		Error:     errorMsg,
+		ToolName:          toolName,
+		Timestamp:         time.Now(),
+		Duration:          duration,
+		Success:           success,
+		Error:             errorMsg,
+		ParentMessageUUID: parentMessageUUID,
 	}
 
 	_, err := collection.InsertOne(ctx, call)

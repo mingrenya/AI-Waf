@@ -16,6 +16,7 @@ export interface BlockedIPListRequest {
     status?: 'active' | 'expired' | 'all'
     sortBy?: 'blocked_at' | 'blocked_until' | 'ip'
     sortDir?: 'asc' | 'desc'
+    [key: string]: string | number | undefined
 }
 
 export interface BlockedIPListResponse {

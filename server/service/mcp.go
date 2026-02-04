@@ -120,12 +120,13 @@ func (s *MCPService) GetToolCallHistory(ctx context.Context, limit, offset int) 
 	records := make([]dto.MCPToolCallRecord, len(calls))
 	for i, call := range calls {
 		records[i] = dto.MCPToolCallRecord{
-			ID:        call.ID.Hex(),
-			ToolName:  call.ToolName,
-			Timestamp: call.Timestamp,
-			Duration:  call.Duration,
-			Success:   call.Success,
-			Error:     call.Error,
+			ID:                call.ID.Hex(),
+			ToolName:          call.ToolName,
+			Timestamp:         call.Timestamp,
+			Duration:          call.Duration,
+			Success:           call.Success,
+			Error:             call.Error,
+			ParentMessageUUID: call.ParentMessageUUID,
 		}
 	}
 
@@ -133,8 +134,8 @@ func (s *MCPService) GetToolCallHistory(ctx context.Context, limit, offset int) 
 }
 
 // RecordToolCall 记录工具调用
-func (s *MCPService) RecordToolCall(ctx context.Context, toolName string, duration int64, success bool, errorMsg string) error {
-	return s.mcpRepo.RecordToolCall(ctx, toolName, duration, success, errorMsg)
+func (s *MCPService) RecordToolCall(ctx context.Context, toolName string, duration int64, success bool, errorMsg string, parentMessageUUID string) error {
+	return s.mcpRepo.RecordToolCall(ctx, toolName, duration, success, errorMsg, parentMessageUUID)
 }
 
 // checkMCPServerConnection 检查MCP服务器连接

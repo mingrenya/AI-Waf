@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Save, RefreshCw } from 'lucide-react'
 import { adaptiveThrottlingApi } from '@/api/adaptive-throttling'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 
 const configSchema = z.object({
     enabled: z.boolean(),
@@ -47,7 +47,6 @@ type ConfigFormValues = z.infer<typeof configSchema>
 
 export function AdaptiveConfigForm() {
     const { t } = useTranslation()
-    const { toast } = useToast()
     const [loading, setLoading] = useState(false)
     const [fetching, setFetching] = useState(true)
 

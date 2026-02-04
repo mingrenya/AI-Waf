@@ -2,14 +2,14 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { configApi } from '@/api/config'
 import { ConfigPatchRequest } from '@/types/config'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
 import { useConfigQuery } from '@/feature/global-setting/hooks/useConfig'
+import { queryKeys } from '@/lib/query-keys'
 
 // 更新流量控制配置mutation hook
 export const useUpdateFlowControlConfig = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -19,8 +19,9 @@ export const useUpdateFlowControlConfig = () => {
             toast({
                 title: t('flowControl.toast.updateSuccess', '更新成功'),
                 description: t('flowControl.toast.configUpdated', '流量控制配置已成功更新'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['config'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.config.detail() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {

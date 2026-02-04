@@ -25,9 +25,10 @@ import { AlertCircle, Loader2 } from 'lucide-react'
 import { AlertChannelType, CreateAlertChannelRequest, UpdateAlertChannelRequest } from '@/types/alert'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { alertChannelApi } from '@/api/alert'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 // 表单验证Schema
 const channelFormSchema = z.object({
@@ -56,7 +57,6 @@ export function ChannelForm({
     }
 }: ChannelFormProps) {
     const { t } = useTranslation()
-    const { toast } = useToast()
     const queryClient = useQueryClient()
     const [selectedType, setSelectedType] = useState<AlertChannelType>(
         defaultValues.type || AlertChannelType.Webhook
@@ -71,8 +71,8 @@ export function ChannelForm({
     const createMutation = useMutation({
         mutationFn: (data: CreateAlertChannelRequest) => alertChannelApi.createChannel(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['alertChannels'] })
-            toast({ title: 'Success', description: t('alert.createSuccess') })
+            queryClient.invalidateQueries({ queryKey: queryKeys.alert.channels.lists() })
+            toast({ title: 'Success', description: t('alert.createSuccess'), variant: 'success' })
             onSuccess?.()
         },
         onError: (error: Error & { response?: { data?: { message?: string } } }) => {
@@ -85,8 +85,8 @@ export function ChannelForm({
         mutationFn: (data: { id: string, payload: UpdateAlertChannelRequest }) =>
             alertChannelApi.updateChannel(data.id, data.payload),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['alertChannels'] })
-            toast({ title: 'Success', description: t('alert.updateSuccess') })
+            queryClient.invalidateQueries({ queryKey: queryKeys.alert.channels.lists() })
+            toast({ title: 'Success', description: t('alert.updateSuccess'), variant: 'success' })
             onSuccess?.()
         },
         onError: (error: Error & { response?: { data?: { message?: string } } }) => {

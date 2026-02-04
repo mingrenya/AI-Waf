@@ -36,6 +36,7 @@ type AlertService interface {
 
 	// History 管理
 	GetAlertHistory(ctx context.Context, req *dto.GetAlertHistoryRequest) ([]*dto.AlertHistoryResponse, int64, error)
+	GetAlertHistoryByID(ctx context.Context, id string) (*dto.AlertHistoryResponse, error)
 	AcknowledgeAlert(ctx context.Context, id string, userID string, comment string) error
 	GetStatistics(ctx context.Context, startTime, endTime time.Time) (*dto.AlertStatisticsResponse, error)
 
@@ -331,13 +332,23 @@ func (s *alertServiceImpl) GetAlertHistory(ctx context.Context, req *dto.GetAler
 	return responses, total, nil
 }
 
+// GetAlertHistoryByID 获取告警历史详情
+func (s *alertServiceImpl) GetAlertHistoryByID(ctx context.Context, id string) (*dto.AlertHistoryResponse, error) {
+	history, err := s.historyRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.toHistoryResponse(history), nil
+}
+
 // AcknowledgeAlert 确认告警
 func (s *alertServiceImpl) AcknowledgeAlert(ctx context.Context, id string, userID string, comment string) error {
 	now := time.Now()
 	updates := map[string]interface{}{
-		"status":           model.AlertStatusAcknowledged,
-		"acknowledged_at":  now,
-		"acknowledged_by":  userID,
+		"status":          model.AlertStatusAcknowledged,
+		"acknowledged_at": now,
+		"acknowledged_by": userID,
 	}
 
 	return s.historyRepo.Update(ctx, id, updates)
@@ -399,13 +410,13 @@ func (s *alertServiceImpl) SendAlert(ctx context.Context, rule *model.AlertRule,
 
 	// 创建告警历史记录
 	history := &model.AlertHistory{
-		RuleID:      rule.ID.Hex(),
-		RuleName:    rule.Name,
-		Severity:    rule.Severity,
-		Message:     message,
-		Details:     data,
-		Channels:    rule.Channels,
-		Status:      model.AlertStatusPending,
+		RuleID:   rule.ID.Hex(),
+		RuleName: rule.Name,
+		Severity: rule.Severity,
+		Message:  message,
+		Details:  data,
+		Channels: rule.Channels,
+		Status:   model.AlertStatusPending,
 	}
 
 	if err := s.historyRepo.Create(ctx, history); err != nil {
@@ -487,19 +498,19 @@ func (s *alertServiceImpl) toRuleResponse(rule *model.AlertRule) *dto.AlertRuleR
 
 func (s *alertServiceImpl) toHistoryResponse(history *model.AlertHistory) *dto.AlertHistoryResponse {
 	return &dto.AlertHistoryResponse{
-		ID:              history.ID.Hex(),
-		RuleID:          history.RuleID,
-		RuleName:        history.RuleName,
-		Severity:        history.Severity,
-		Message:         history.Message,
-		Details:         history.Details,
-		Channels:        history.Channels,
-		Status:          history.Status,
-		ErrorMessage:    history.ErrorMessage,
-		TriggeredAt:     history.TriggeredAt,
-		SentAt:          history.SentAt,
-		AcknowledgedAt:  history.AcknowledgedAt,
-		AcknowledgedBy:  history.AcknowledgedBy,
+		ID:             history.ID.Hex(),
+		RuleID:         history.RuleID,
+		RuleName:       history.RuleName,
+		Severity:       history.Severity,
+		Message:        history.Message,
+		Details:        history.Details,
+		Channels:       history.Channels,
+		Status:         history.Status,
+		ErrorMessage:   history.ErrorMessage,
+		TriggeredAt:    history.TriggeredAt,
+		SentAt:         history.SentAt,
+		AcknowledgedAt: history.AcknowledgedAt,
+		AcknowledgedBy: history.AcknowledgedBy,
 	}
 }
 
@@ -529,12 +540,12 @@ func (s *alertServiceImpl) evaluateRule(ctx context.Context, rule *model.AlertRu
 	}
 
 	data := map[string]interface{}{
-		"qps":          stats.MaxQPS,
-		"block_rate":   float64(stats.BlockCount) / float64(stats.TotalRequests) * 100,
+		"qps":            stats.MaxQPS,
+		"block_rate":     float64(stats.BlockCount) / float64(stats.TotalRequests) * 100,
 		"error_4xx_rate": stats.Error4xxRate,
 		"error_5xx_rate": stats.Error5xxRate,
-		"attack_count": stats.BlockCount,
-		"traffic":      stats.InboundTraffic + stats.OutboundTraffic,
+		"attack_count":   stats.BlockCount,
+		"traffic":        stats.InboundTraffic + stats.OutboundTraffic,
 	}
 
 	// 评估条件

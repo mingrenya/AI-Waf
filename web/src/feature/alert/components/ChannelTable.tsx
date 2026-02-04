@@ -29,7 +29,8 @@ import { Loader2 } from 'lucide-react'
 import { DataTable } from '@/components/table/motion-data-table'
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
+import { queryKeys } from '@/lib/query-keys'
 
 interface ChannelTableProps {
     onEdit: (channel: AlertChannel) => void
@@ -60,7 +61,6 @@ const PAGINATION_CONFIG = {
 
 export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
     const { t } = useTranslation()
-    const { toast } = useToast()
     const queryClient = useQueryClient()
     const sentinelRef = useRef<HTMLDivElement>(null)
 
@@ -73,7 +73,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         hasNextPage,
         isFetchingNextPage,
     } = useInfiniteQuery({
-        queryKey: ['alertChannels'],
+        queryKey: queryKeys.alert.channels.all,
         queryFn: ({ pageParam = 1 }) => {
             const page = typeof pageParam === 'number' ? pageParam : 1
             return alertChannelApi.getChannels(page, PAGINATION_CONFIG.pageSize)
@@ -121,13 +121,13 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
             alertChannelApi.updateChannel(channel.id, { enabled: !channel.enabled }),
         onMutate: async (channel) => {
             // 取消进行中的查询避免覆盖乐观更新
-            await queryClient.cancelQueries({ queryKey: ['alertChannels'] })
+            await queryClient.cancelQueries({ queryKey: queryKeys.alert.channels.all })
             
             // 保存当前数据用于回滚
-            const previousData = queryClient.getQueryData<InfiniteQueryData>(['alertChannels'])
+            const previousData = queryClient.getQueryData<InfiniteQueryData>(queryKeys.alert.channels.all)
             
             // 乐观更新UI
-            queryClient.setQueryData<InfiniteQueryData>(['alertChannels'], (old) => {
+            queryClient.setQueryData<InfiniteQueryData>(queryKeys.alert.channels.all, (old) => {
                 if (!old?.pages) return old
                 return {
                     ...old,
@@ -147,7 +147,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         onError: (_err, _channel, context) => {
             // 出错时回滚到之前的状态
             if (context?.previousData) {
-                queryClient.setQueryData<InfiniteQueryData>(['alertChannels'], context.previousData)
+                queryClient.setQueryData<InfiniteQueryData>(queryKeys.alert.channels.all, context.previousData)
             }
             toast({ 
                 title: t('common.error'), 
@@ -163,7 +163,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         },
         onSettled: () => {
             // 无论成功失败都重新获取确保数据同步
-            queryClient.invalidateQueries({ queryKey: ['alertChannels'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.alert.channels.all })
         }
     })
 
@@ -343,7 +343,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
                     {error instanceof Error ? error.message : String(error)}
                 </p>
                 <Button 
-                    onClick={() => queryClient.invalidateQueries({ queryKey: ['alertChannels'] })}
+                    onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.alert.channels.all })}
                     variant="outline"
                     size="sm"
                     className="mt-4"

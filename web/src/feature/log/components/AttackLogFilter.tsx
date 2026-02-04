@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next"
 import { useState } from "react"
 import { DateTimePicker24h } from "@/components/common/date"
 import { Collapse } from "@/components/ui/animation/components/collapse"
-import { AnimatedButton } from "@/components/ui/animation/components/animated-button"
 import { AnimatedIcon } from "@/components/ui/animation/components/animated-icon"
 
 interface AttackLogFilterProps {
@@ -93,44 +92,38 @@ export function AttackLogFilter({ onFilter, onRefresh, defaultValues = {} }: Att
                         </Button>
 
                         <div className="flex gap-2">
-                            <AnimatedButton>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleReset}
-                                    className="flex items-center gap-1"
-                                >
-                                    <AnimatedIcon animationVariant="continuous-spin" isAnimating={isResetAnimating} className="h-4 w-4">
-                                        <RotateCcw className="h-4 w-4" />
-                                    </AnimatedIcon>
-                                    {t('reset')}
-                                </Button>
-                            </AnimatedButton>
-                            <AnimatedButton>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={handleRefresh}
-                                    className="flex items-center gap-1"
-                                >
-                                    <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
-                                        <RefreshCw className="h-4 w-4" />
-                                    </AnimatedIcon>
-                                    {t('refresh')}
-                                </Button>
-                            </AnimatedButton>
-                            <AnimatedButton>
-                                <Button
-                                    type="submit"
-                                    size="sm"
-                                    className="flex items-center gap-1"
-                                >
-                                    <Search className="h-4 w-4" />
-                                    {t('search')}
-                                </Button>
-                            </AnimatedButton>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleReset}
+                                className="flex items-center gap-1"
+                            >
+                                <AnimatedIcon animationVariant="continuous-spin" isAnimating={isResetAnimating} className="h-4 w-4">
+                                    <RotateCcw className="h-4 w-4" />
+                                </AnimatedIcon>
+                                {t('reset')}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleRefresh}
+                                className="flex items-center gap-1"
+                            >
+                                <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
+                                    <RefreshCw className="h-4 w-4" />
+                                </AnimatedIcon>
+                                {t('refresh')}
+                            </Button>
+                            <Button
+                                type="submit"
+                                size="sm"
+                                className="flex items-center gap-1"
+                            >
+                                <Search className="h-4 w-4" />
+                                {t('search')}
+                            </Button>
                         </div>
                     </div>
 

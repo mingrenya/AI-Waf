@@ -10,7 +10,6 @@ import (
 	"github.com/mingrenya/AI-Waf/server/model"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 辅助函数：获取环境变量或默认值
@@ -121,16 +120,6 @@ func Cors() gin.HandlerFunc {
 			return
 		}
 
-		c.Next()
-	}
-}
-
-// RequestID middleware generates and attaches a unique ID to each request
-func RequestID() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		requestID := uuid.New().String()
-		c.Set("RequestID", requestID)
-		c.Header("X-Request-ID", requestID)
 		c.Next()
 	}
 }

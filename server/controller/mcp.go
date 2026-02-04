@@ -105,7 +105,7 @@ func (c *MCPController) RecordToolCall(ctx *gin.Context) {
 		return
 	}
 
-	err := c.mcpService.RecordToolCall(ctx, req.ToolName, req.Duration, req.Success, req.Error)
+	err := c.mcpService.RecordToolCall(ctx, req.ToolName, req.Duration, req.Success, req.Error, req.ParentMessageUUID)
 	if err != nil {
 		response.Error(ctx, model.NewAPIError(http.StatusInternalServerError, "记录工具调用失败", err), true)
 		return

@@ -3,16 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { runnerApi } from '@/api/runner'
 import { RunnerAction } from '@/types/runner'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { ApiError } from '@/api/index'
 import { getConstant } from '@/constant'
 import { ConstantCategory } from '@/constant'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 // 获取运行器状态查询hook
 export const useRunnerStatusQuery = () => {
     const query = useQuery({
-        queryKey: ['runner-status'],
+        queryKey: queryKeys.runner.status(),
         queryFn: runnerApi.getStatus,
         // refetchInterval: 5000 // 每5秒自动刷新一次
     })
@@ -28,7 +29,6 @@ export const useRunnerStatusQuery = () => {
 // 控制运行器mutation hook
 export const useRunnerControl = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const [error, setError] = useState<string | null>(null)
     const { t } = useTranslation()
 
@@ -39,8 +39,9 @@ export const useRunnerControl = () => {
                 title: t("globalSetting.engine.operationSuccess", "操作成功"),
                 description: data.message || t("globalSetting.engine.operationCompleted", "运行器控制操作已成功执行"),
                 duration: getConstant(ConstantCategory.FEATURE, 'TOAST_DURATION', 3000),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['runner-status'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.runner.status() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {

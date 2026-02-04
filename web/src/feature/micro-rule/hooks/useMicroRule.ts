@@ -2,12 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { ruleApi } from '@/api/rule'
 import { MicroRuleCreateRequest, MicroRuleUpdateRequest } from '@/types/rule'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 export const useCreateMicroRule = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -17,8 +17,9 @@ export const useCreateMicroRule = () => {
             toast({
                 title: t('microRule.toast.createSuccess'),
                 description: t('microRule.toast.microRuleCreated'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['microRules'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.microRule.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -43,7 +44,6 @@ export const useCreateMicroRule = () => {
 
 export const useDeleteMicroRule = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -53,8 +53,9 @@ export const useDeleteMicroRule = () => {
             toast({
                 title: t('microRule.toast.deleteSuccess'),
                 description: t('microRule.toast.microRuleDeleted'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['microRules'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.microRule.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -79,7 +80,6 @@ export const useDeleteMicroRule = () => {
 
 export const useUpdateMicroRule = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -90,8 +90,9 @@ export const useUpdateMicroRule = () => {
             toast({
                 title: t('microRule.toast.updateSuccess'),
                 description: t('microRule.toast.microRuleUpdated'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['microRules'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.microRule.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {

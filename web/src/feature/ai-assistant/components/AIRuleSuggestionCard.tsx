@@ -33,7 +33,7 @@ import {
 } from 'lucide-react'
 import { aiAnalyzerApi } from '@/api/ai-analyzer'
 import type { GeneratedRule } from '@/types/ai-analyzer'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 
 const statusConfig = {
   pending: { label: '待审核', variant: 'secondary' as const },
@@ -44,7 +44,6 @@ const statusConfig = {
 
 export function AIRuleSuggestionCard() {
   const [statusFilter, setStatusFilter] = useState<string>('pending')
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({

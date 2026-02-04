@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -12,8 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Send, Loader2, Bot, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { sendChatMessage } from '@/api/mcp'
-import { useToast } from '@/hooks/use-toast'
+import { getMCPStatus, sendChatMessage } from '@/api/mcp'
+import { toast } from '@/store'
 import type { AIAssistantMessage } from '@/types/mcp'
 
 interface ChatMessageResponse {
@@ -28,26 +29,38 @@ interface AIAssistantDialogProps {
 }
 
 export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps) {
-  const { toast } = useToast()
-  const [messages, setMessages] = useState<AIAssistantMessage[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: '你好！我是AI安全助手。我可以帮助你分析攻击模式、生成防护规则、评估规则效果等。请问有什么可以帮助你的？',
-      timestamp: new Date().toISOString(),
-    },
-  ])
+  const [messages, setMessages] = useState<AIAssistantMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const initializedRef = useRef(false)
 
-  // 示例建议
-  const suggestions = [
-    '分析最近24小时的攻击模式',
-    '为高频SQL注入生成防护规则',
-    '评估规则ID 123 的效果',
-    '显示当前系统安全状态',
-  ]
+  const { data: statusResponse } = useQuery({
+    queryKey: ['mcp-status'],
+    queryFn: getMCPStatus,
+    refetchInterval: 10000,
+  })
+
+  const status = statusResponse?.data
+
+  const suggestions = status?.availableTools?.slice(0, 4).map((tool) => `运行工具: ${tool}`) || []
+
+  useEffect(() => {
+    if (initializedRef.current || !status) return
+    const greeting = status.connected
+      ? `你好！我是AI安全助手。MCP已连接（可用工具：${status.totalTools} 个${status.serverVersion ? `，版本 ${status.serverVersion}` : ''}）。请问有什么可以帮助你的？`
+      : `你好！我是AI安全助手。当前MCP未连接，请检查服务状态后重试。`
+
+    setMessages([
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: greeting,
+        timestamp: new Date().toISOString(),
+      },
+    ])
+    initializedRef.current = true
+  }, [status])
 
   // 自动滚动到底部
   useEffect(() => {
@@ -209,7 +222,7 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
           </ScrollArea>
 
           {/* 建议快捷操作 */}
-          {messages.length === 1 && (
+          {messages.length === 1 && suggestions.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">你可以试试：</p>
               <div className="flex flex-wrap gap-2">

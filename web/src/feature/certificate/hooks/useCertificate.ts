@@ -2,12 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { certificatesApi } from '@/api/certificate'
 import { CertificateCreateRequest, CertificateUpdateRequest } from '@/types/certificate'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 export const useCreateCertificate = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -17,8 +17,9 @@ export const useCreateCertificate = () => {
             toast({
                 title: t('certificate.toast.createSuccess'),
                 description: t('certificate.toast.certificateCreated'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['certificates'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.certificate.lists() })
         },
         onError: (error: ApiError) => {
             console.error(t('certificate.toast.createFailed'), error)
@@ -41,7 +42,6 @@ export const useCreateCertificate = () => {
 
 export const useDeleteCertificate = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -51,8 +51,9 @@ export const useDeleteCertificate = () => {
             toast({
                 title: t('certificate.toast.deleteSuccess'),
                 description: t('certificate.toast.certificateDeleted'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['certificates'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.certificate.lists() })
         },
         onError: (error: ApiError) => {
             console.error(t('certificate.toast.deleteFailed'), error)
@@ -75,7 +76,6 @@ export const useDeleteCertificate = () => {
 
 export const useUpdateCertificate = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -86,8 +86,9 @@ export const useUpdateCertificate = () => {
             toast({
                 title: t('certificate.toast.updateSuccess'),
                 description: t('certificate.toast.certificateUpdated'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['certificates'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.certificate.lists() })
         },
         onError: (error: ApiError) => {
             console.error(t('certificate.toast.updateFailed'), error)

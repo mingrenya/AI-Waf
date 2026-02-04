@@ -5,14 +5,17 @@ import (
 	"context"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	pkgModel "github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/dto"
 	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/service"
 	"github.com/mingrenya/AI-Waf/server/utils/response"
 	"github.com/rs/zerolog"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // AIAnalyzerController AI分析器控制器接口
@@ -41,9 +44,17 @@ type AIAnalyzerController interface {
 
 	// 统计分析相关
 	GetAnalyzerStats(ctx *gin.Context)
-	
+	GetAIAnalysisResult(ctx *gin.Context)
+
 	// 手动触发AI分析
 	TriggerAnalysis(ctx *gin.Context)
+	AnalyzePatterns(ctx *gin.Context)
+
+	// MCP规则建议相关
+	ListRuleSuggestions(ctx *gin.Context)
+	ApproveRuleSuggestion(ctx *gin.Context)
+	RejectRuleSuggestion(ctx *gin.Context)
+	DeployRuleSuggestion(ctx *gin.Context)
 }
 
 // AIAnalyzerControllerImpl AI分析器控制器实现
@@ -490,7 +501,7 @@ func (c *AIAnalyzerControllerImpl) GetAnalyzerStats(ctx *gin.Context) {
 // @Router /api/v1/ai-analyzer/trigger [post]
 func (c *AIAnalyzerControllerImpl) TriggerAnalysis(ctx *gin.Context) {
 	c.logger.Info().Msg("手动触发AI分析")
-	
+
 	// 异步执行分析任务
 	go func() {
 		bgCtx := context.Background()
@@ -498,6 +509,269 @@ func (c *AIAnalyzerControllerImpl) TriggerAnalysis(ctx *gin.Context) {
 			c.logger.Error().Err(err).Msg("AI分析执行失败")
 		}
 	}()
-	
+
 	response.Success(ctx, "AI分析已触发，请稍后查看结果", nil)
+}
+
+// AnalyzePatterns 兼容 MCP 触发分析接口
+// @Summary 触发AI分析（MCP兼容）
+// @Tags AI分析器
+// @Accept json
+// @Produce json
+// @Param request body dto.TriggerAnalysisParams false "触发参数"
+// @Success 200 {object} model.APIResponse
+// @Router /api/v1/ai-analyzer/analyze/patterns [post]
+func (c *AIAnalyzerControllerImpl) AnalyzePatterns(ctx *gin.Context) {
+	var req dto.TriggerAnalysisParams
+	_ = ctx.ShouldBindJSON(&req)
+
+	c.logger.Info().Str("timeRange", req.TimeRange).Msg("MCP触发AI分析")
+
+	go func() {
+		bgCtx := context.Background()
+		if err := c.service.TriggerAnalysis(bgCtx); err != nil {
+			c.logger.Error().Err(err).Msg("AI分析执行失败")
+		}
+	}()
+
+	response.Success(ctx, "AI分析已触发，请稍后查看结果", nil)
+}
+
+// GetAIAnalysisResult 获取AI分析结果（MCP兼容）
+// @Summary 获取AI分析结果
+// @Tags AI分析器
+// @Produce json
+// @Param timeRange query string false "时间范围"
+// @Success 200 {object} dto.AIAnalysisResult
+// @Router /api/v1/ai-analyzer/analysis/result [get]
+func (c *AIAnalyzerControllerImpl) GetAIAnalysisResult(ctx *gin.Context) {
+	stats, err := c.service.GetAnalyzerStats(ctx.Request.Context(), &dto.TriggerAnalysisRequest{})
+	if err != nil {
+		c.logger.Error().Err(err).Msg("查询AI分析结果失败")
+		response.Error(ctx, model.NewAPIError(http.StatusInternalServerError, "查询AI分析结果失败", err), false)
+		return
+	}
+
+	var highSeverity int64
+	if stats != nil && stats.PatternStats != nil {
+		if count, ok := stats.PatternStats.BySeverity["high"]; ok {
+			highSeverity += int64(count)
+		}
+		if count, ok := stats.PatternStats.BySeverity["critical"]; ok {
+			highSeverity += int64(count)
+		}
+	}
+
+	result := dto.AIAnalysisResult{
+		TotalPatterns:        getPatternStat(stats, func(s *dto.AttackPatternStatsResponse) int64 { return s.TotalPatterns }),
+		HighSeverityPatterns: highSeverity,
+		SuggestedRules:       getRuleStat(stats, func(s *dto.GeneratedRuleStatsResponse) int64 { return s.PendingRules }),
+		ProcessingTime:       0,
+		Timestamp:            time.Now(),
+	}
+
+	response.Success(ctx, "查询成功", result)
+}
+
+// ListRuleSuggestions 获取AI规则建议列表（MCP兼容）
+// @Summary 获取AI规则建议列表
+// @Tags AI分析器
+// @Produce json
+// @Param status query string false "状态"
+// @Param severity query string false "严重等级"
+// @Param limit query int false "数量" default(20)
+// @Param offset query int false "偏移" default(0)
+// @Success 200 {object} dto.AIRuleSuggestionListResponse
+// @Router /api/v1/ai-analyzer/suggestions [get]
+func (c *AIAnalyzerControllerImpl) ListRuleSuggestions(ctx *gin.Context) {
+	status := ctx.Query("status")
+	severity := ctx.Query("severity")
+	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "20"))
+	offset, _ := strconv.Atoi(ctx.DefaultQuery("offset", "0"))
+	if limit <= 0 {
+		limit = 20
+	}
+	page := offset/limit + 1
+
+	req := dto.GeneratedRuleListRequest{
+		Page:   page,
+		Size:   limit,
+		Status: status,
+	}
+
+	resp, err := c.service.ListGeneratedRules(ctx.Request.Context(), &req)
+	if err != nil {
+		c.logger.Error().Err(err).Msg("查询规则建议失败")
+		response.Error(ctx, model.NewAPIError(http.StatusInternalServerError, "查询规则建议失败", err), false)
+		return
+	}
+
+	filtered := make([]dto.AIRuleSuggestion, 0, len(resp.List))
+	for _, rule := range resp.List {
+		if severity != "" && rule.Severity != severity {
+			continue
+		}
+		filtered = append(filtered, mapRuleToSuggestion(rule))
+	}
+
+	result := dto.AIRuleSuggestionListResponse{
+		Data:  filtered,
+		Total: resp.Total,
+	}
+
+	response.Success(ctx, "查询成功", result)
+}
+
+// ApproveRuleSuggestion 批准规则建议（MCP兼容）
+// @Summary 批准规则建议
+// @Tags AI分析器
+// @Accept json
+// @Produce json
+// @Param id path string true "建议ID"
+// @Success 200 {object} response.Response
+// @Router /api/v1/ai-analyzer/suggestions/{id}/approve [post]
+func (c *AIAnalyzerControllerImpl) ApproveRuleSuggestion(ctx *gin.Context) {
+	id := ctx.Param("id")
+	username, exists := ctx.Get("username")
+	if !exists {
+		response.Error(ctx, model.NewAPIError(http.StatusUnauthorized, "未授权", nil), false)
+		return
+	}
+
+	req := dto.ReviewRuleRequest{
+		RuleID:  id,
+		Action:  "approve",
+		Comment: "approved via suggestions api",
+	}
+	if err := c.service.ReviewRule(ctx.Request.Context(), &req, username.(string)); err != nil {
+		c.logger.Error().Err(err).Str("rule_id", id).Msg("批准规则建议失败")
+		response.Error(ctx, model.NewAPIError(http.StatusInternalServerError, "批准规则建议失败", err), false)
+		return
+	}
+
+	response.Success(ctx, "审核成功", nil)
+}
+
+// RejectRuleSuggestion 拒绝规则建议（MCP兼容）
+// @Summary 拒绝规则建议
+// @Tags AI分析器
+// @Accept json
+// @Produce json
+// @Param id path string true "建议ID"
+// @Success 200 {object} response.Response
+// @Router /api/v1/ai-analyzer/suggestions/{id}/reject [post]
+func (c *AIAnalyzerControllerImpl) RejectRuleSuggestion(ctx *gin.Context) {
+	type rejectRequest struct {
+		Reason string `json:"reason"`
+	}
+
+	var body rejectRequest
+	_ = ctx.ShouldBindJSON(&body)
+
+	id := ctx.Param("id")
+	username, exists := ctx.Get("username")
+	if !exists {
+		response.Error(ctx, model.NewAPIError(http.StatusUnauthorized, "未授权", nil), false)
+		return
+	}
+
+	comment := body.Reason
+	if comment == "" {
+		comment = "rejected via suggestions api"
+	}
+
+	req := dto.ReviewRuleRequest{
+		RuleID:  id,
+		Action:  "reject",
+		Comment: comment,
+	}
+	if err := c.service.ReviewRule(ctx.Request.Context(), &req, username.(string)); err != nil {
+		c.logger.Error().Err(err).Str("rule_id", id).Msg("拒绝规则建议失败")
+		response.Error(ctx, model.NewAPIError(http.StatusInternalServerError, "拒绝规则建议失败", err), false)
+		return
+	}
+
+	response.Success(ctx, "审核成功", nil)
+}
+
+// DeployRuleSuggestion 部署规则建议（MCP兼容）
+// @Summary 部署规则建议
+// @Tags AI分析器
+// @Accept json
+// @Produce json
+// @Param id path string true "建议ID"
+// @Success 200 {object} response.Response
+// @Router /api/v1/ai-analyzer/suggestions/{id}/deploy [post]
+func (c *AIAnalyzerControllerImpl) DeployRuleSuggestion(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if err := c.service.DeployRule(ctx.Request.Context(), id); err != nil {
+		c.logger.Error().Err(err).Str("rule_id", id).Msg("部署规则建议失败")
+		response.Error(ctx, model.NewAPIError(http.StatusInternalServerError, "部署规则建议失败", err), false)
+		return
+	}
+
+	response.Success(ctx, "部署成功", nil)
+}
+
+func mapRuleToSuggestion(rule pkgModel.GeneratedRule) dto.AIRuleSuggestion {
+	content := map[string]interface{}{}
+	if rule.RuleType == "micro_rule" && len(rule.MicroRuleCondition) > 0 {
+		var decoded map[string]interface{}
+		if err := bson.Unmarshal(rule.MicroRuleCondition, &decoded); err == nil {
+			content = decoded
+		}
+	} else if rule.RuleType == "modsecurity" && rule.SecLangDirective != "" {
+		content["secLangDirective"] = rule.SecLangDirective
+	}
+
+	id := ""
+	if !rule.ID.IsZero() {
+		id = rule.ID.Hex()
+	}
+
+	var reviewedAt *time.Time
+	if !rule.ReviewedAt.IsZero() {
+		reviewedAt = &rule.ReviewedAt
+	}
+	var deployedAt *time.Time
+	if !rule.DeployedAt.IsZero() {
+		deployedAt = &rule.DeployedAt
+	}
+
+	recommendation := "请审核并确认后部署"
+	if rule.Status == "approved" {
+		recommendation = "建议尽快部署"
+	}
+
+	return dto.AIRuleSuggestion{
+		ID:             id,
+		PatternID:      rule.PatternID,
+		PatternName:    rule.PatternName,
+		RuleName:       rule.Name,
+		RuleType:       rule.RuleType,
+		Confidence:     rule.Confidence,
+		Severity:       rule.Severity,
+		Description:    rule.Description,
+		Recommendation: recommendation,
+		RuleContent:    content,
+		Status:         rule.Status,
+		CreatedAt:      rule.CreatedAt,
+		ReviewedAt:     reviewedAt,
+		DeployedAt:     deployedAt,
+	}
+}
+
+func getPatternStat(stats *dto.AIAnalysisStatsResponse, getter func(*dto.AttackPatternStatsResponse) int64) int64 {
+	if stats == nil || stats.PatternStats == nil {
+		return 0
+	}
+	return getter(stats.PatternStats)
+}
+
+func getRuleStat(stats *dto.AIAnalysisStatsResponse, getter func(*dto.GeneratedRuleStatsResponse) int64) int64 {
+	if stats == nil || stats.RuleStats == nil {
+		return 0
+	}
+	return getter(stats.RuleStats)
 }

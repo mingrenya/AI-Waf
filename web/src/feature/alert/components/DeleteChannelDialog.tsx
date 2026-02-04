@@ -10,8 +10,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { alertChannelApi } from '@/api/alert'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 interface DeleteChannelDialogProps {
     open: boolean
@@ -21,14 +22,13 @@ interface DeleteChannelDialogProps {
 
 export function DeleteChannelDialog({ open, onOpenChange, channelId }: DeleteChannelDialogProps) {
     const { t } = useTranslation()
-    const { toast } = useToast()
     const queryClient = useQueryClient()
 
     const deleteMutation = useMutation({
         mutationFn: (id: string) => alertChannelApi.deleteChannel(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['alertChannels'] })
-            toast({ title: 'Success', description: t('alert.deleteChannelSuccess') })
+            queryClient.invalidateQueries({ queryKey: queryKeys.alert.channels.lists() })
+            toast({ title: 'Success', description: t('alert.deleteChannelSuccess'), variant: 'success' })
             onOpenChange(false)
         },
         onError: () => {

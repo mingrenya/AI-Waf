@@ -1,15 +1,16 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router' // 修改导入路径从react-router-dom到react-router
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { authApi } from '@/api/services'
-import useAuthStore from '@/store/auth'
+import { useAuthActions, useAuthStore, useUser, toast } from '@/store'
 import { LoginFormValues, PasswordResetFormValues } from '@/validation/auth'
-import { useEffect } from 'react'
 import { GetUserInfoResponseData } from '@/types/auth'
+import { queryKeys } from '@/lib/query-keys'
+import type { ApiError } from '@/api/index'
 
 export const useLogin = () => {
     const navigate = useNavigate()
-    const { login } = useAuthStore()
+    const { login } = useAuthActions()
     const [error, setError] = useState<string | null>(null)
 
     const mutation = useMutation({
@@ -26,7 +27,9 @@ export const useLogin = () => {
             }
         },
         onError: (error: ApiError) => {
-            setError(error.message || '登录失败，请检查用户名和密码')
+            const message = error.message || '登录失败，请检查用户名和密码'
+            setError(message)
+            toast({ title: '登录失败', description: message, variant: 'destructive' })
         }
     })
 
@@ -41,7 +44,8 @@ export const useLogin = () => {
 export const useResetPassword = () => {
     const navigate = useNavigate()
     const [error, setError] = useState<string | null>(null)
-    const { user, logout } = useAuthStore()
+    const { logout } = useAuthActions()
+    const user = useUser()
 
     const mutation = useMutation({
         mutationFn: (values: Omit<PasswordResetFormValues, 'confirmPassword'>) => {
@@ -59,9 +63,12 @@ export const useResetPassword = () => {
             } else {
                 navigate('/')
             }
+            toast({ title: '成功', description: '密码已重置', variant: 'success' })
         },
         onError: (error: ApiError) => {
-            setError(error.message || '密码重置失败，请重试')
+            const message = error.message || '密码重置失败，请重试'
+            setError(message)
+            toast({ title: '重置失败', description: message, variant: 'destructive' })
         },
     })
 
@@ -75,10 +82,11 @@ export const useResetPassword = () => {
 
 
 export const useCurrentUser = () => {
-    const { user, setUser } = useAuthStore()
+    const { setUser } = useAuthActions()
+    const user = useUser()
 
     const { data, isLoading, error } = useQuery<GetUserInfoResponseData, ApiError>({
-        queryKey: ['currentUser'],
+        queryKey: queryKeys.auth.currentUser(),
         queryFn: () => authApi.getCurrentUser(),
         enabled: !!useAuthStore.getState().token,
     })

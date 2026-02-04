@@ -2,19 +2,20 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { ipGroupApi } from '@/api/ip-group'
 import { IPGroupCreateRequest, IPGroupUpdateRequest, IPGroupListResponse, IPGroup } from '@/types/ip-group'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 export const useIPGroups = (page: number = 1, size: number = 10) => {
     return useQuery<IPGroupListResponse>({
-        queryKey: ['ipGroups', page, size],
+        queryKey: queryKeys.ipGroup.list(page, size),
         queryFn: () => ipGroupApi.getIPGroups(page, size),
     })
 }
 
 export const useIPGroup = (id: string) => {
     return useQuery<IPGroup>({
-        queryKey: ['ipGroup', id],
+        queryKey: queryKeys.ipGroup.detail(id),
         queryFn: () => ipGroupApi.getIPGroup(id),
         enabled: !!id,
     })
@@ -22,7 +23,6 @@ export const useIPGroup = (id: string) => {
 
 export const useCreateIPGroup = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -32,8 +32,9 @@ export const useCreateIPGroup = () => {
             toast({
                 title: t('ipGroup.toast.createSuccess'),
                 description: t('ipGroup.toast.ipGroupCreated'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.ipGroup.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -58,7 +59,6 @@ export const useCreateIPGroup = () => {
 
 export const useDeleteIPGroup = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -68,8 +68,9 @@ export const useDeleteIPGroup = () => {
             toast({
                 title: t('ipGroup.toast.deleteSuccess'),
                 description: t('ipGroup.toast.ipGroupDeleted'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.ipGroup.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -94,7 +95,6 @@ export const useDeleteIPGroup = () => {
 
 export const useUpdateIPGroup = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -105,8 +105,9 @@ export const useUpdateIPGroup = () => {
             toast({
                 title: t('ipGroup.toast.updateSuccess'),
                 description: t('ipGroup.toast.ipGroupUpdated'),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.ipGroup.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -131,7 +132,6 @@ export const useUpdateIPGroup = () => {
 
 export const useBlockIP = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const { t } = useTranslation()
     const [error, setError] = useState<string | null>(null)
 
@@ -141,8 +141,9 @@ export const useBlockIP = () => {
             toast({
                 title: t('ipGroup.toast.blockSuccess'),
                 description: t('ipGroup.toast.ipBlocked', { ip }),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['ipGroups'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.ipGroup.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {

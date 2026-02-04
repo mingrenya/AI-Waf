@@ -3,15 +3,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { configApi } from '@/api/config'
 import { ConfigPatchRequest } from '@/types/config'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { ApiError } from '@/api/index'
 import { ConstantCategory, getConstant } from '@/constant'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
-// 获取配置查询hook
+// 获取配置hook
 export const useConfigQuery = () => {
     const query = useQuery({
-        queryKey: ['config'],
+        queryKey: queryKeys.config.detail(),
         queryFn: configApi.getConfig,
         // 添加重试策略，提高数据加载可靠性
         retry: 2,
@@ -34,7 +35,6 @@ export const useConfigQuery = () => {
 // 更新配置mutation hook
 export const useUpdateConfig = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const [error, setError] = useState<ApiError | null>(null)
     const { t } = useTranslation()
 
@@ -45,8 +45,9 @@ export const useUpdateConfig = () => {
                 title: t("globalSetting.config.updateSuccess", "更新成功"),
                 description: t("globalSetting.config.systemConfigUpdated", "系统配置已成功更新"),
                 duration: getConstant(ConstantCategory.FEATURE, 'TOAST_DURATION', 3000),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['config'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.config.detail() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {

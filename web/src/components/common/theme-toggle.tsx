@@ -1,10 +1,10 @@
 import { Moon, Sun } from "lucide-react"
-import { useTheme } from "@/provider/theme-context"
-
+import { useTheme, useSetTheme } from "@/store"
 import { Switch } from "@/components/ui/switch"
 
 export function ThemeToggle() {
-    const { theme, setTheme } = useTheme()
+    const theme = useTheme()
+    const setTheme = useSetTheme()
 
     const toggleTheme = () => {
         setTheme(theme === "light" ? "dark" : "light")

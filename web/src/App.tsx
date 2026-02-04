@@ -1,12 +1,14 @@
 import { AppRouter } from "@/routes"
-import { ThemeProvider } from "@/provider/theme-provider"
+import { useEffect } from 'react'
+import { useThemeStore } from '@/store'
 
 function App() {
-    return (
-        <ThemeProvider defaultTheme="system" storageKey="waf-theme">
-            <AppRouter />
-        </ThemeProvider>
-    )
+    // 初始化主题
+    useEffect(() => {
+        useThemeStore.getState().initTheme()
+    }, [])
+
+    return <AppRouter />
 }
 
 export default App

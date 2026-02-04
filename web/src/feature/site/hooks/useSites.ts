@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { siteApi } from '@/api/site'
 import { CreateSiteRequest, UpdateSiteRequest } from '@/types/site'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
+import { queryKeys } from '@/lib/query-keys'
 
 type ApiError = {
     message: string
@@ -14,7 +15,6 @@ type ApiError = {
  */
 export const useCreateSite = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const [error, setError] = useState<string | null>(null)
     const { t } = useTranslation()
 
@@ -24,8 +24,9 @@ export const useCreateSite = () => {
             toast({
                 title: t("site.toast.createSuccess", "创建成功"),
                 description: t("site.toast.siteCreated", "站点已成功创建"),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['sites'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.site.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -53,7 +54,6 @@ export const useCreateSite = () => {
  */
 export const useDeleteSite = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const [error, setError] = useState<string | null>(null)
     const { t } = useTranslation()
 
@@ -63,8 +63,9 @@ export const useDeleteSite = () => {
             toast({
                 title: t("site.toast.deleteSuccess", "删除成功"),
                 description: t("site.toast.siteDeleted", "站点已成功删除"),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['sites'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.site.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {
@@ -92,7 +93,6 @@ export const useDeleteSite = () => {
  */
 export const useUpdateSite = () => {
     const queryClient = useQueryClient()
-    const { toast } = useToast()
     const [error, setError] = useState<string | null>(null)
     const { t } = useTranslation()
 
@@ -103,8 +103,9 @@ export const useUpdateSite = () => {
             toast({
                 title: t("site.toast.updateSuccess", "更新成功"),
                 description: t("site.toast.siteUpdated", "站点已成功更新"),
+                variant: 'success',
             })
-            queryClient.invalidateQueries({ queryKey: ['sites'] })
+            queryClient.invalidateQueries({ queryKey: queryKeys.site.lists() })
         },
         onError: (error: ApiError) => {
             if (import.meta.env.DEV) {

@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label'
 import { AlertChannel } from '@/types/alert'
 import { useMutation } from '@tanstack/react-query'
 import { alertChannelApi } from '@/api/alert'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from '@/store'
 import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
@@ -25,14 +25,13 @@ interface TestChannelDialogProps {
 
 export function TestChannelDialog({ open, onOpenChange, channel }: TestChannelDialogProps) {
     const { t } = useTranslation()
-    const { toast } = useToast()
     const [message, setMessage] = useState('This is a test alert message from AI-WAF.')
 
     const testMutation = useMutation({
         mutationFn: (data: { id: string, message: string }) => 
             alertChannelApi.testChannel(data.id, { message: data.message }),
         onSuccess: () => {
-            toast({ title: 'Success', description: t('alert.testChannelSuccess') })
+            toast({ title: 'Success', description: t('alert.testChannelSuccess'), variant: 'success' })
             onOpenChange(false)
         },
         onError: (error: Error & { response?: { data?: { message?: string } } }) => {

@@ -324,7 +324,9 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 
 		// 告警历史查询
 		alertRoutes.GET("/history", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetAlertHistory)
+		alertRoutes.GET("/history/:id", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetAlertHistoryDetail)
 		alertRoutes.POST("/history/:id/acknowledge", middleware.HasPermission(model.PermAlertHistoryRead), alertController.AcknowledgeAlert)
+		alertRoutes.GET("/history/stats", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetStatistics)
 
 		// 告警统计
 		alertRoutes.GET("/statistics", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetStatistics)
@@ -350,6 +352,12 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		aiAnalyzerRoutes.GET("/config", middleware.HasPermission(model.PermConfigRead), aiAnalyzerController.GetAnalyzerConfig)
 		aiAnalyzerRoutes.PUT("/config", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.UpdateAnalyzerConfig)
 
+		// 规则建议（MCP兼容）
+		aiAnalyzerRoutes.GET("/suggestions", middleware.HasPermission(model.PermConfigRead), aiAnalyzerController.ListRuleSuggestions)
+		aiAnalyzerRoutes.POST("/suggestions/:id/approve", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.ApproveRuleSuggestion)
+		aiAnalyzerRoutes.POST("/suggestions/:id/reject", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.RejectRuleSuggestion)
+		aiAnalyzerRoutes.POST("/suggestions/:id/deploy", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.DeployRuleSuggestion)
+
 		// MCP对话管理
 		aiAnalyzerRoutes.GET("/conversations", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.ListMCPConversations)
 		aiAnalyzerRoutes.GET("/conversations/:id", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetMCPConversation)
@@ -357,9 +365,11 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 
 		// 统计分析
 		aiAnalyzerRoutes.GET("/stats", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetAnalyzerStats)
+		aiAnalyzerRoutes.GET("/analysis/result", middleware.HasPermission(model.PermWAFLogRead), aiAnalyzerController.GetAIAnalysisResult)
 
 		// 手动触发AI分析
 		aiAnalyzerRoutes.POST("/trigger", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.TriggerAnalysis)
+		aiAnalyzerRoutes.POST("/analyze/patterns", middleware.HasPermission(model.PermConfigUpdate), aiAnalyzerController.AnalyzePatterns)
 	}
 
 	// AI聊天助手模块

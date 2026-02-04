@@ -67,7 +67,7 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
             defaultPath: "event",
             items: [
                 { title: t('breadcrumb.logs.attack'), path: "event", component: <EventsPage /> },
-                { title: t('breadcrumb.logs.protect'), path: "log", component: <LogsPage /> },
+                { title: t('breadcrumb.logs.protect'), path: "protect", component: <LogsPage /> },
             ]
         },
         [ROUTES.MONITOR]: {

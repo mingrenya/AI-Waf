@@ -30,6 +30,7 @@ type AlertController interface {
 
 	// History 查询
 	GetAlertHistory(ctx *gin.Context)
+	GetAlertHistoryDetail(ctx *gin.Context)
 	AcknowledgeAlert(ctx *gin.Context)
 	GetStatistics(ctx *gin.Context)
 }
@@ -374,6 +375,13 @@ func (c *alertControllerImpl) GetAlertHistory(ctx *gin.Context) {
 		}
 	}
 	if req.PageSize == 0 {
+		if sizeStr := ctx.Query("size"); sizeStr != "" {
+			if size, err := strconv.Atoi(sizeStr); err == nil {
+				req.PageSize = size
+			}
+		}
+	}
+	if req.PageSize == 0 {
 		req.PageSize = 20
 	}
 
@@ -384,6 +392,29 @@ func (c *alertControllerImpl) GetAlertHistory(ctx *gin.Context) {
 	}
 
 	response.SuccessWithPagination(ctx, histories, total, req.Page, req.PageSize)
+}
+
+// GetAlertHistoryDetail 获取单个告警历史详情
+// @Summary 获取告警历史详情
+// @Tags Alert
+// @Produce json
+// @Param id path string true "告警历史ID"
+// @Success 200 {object} response.Response{data=dto.AlertHistoryResponse}
+// @Router /alerts/history/{id} [get]
+func (c *alertControllerImpl) GetAlertHistoryDetail(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		response.Error(ctx, model.ErrBadRequest(nil), false)
+		return
+	}
+
+	history, err := c.alertService.GetAlertHistoryByID(ctx.Request.Context(), id)
+	if err != nil {
+		response.Error(ctx, model.ErrInternalServerError(err), true)
+		return
+	}
+
+	response.Success(ctx, "Success", history)
 }
 
 // AcknowledgeAlert 确认告警
