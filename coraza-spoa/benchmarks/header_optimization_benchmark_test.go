@@ -9,7 +9,6 @@ import (
 )
 
 // 这些是从 internal 包导入的私有函数，需要通过接口访问
-// 或者我们复制实现用于基准测试
 
 // 原始的bufio.Scanner实现（用于性能对比）
 func getHeaderValueOld(headers []byte, targetHeader string) (string, error) {
