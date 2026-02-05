@@ -183,7 +183,7 @@ function useToast() {
                 listeners.splice(index, 1)
             }
         }
-    }, [state])
+    }, [setState]) // 修复: 只依赖setState而不是state
 
     return {
         ...state,

@@ -39,7 +39,7 @@ const IPAddressesCell = ({ items }: IPAddressesCellProps) => {
                     {items.length > 3 ? (
                         <>
                             {items.slice(0, 3).map((item, index) => (
-                                <Badge key={index} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
+                                <Badge key={`${item}-${index}`} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
                                     {item}
                                 </Badge>
                             ))}
@@ -49,7 +49,7 @@ const IPAddressesCell = ({ items }: IPAddressesCellProps) => {
                         </>
                     ) : (
                         items.map((item, index) => (
-                            <Badge key={index} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
+                            <Badge key={`${item}-${index}`} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
                                 {item}
                             </Badge>
                         ))
@@ -71,7 +71,7 @@ const IPAddressesCell = ({ items }: IPAddressesCellProps) => {
                         <div className="space-y-2">
                             {filteredItems.map((item, index) => (
                                 <div
-                                    key={index}
+                                    key={`filtered-${item}-${index}`}
                                     className="px-2 py-1.5 text-sm font-mono rounded-md hover:bg-slate-700/50 dark:text-shadow-glow-white cursor-pointer"
                                 >
                                     {item}

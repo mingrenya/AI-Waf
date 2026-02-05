@@ -162,7 +162,7 @@ export function SiteTable({ onEdit, onDelete }: SiteTableProps) {
                 return (
                     <div className={`flex flex-col gap-1 dark:text-shadow-glow-white ${isInactive ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-300'}`}>
                         {servers.map((server, index) => (
-                            <div key={index} className="flex items-center gap-1 text-xs">
+                            <div key={`${server.host}-${server.port}-${index}`} className="flex items-center gap-1 text-xs">
                                 <Server className="h-3 w-3 dark:text-shadow-glow-white" />
                                 <span className="dark:text-shadow-glow-white">
                                     {server.isSSL ? 'https://' : 'http://'}

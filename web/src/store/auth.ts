@@ -2,6 +2,7 @@
  * Auth Store - 使用 Zustand 管理认证状态
  * 支持状态持久化、DevTools 调试
  */
+import { useMemo } from 'react'
 import { create } from 'zustand'
 import { persist, devtools } from 'zustand/middleware'
 import { AuthState, User } from '@/types/auth'
@@ -98,23 +99,45 @@ export const useNeedPasswordReset = () => useAuthStore((state) => state.needPass
 /**
  * 获取认证操作函数
  */
-export const useAuthActions = () => useAuthStore((state) => ({
-    login: state.login,
-    logout: state.logout,
-    setUser: state.setUser,
-}))
+export const useAuthActions = () => {
+    const login = useAuthStore((state) => state.login)
+    const logout = useAuthStore((state) => state.logout)
+    const setUser = useAuthStore((state) => state.setUser)
+
+    return useMemo(
+        () => ({
+            login,
+            logout,
+            setUser,
+        }),
+        [login, logout, setUser]
+    )
+}
 
 /**
  * 获取完整的认证状态和操作
  */
-export const useAuth = () => useAuthStore((state) => ({
-    user: state.user,
-    token: state.token,
-    isAuthenticated: state.isAuthenticated,
-    needPasswordReset: state.needPasswordReset,
-    login: state.login,
-    logout: state.logout,
-    setUser: state.setUser,
-}))
+export const useAuth = () => {
+    const user = useAuthStore((state) => state.user)
+    const token = useAuthStore((state) => state.token)
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+    const needPasswordReset = useAuthStore((state) => state.needPasswordReset)
+    const login = useAuthStore((state) => state.login)
+    const logout = useAuthStore((state) => state.logout)
+    const setUser = useAuthStore((state) => state.setUser)
+
+    return useMemo(
+        () => ({
+            user,
+            token,
+            isAuthenticated,
+            needPasswordReset,
+            login,
+            logout,
+            setUser,
+        }),
+        [user, token, isAuthenticated, needPasswordReset, login, logout, setUser]
+    )
+}
 
 export default useAuthStore 

@@ -220,7 +220,7 @@ export function IPGroupForm({
                                                             const originalIndex = ipItems.indexOf(item)
                                                             return (
                                                                 <li
-                                                                    key={originalIndex}
+                                                                    key={`ip-${item}-${originalIndex}`}
                                                                     className="flex items-center justify-between py-2 px-4"
                                                                 >
                                                                     <span className="font-mono dark:text-shadow-glow-white">{item}</span>

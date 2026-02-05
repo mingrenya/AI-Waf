@@ -131,7 +131,8 @@ function createChildRoutes(config: BreadcrumbConfig): RouteObject[] {
         },
         ...config.items.map(item => ({
             path: item.path,
-            element: item.component
+            element: item.component,
+            id: item.path // 添加唯一标识
         }))
     ]
 }
@@ -144,11 +145,6 @@ export function useRoutes(): RouteObject[] {
     const authRoutes: RouteObject[] = [
         { path: "/login", element: lazyLoad(LoginPage) },
         { path: "/reset-password", element: lazyLoad(ResetPasswordPage) }
-    ]
-
-    // security-dashboard
-    const securityDashboardRoutes: RouteObject[] = [
-        { path: "/security-dashboard", element: lazyLoad(ViewerPage) }
     ]
 
     // 应用路由
@@ -190,12 +186,17 @@ export function useRoutes(): RouteObject[] {
                     path: ROUTES.AI_ANALYZER,
                     element: <AIAnalyzerLayOut />,
                     children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER])
+                },
+                // security-dashboard 应该在 ProtectedRoute 内
+                {
+                    path: "/security-dashboard",
+                    element: <ViewerPage />
                 }
             ]
         }]
     }
 
-    return [...authRoutes, appRoutes, ...securityDashboardRoutes]
+    return [...authRoutes, appRoutes]
 }
 
 // 默认面包屑配置，用于类型推断

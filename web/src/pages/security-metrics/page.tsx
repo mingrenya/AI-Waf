@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { securityMetricsApi } from '@/api/security-metrics'
@@ -17,7 +17,6 @@ import type { SecurityMetricsResponse } from '@/types/security-metrics'
 const SecurityMetricsPage = () => {
     const { t } = useTranslation()
     const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h')
-    const [renderKey, setRenderKey] = useState(Date.now())
 
     // 获取综合安全指标 - 使用简化的缓存策略
     const { data, isLoading, error } = useQuery({
@@ -27,13 +26,6 @@ const SecurityMetricsPage = () => {
         gcTime: 60000, // 缓存时间
         refetchOnWindowFocus: false, // 禁用窗口聚焦时自动刷新
     })
-
-    // 数据更新时生成新的渲染key，强制重新挂载
-    useEffect(() => {
-        if (data) {
-            setRenderKey(Date.now())
-        }
-    }, [data])
 
     return (
         <div className="w-full min-h-full p-6 space-y-6">
@@ -72,7 +64,7 @@ const SecurityMetricsPage = () => {
             {isLoading ? (
                 <LoadingSkeleton />
             ) : data ? (
-                <div key={renderKey} className="space-y-6">{/* 使用时间戳key强制重新挂载 */}
+                <div className="space-y-6">
                     {/* 第一行: 核心指标卡片 */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <StatCard
@@ -123,7 +115,7 @@ const SecurityMetricsPage = () => {
                             {data.topTriggeredRules && data.topTriggeredRules.length > 0 ? (
                                 <div className="space-y-4">
                                     {data.topTriggeredRules.map((rule, index) => (
-                                        <div key={`rule-${renderKey}-${index}`} className="flex items-center gap-4">
+                                        <div key={`rule-${rule.ruleName}-${index}`} className="flex items-center gap-4">
                                             <div className="flex-1">
                                                 <div className="flex justify-between items-center mb-2">
                                                     <span className="font-medium">{rule.ruleName}</span>
@@ -154,7 +146,7 @@ const SecurityMetricsPage = () => {
                                 {data.severityDistribution && data.severityDistribution.length > 0 ? (
                                     <div className="space-y-3">
                                         {data.severityDistribution.map((severity, index) => (
-                                            <div key={`severity-${renderKey}-${index}`} className="flex items-center gap-4">
+                                            <div key={`severity-${severity.level}-${index}`} className="flex items-center gap-4">
                                                 <Badge variant={getSeverityVariant(severity.level)}>
                                                     {severity.levelName}
                                                 </Badge>
@@ -183,7 +175,7 @@ const SecurityMetricsPage = () => {
                                 {data.attackTypeDistribution && data.attackTypeDistribution.length > 0 ? (
                                     <div className="space-y-3">
                                         {data.attackTypeDistribution.map((type, index) => (
-                                            <div key={`attack-${renderKey}-${index}`} className="flex items-center justify-between">
+                                            <div key={`attack-${type.category}-${index}`} className="flex items-center justify-between">
                                                 <span className="text-sm">{type.category}</span>
                                                 <div className="flex items-center gap-2">
                                                     <Progress value={type.percentage} max={100} className="h-2 w-24" />
@@ -215,7 +207,7 @@ const SecurityMetricsPage = () => {
                             {data.topAttackSources && data.topAttackSources.length > 0 ? (
                                 <div className="space-y-3">
                                     {data.topAttackSources.map((source, index) => (
-                                        <div key={`source-${renderKey}-${index}`} className="flex items-center justify-between">
+                                        <div key={`source-${source.countryCode}-${index}`} className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <span className="font-mono text-sm">{source.countryCode}</span>
                                                 <span>{source.country}</span>

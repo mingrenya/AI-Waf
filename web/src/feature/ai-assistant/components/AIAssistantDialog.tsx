@@ -226,9 +226,9 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground">你可以试试：</p>
               <div className="flex flex-wrap gap-2">
-                {suggestions.map((suggestion) => (
+                {suggestions.map((suggestion, index) => (
                   <Button
-                    key={suggestion}
+                    key={`suggestion-${index}-${suggestion.slice(0, 20)}`}
                     variant="outline"
                     size="sm"
                     onClick={() => handleSuggestionClick(suggestion)}

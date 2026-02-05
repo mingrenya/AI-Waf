@@ -11,6 +11,9 @@ i18n
     .init({
         fallbackLng: 'en',
         debug: ENV.isDevelopment,
+        supportedLngs: ['en', 'zh'],
+        nonExplicitSupportedLngs: true,
+        load: 'languageOnly',
         interpolation: {
             escapeValue: false,
         },
