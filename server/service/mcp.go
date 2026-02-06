@@ -82,9 +82,16 @@ var mcpTools = []string{
 
 // GetMCPStatus 获取MCP服务器连接状态
 func (s *MCPService) GetMCPStatus(ctx context.Context) (*dto.MCPStatusResponse, error) {
-	// 检查MCP服务器是否在运行
-	// 这里简化处理，实际应该检查MCP Server进程或健康检查端点
-	connected := s.checkMCPServerConnection()
+	// 获取最后一次工具调用记录
+	lastCall, err := s.mcpRepo.GetLastToolCall(ctx)
+
+	// 判断是否最近有工具调用（例如两分钟内），作为 MCP 可用性的简单判断
+	connected := false
+	if err == nil && lastCall != nil {
+		if time.Since(lastCall.Timestamp) <= 2*time.Minute {
+			connected = true
+		}
+	}
 
 	status := &dto.MCPStatusResponse{
 		Connected:      connected,
@@ -93,13 +100,10 @@ func (s *MCPService) GetMCPStatus(ctx context.Context) (*dto.MCPStatusResponse, 
 		AvailableTools: mcpTools,
 	}
 
-	// 获取最后连接时间（从数据库获取最近的工具调用时间）
-	if connected {
-		lastCall, err := s.mcpRepo.GetLastToolCall(ctx)
-		if err == nil && lastCall != nil {
-			timestamp := lastCall.Timestamp.Format(time.RFC3339)
-			status.LastConnectedAt = &timestamp
-		}
+	// 填充最后连接时间（如果存在）
+	if lastCall != nil {
+		timestamp := lastCall.Timestamp.Format(time.RFC3339)
+		status.LastConnectedAt = &timestamp
 	}
 
 	return status, nil
@@ -140,9 +144,6 @@ func (s *MCPService) RecordToolCall(ctx context.Context, toolName string, durati
 
 // checkMCPServerConnection 检查MCP服务器连接
 func (s *MCPService) checkMCPServerConnection() bool {
-	// MCP功能可用性的判断逻辑：
-	// MCP Server 是 stdio 进程，无法直接通过网络检测
-	// 这里返回 true 表示后端 API（MCP 功能实现）正常运行
-	// "connected: true" 表示 MCP 功能可用，而不是 MCP Server 的网络连接状态
+	// 旧的简化检测方法保留为兼容（不再主动使用）
 	return true
 }

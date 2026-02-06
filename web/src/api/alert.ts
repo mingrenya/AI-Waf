@@ -1,18 +1,16 @@
 import { get, post, put, del } from './index'
 import {
     AlertChannel,
-    AlertChannelListResponse,
     CreateAlertChannelRequest,
     UpdateAlertChannelRequest,
     TestAlertChannelRequest,
     AlertRule,
-    AlertRuleListResponse,
     CreateAlertRuleRequest,
     UpdateAlertRuleRequest,
     AlertHistory,
-    AlertHistoryResponse,
+    AlertHistoryListResponse,
     AcknowledgeAlertRequest,
-    AlertStats
+    AlertStatisticsResponse
 } from '@/types/alert'
 
 // 告警API接口基础路径
@@ -26,14 +24,11 @@ const HISTORY_URL = '/alerts/history'
 export const alertChannelApi = {
     /**
      * 获取告警通道列表
-     * @param page 页码
-     * @param size 每页数量
-     * @returns 告警通道列表响应数据
+     * 获取告警通道列表（后端当前返回全量列表）
+     * @returns 告警通道数组
      */
-    getChannels: (page: number = 1, size: number = 10): Promise<AlertChannelListResponse> => {
-        return get<AlertChannelListResponse>(CHANNEL_URL, {
-            params: { page, size }
-        })
+    getChannels: (): Promise<AlertChannel[]> => {
+        return get<AlertChannel[]>(CHANNEL_URL)
     },
 
     /**
@@ -90,14 +85,11 @@ export const alertChannelApi = {
 export const alertRuleApi = {
     /**
      * 获取告警规则列表
-     * @param page 页码
-     * @param size 每页数量
-     * @returns 告警规则列表响应数据
+     * 获取告警规则列表（后端当前返回全量列表）
+     * @returns 告警规则数组
      */
-    getRules: (page: number = 1, size: number = 10): Promise<AlertRuleListResponse> => {
-        return get<AlertRuleListResponse>(RULE_URL, {
-            params: { page, size }
-        })
+    getRules: (): Promise<AlertRule[]> => {
+        return get<AlertRule[]>(RULE_URL)
     },
 
     /**
@@ -157,13 +149,13 @@ export const alertHistoryApi = {
         ruleId?: string,
         severity?: string,
         status?: string
-    ): Promise<AlertHistoryResponse> => {
-        const params: Record<string, string | number> = { page, size }
+    ): Promise<AlertHistoryListResponse> => {
+        const params: Record<string, string | number> = { page, pageSize: size }
         if (ruleId) params.ruleId = ruleId
         if (severity) params.severity = severity
         if (status) params.status = status
 
-        return get<AlertHistoryResponse>(HISTORY_URL, { params })
+        return get<AlertHistoryListResponse>(HISTORY_URL, { params })
     },
 
     /**
@@ -189,7 +181,8 @@ export const alertHistoryApi = {
      * 获取告警统计信息
      * @returns 告警统计数据
      */
-    getStats: (): Promise<AlertStats> => {
-        return get<AlertStats>(`${HISTORY_URL}/stats`)
+    getStats: (): Promise<AlertStatisticsResponse> => {
+        // 对应后端 /alerts/statistics 接口
+        return get<AlertStatisticsResponse>('/alerts/statistics')
     }
 }

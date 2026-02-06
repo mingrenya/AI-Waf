@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   Dialog,
   DialogContent,
@@ -12,9 +13,15 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Send, Loader2, Bot, User, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { sendChatMessage } from '@/api/mcp'
+import { getMCPStatus, sendChatMessage } from '@/api/mcp'
 import { toast } from '@/store'
 import type { AIAssistantMessage } from '@/types/mcp'
+
+interface ChatMessageResponse {
+  message: string
+  toolCalls?: string[]
+  timestamp: string
+}
 
 interface AIAssistantDialogProps {
   open: boolean
@@ -22,17 +29,39 @@ interface AIAssistantDialogProps {
 }
 
 export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps) {
-  const [messages, setMessages] = useState<AIAssistantMessage[]>([
-    {
-      id: 'welcome',
-      role: 'assistant',
-      content: '你好！我是AI安全助手。我可以帮你分析WAF日志、生成防护规则、评估攻击模式等。请告诉我你的需求。',
-      timestamp: new Date().toISOString(),
-    },
-  ])
+  const [messages, setMessages] = useState<AIAssistantMessage[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const initializedRef = useRef(false)
+
+  const { data: statusResponse } = useQuery({
+    queryKey: ['mcp-status'],
+    queryFn: getMCPStatus,
+    refetchInterval: 10000,
+  })
+
+  const status = statusResponse?.data
+
+  const suggestions = status?.availableTools?.slice(0, 4).map((tool) => `运行工具: ${tool}`) || []
+
+  useEffect(() => {
+    if (initializedRef.current || !status) return
+    const mcpNote = '（说明：MCP 以 STDIO 形式运行，前端仅能基于最近工具调用判断可用性，结果可能不完全实时或准确。）'
+    const greeting = status.connected
+      ? `你好！我是AI安全助手。MCP已连接（可用工具：${status.totalTools} 个${status.serverVersion ? `，版本 ${status.serverVersion}` : ''}）。${mcpNote} 请问有什么可以帮助你的？`
+      : `你好！我是AI安全助手。当前检测到 MCP 可能不可用（最近活动：${status.lastConnectedAt ?? '未知'}）。${mcpNote} AI 助手仍可提供部分功能。`
+
+    setMessages([
+      {
+        id: 'welcome',
+        role: 'assistant',
+        content: greeting,
+        timestamp: new Date().toISOString(),
+      },
+    ])
+    initializedRef.current = true
+  }, [status])
 
   // 自动滚动到底部
   useEffect(() => {
@@ -63,19 +92,50 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
         content: msg.content
       }))
 
-      // 调用后端API
+      // 调用后端API，sendChatMessage 返回的数据形态可能是已解包的 data，也可能是 AxiosResponse
       const response = await sendChatMessage({
         message: currentInput,
         messages: historyMessages,
         stream: false
       })
-      
-      // 从响应中提取聊天数据
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const responseData = response as any
-      const chatData = responseData.data?.data || responseData.data || responseData
-      const aiMessage = chatData.message || '无响应'
-      const aiToolCalls = chatData.toolCalls || []
+      const resAny: unknown = response
+
+      // 处理响应：兼容多种后端/网络层返回格式，优先使用内层 data
+      let chatData: ChatMessageResponse | undefined
+
+      // 类型守卫和安全检查，避免使用 `any`
+      const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null
+
+      const isChatMessageResponse = (v: unknown): v is ChatMessageResponse => {
+        if (!isObject(v)) return false
+        const msg = v['message']
+        const ts = v['timestamp']
+        const tc = v['toolCalls']
+        return typeof msg === 'string' && (typeof ts === 'string' || ts === undefined) && (tc === undefined || Array.isArray(tc))
+      }
+
+      const isApiWrapperWithData = (v: unknown): v is { data: unknown } => isObject(v) && 'data' in v
+
+      if (isApiWrapperWithData(resAny)) {
+        const inner = resAny.data
+        if (isChatMessageResponse(inner)) {
+          chatData = inner
+        } else if (typeof inner === 'string') {
+          // 后端有时把字符串放在 data 中
+          chatData = { message: inner, toolCalls: [], timestamp: new Date().toISOString() }
+        }
+      } else if (isChatMessageResponse(resAny)) {
+        // 已经是目标格式
+        chatData = resAny
+      } else if (isObject(resAny) && typeof resAny['message'] === 'string' && typeof resAny['data'] === 'string') {
+        // 兼容性：某些实现把真正内容放在 top-level message
+        chatData = { message: String(resAny['message']), toolCalls: [], timestamp: new Date().toISOString() }
+      } else {
+        // 无法识别的格式，保守回退为 undefined（后续显示“无响应”）
+        chatData = undefined
+      }
+      const aiMessage = chatData?.message || '无响应'
+      const aiToolCalls = chatData?.toolCalls || []
 
       const assistantMessage: AIAssistantMessage = {
         id: (Date.now() + 1).toString(),
@@ -111,6 +171,10 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion)
   }
 
   return (
@@ -191,7 +255,24 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
             </div>
           </ScrollArea>
 
-
+          {/* 建议快捷操作 */}
+          {messages.length === 1 && suggestions.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">你可以试试：</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestions.map((suggestion, index) => (
+                  <Button
+                    key={`suggestion-${index}-${suggestion.slice(0, 20)}`}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 输入区域 */}
           <div className="flex gap-2">

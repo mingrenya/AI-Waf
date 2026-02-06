@@ -118,7 +118,7 @@ export function ChannelForm({
                                 <FormItem>
                                     <FormLabel>Webhook URL *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://example.com/webhook" {...field} />
+                                        <Input placeholder="https://example.com/webhook" value={typeof field.value === 'string' ? field.value : ''} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -130,7 +130,7 @@ export function ChannelForm({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>HTTP Method</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value || 'POST'}>
+                                    <Select onValueChange={field.onChange} defaultValue={typeof field.value === 'string' ? field.value : 'POST'}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue />
@@ -150,112 +150,94 @@ export function ChannelForm({
 
             case AlertChannelType.Slack:
                 return (
-                    <>
-                        <FormField
-                            control={form.control}
-                            name="config.token"
-                            render={({ field }) => (
+                    <FormField
+                        control={form.control}
+                        name="config"
+                        render={({ field }) => (
+                            <>
                                 <FormItem>
                                     <FormLabel>Bot Token *</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="xoxb-..." {...field} />
+                                        <Input type="password" placeholder="xoxb-..." value={(field.value as Record<string, string>)?.token || ''} onChange={(e) => field.onChange({...field.value, token: e.target.value})} />
                                     </FormControl>
                                     <FormDescription>Slack Bot OAuth Token</FormDescription>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="config.channel"
-                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Channel *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="#alerts" {...field} />
+                                        <Input placeholder="#alerts" value={(field.value as Record<string, string>)?.channel || ''} onChange={(e) => field.onChange({...field.value, channel: e.target.value})} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                        />
-                    </>
+                            </>
+                        )}
+                    />
                 )
 
             case AlertChannelType.Discord:
                 return (
-                    <>
-                        <FormField
-                            control={form.control}
-                            name="config.webhookUrl"
-                            render={({ field }) => (
+                    <FormField
+                        control={form.control}
+                        name="config"
+                        render={({ field }) => (
+                            <>
                                 <FormItem>
                                     <FormLabel>Webhook URL *</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://discord.com/api/webhooks/..." {...field} />
+                                        <Input placeholder="https://discord.com/api/webhooks/..." value={(field.value as Record<string, string>)?.webhookUrl || ''} onChange={(e) => field.onChange({...field.value, webhookUrl: e.target.value})} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="config.username"
-                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Bot Username</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="WAF Alert Bot" {...field} />
+                                        <Input placeholder="WAF Alert Bot" value={(field.value as Record<string, string>)?.username || ''} onChange={(e) => field.onChange({...field.value, username: e.target.value})} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                        />
-                    </>
+                            </>
+                        )}
+                    />
                 )
 
             case AlertChannelType.DingTalk:
                 return (
-                    <>
-                        <FormField
-                            control={form.control}
-                            name="config.accessToken"
-                            render={({ field }) => (
+                    <FormField
+                        control={form.control}
+                        name="config"
+                        render={({ field }) => (
+                            <>
                                 <FormItem>
                                     <FormLabel>Access Token *</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="..." {...field} />
+                                        <Input type="password" placeholder="..." value={(field.value as Record<string, string>)?.accessToken || ''} onChange={(e) => field.onChange({...field.value, accessToken: e.target.value})} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="config.secret"
-                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Secret Key</FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="..." {...field} />
+                                        <Input type="password" placeholder="..." value={(field.value as Record<string, string>)?.secret || ''} onChange={(e) => field.onChange({...field.value, secret: e.target.value})} />
                                     </FormControl>
                                     <FormDescription>Optional, for signature verification</FormDescription>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                        />
-                    </>
+                            </>
+                        )}
+                    />
                 )
 
             case AlertChannelType.WeCom:
                 return (
                     <FormField
                         control={form.control}
-                        name="config.webhookKey"
+                        name="config"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Webhook Key *</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="..." {...field} />
+                                    <Input placeholder="..." value={(field.value as Record<string, string>)?.webhookKey || ''} onChange={(e) => field.onChange({...field.value, webhookKey: e.target.value})} />
                                 </FormControl>
                                 <FormDescription>Enterprise WeChat webhook key</FormDescription>
                                 <FormMessage />

@@ -7,11 +7,12 @@ import { useTranslation } from "react-i18next"
 import { AnimatedButton } from "@/components/ui/animation/components/animated-button"
 import { AnimatedIcon } from "@/components/ui/animation/components/animated-icon"
 import { AlertHistory } from "@/types/alert"
-import { 
+import {
     HistoryTable, 
     HistoryDetailDialog, 
     AlertStatsCards 
 } from "@/feature/alert/components"
+import { queryKeys } from "@/lib/query-keys"
 
 export default function AlertHistoryPage() {
     const { t } = useTranslation()
@@ -30,8 +31,8 @@ export default function AlertHistoryPage() {
     // 刷新历史列表
     const refreshHistory = () => {
         setIsRefreshAnimating(true)
-        queryClient.invalidateQueries({ queryKey: ['alertHistory'] })
-        queryClient.invalidateQueries({ queryKey: ['alertStats'] })
+        queryClient.invalidateQueries({ queryKey: queryKeys.alert.history.lists() })
+        queryClient.invalidateQueries({ queryKey: queryKeys.alert.history.stats() })
 
         setTimeout(() => {
             setIsRefreshAnimating(false)

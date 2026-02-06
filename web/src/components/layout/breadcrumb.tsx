@@ -3,7 +3,6 @@ import { useBreadcrumbMap } from "@/routes/config"
 import type { RoutePath } from "@/routes/constants"
 import { cn } from "@/lib/utils"
 import { ChevronRight } from "lucide-react"
-import { MCPStatusIndicator } from "@/components/common/mcp-status-indicator"
 import { AIAssistantButton } from "@/components/common/ai-assistant-button"
 
 export function Breadcrumb() {
@@ -43,7 +42,6 @@ export function Breadcrumb() {
                     ))}
                     </div>
                     <div className="flex items-center gap-3">
-                        <MCPStatusIndicator />
                         <AIAssistantButton />
                     </div>
                 </div>

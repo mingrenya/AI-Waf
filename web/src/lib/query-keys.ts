@@ -39,6 +39,7 @@ export const queryKeys = {
             all: ['alert', 'history'] as const,
             lists: () => ['alert', 'history', 'list'] as const,
             list: (filters: Record<string, unknown>) => ['alert', 'history', 'list', filters] as const,
+            stats: () => ['alert', 'history', 'stats'] as const,
         },
     },
 

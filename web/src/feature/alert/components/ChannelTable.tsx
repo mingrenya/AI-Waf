@@ -75,8 +75,14 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
     } = useInfiniteQuery({
         queryKey: queryKeys.alert.channels.all,
         queryFn: ({ pageParam = 1 }) => {
-            const page = typeof pageParam === 'number' ? pageParam : 1
-            return alertChannelApi.getChannels(page, PAGINATION_CONFIG.pageSize)
+            // API 返回全量列表，我们需要在客户端进行分页
+            return alertChannelApi.getChannels().then(items => ({
+                items: items.slice(
+                    (pageParam - 1) * PAGINATION_CONFIG.pageSize,
+                    pageParam * PAGINATION_CONFIG.pageSize
+                ),
+                total: items.length
+            }))
         },
         initialPageParam: 1,
         getNextPageParam: (lastPage, allPages) => {

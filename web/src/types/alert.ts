@@ -25,44 +25,77 @@ export enum AlertSeverity {
  * 条件运算符
  */
 export enum ConditionOperator {
-    GreaterThan = "gt",
-    GreaterThanOrEqual = "gte",
-    LessThan = "lt",
-    LessThanOrEqual = "lte",
-    Equal = "eq",
-    NotEqual = "ne",
-    Contains = "contains"
+    GreaterThan = ">",
+    GreaterThanOrEqual = ">=",
+    LessThan = "<",
+    LessThanOrEqual = "<=",
+    Equal = "==",
+    NotEqual = "!=",
 }
 
 /**
- * 告警通道配置
+ * 告警通道配置基础
  */
-export interface AlertChannelConfig {
-    // Webhook配置
-    url?: string
+export interface BaseAlertChannelConfig {
+    // 所有通道共有的字段
+    [key: string]: string | string[] | boolean | Record<string, string> | undefined
+}
+
+/**
+ * Webhook 通道配置
+ */
+export interface WebhookChannelConfig extends BaseAlertChannelConfig {
+    url: string
     method?: string
     headers?: Record<string, string>
+}
 
-    // Slack配置
-    token?: string
-    channel?: string
+/**
+ * Slack 通道配置
+ */
+export interface SlackChannelConfig extends BaseAlertChannelConfig {
+    token: string
+    channel: string
+}
 
-    // Discord配置
-    webhookUrl?: string
+/**
+ * Discord 通道配置
+ */
+export interface DiscordChannelConfig extends BaseAlertChannelConfig {
+    webhookUrl: string
     username?: string
     avatarUrl?: string
+}
 
-    // 钉钉配置
-    accessToken?: string
+/**
+ * 钉钉通道配置
+ */
+export interface DingTalkChannelConfig extends BaseAlertChannelConfig {
+    accessToken: string
     secret?: string
     atMobiles?: string[]
     isAtAll?: boolean
+}
 
-    // 企业微信配置
-    webhookKey?: string
+/**
+ * 企业微信通道配置
+ */
+export interface WeComChannelConfig extends BaseAlertChannelConfig {
+    webhookKey: string
     mentionedList?: string[]
     mentionedMobileList?: string[]
 }
+
+/**
+ * 告警通道配置（统一类型）
+ */
+export type AlertChannelConfig = 
+    | WebhookChannelConfig 
+    | SlackChannelConfig 
+    | DiscordChannelConfig 
+    | DingTalkChannelConfig 
+    | WeComChannelConfig
+    | Record<string, string | string[] | boolean | Record<string, string> | undefined>
 
 /**
  * 告警通道
@@ -84,7 +117,7 @@ export interface AlertCondition {
     metric: string
     operator: ConditionOperator
     threshold: number
-    duration?: number // 持续时间(秒)
+    duration: number // 持续时间(分钟)
 }
 
 /**
@@ -94,14 +127,16 @@ export interface AlertRule {
     id: string
     name: string
     description?: string
-    enabled: boolean
-    severity: AlertSeverity
     conditions: AlertCondition[]
-    channelIds: string[]
-    cooldown: number // 冷却时间(秒)
-    template?: string
+    logic: "AND" | "OR"
+    channels: string[]
+    template: string
+    cooldown: number // 冷却时间（分钟）
+    severity: AlertSeverity
+    enabled: boolean
     createdAt: string
     updatedAt: string
+    createdBy?: string
 }
 
 /**
@@ -123,23 +158,24 @@ export interface AlertHistory {
     ruleName: string
     severity: AlertSeverity
     message: string
-    channelIds: string[]
+    details: Record<string, unknown>
+    channels: string[]
     status: AlertHistoryStatus
     errorMessage?: string
     acknowledgedBy?: string
     acknowledgedAt?: string
     triggeredAt: string
-    createdAt: string
+    sentAt?: string
 }
 
 /**
- * 告警历史响应(带分页)
+ * 告警历史分页响应
  */
-export interface AlertHistoryResponse {
+export interface AlertHistoryListResponse {
     items: AlertHistory[]
     total: number
     page: number
-    size: number
+    pageSize: number
 }
 
 /**
@@ -167,12 +203,13 @@ export interface UpdateAlertChannelRequest {
 export interface CreateAlertRuleRequest {
     name: string
     description?: string
-    enabled: boolean
-    severity: AlertSeverity
     conditions: AlertCondition[]
-    channelIds: string[]
+    logic: "AND" | "OR"
+    channels: string[]
+    template: string
     cooldown: number
-    template?: string
+    severity: AlertSeverity
+    enabled: boolean
 }
 
 /**
@@ -181,12 +218,13 @@ export interface CreateAlertRuleRequest {
 export interface UpdateAlertRuleRequest {
     name?: string
     description?: string
-    enabled?: boolean
-    severity?: AlertSeverity
     conditions?: AlertCondition[]
-    channelIds?: string[]
-    cooldown?: number
+    logic?: "AND" | "OR"
+    channels?: string[]
     template?: string
+    cooldown?: number
+    severity?: AlertSeverity
+    enabled?: boolean
 }
 
 /**
@@ -216,22 +254,15 @@ export interface TestAlertChannelRequest {
  * 确认告警请求
  */
 export interface AcknowledgeAlertRequest {
-    note?: string
+    comment?: string
 }
 
 /**
  * 告警统计
  */
-export interface AlertStats {
-    total: number
-    pending: number
-    sent: number
-    failed: number
-    acknowledged: number
-    bySeverity: {
-        low: number
-        medium: number
-        high: number
-        critical: number
-    }
+export interface AlertStatisticsResponse {
+    totalAlerts: number
+    alertsBySeverity: Record<string, number>
+    alertsByStatus: Record<string, number>
+    // 这里只定义前端当前用到的字段；TopAlertRules 和 RecentAlerts 如需使用可再扩展
 }
