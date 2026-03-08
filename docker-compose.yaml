@@ -2,7 +2,7 @@ services:
   # MongoDB 服务
   mongodb:
     image: mongo:6.0
-    container_name: waf-demo-mongodb
+    container_name: waf-mongodb
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
@@ -47,12 +47,12 @@ services:
       DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-chat}
     ports:
-      - "2333:2333"
-      - "8080:8080"
-      - "9443:9443"
-      - "443:443"
-      - "80:80"
-      - "8404:8404"
+      - "0.0.0.0:2333:2333"
+      - "0.0.0.0:8080:8080"
+      - "0.0.0.0:9443:9443"
+      - "0.0.0.0:443:443"
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:8404:8404"
     volumes:
       - mrya_data:/app/data
       - ./geo-ip:/home/mrya/mrya-waf/geo-ip:ro
@@ -81,7 +81,8 @@ services:
       # MCP Server通过HTTP调用后端API
       # 使用 Docker 内部网络，通过服务名访问
       WAF_BACKEND_URL: http://mrya:2333
-      WAF_API_TOKEN: ${MCP_API_TOKEN}  # 从.env文件读取
+      WAF_USERNAME: ${WAF_USERNAME:-admin}
+      WAF_PASSWORD: ${WAF_PASSWORD}
     # MCP Server 通过 STDIO 通信,不需要暴露端口
     # stdin_open和tty用于支持stdio传输
     stdin_open: true

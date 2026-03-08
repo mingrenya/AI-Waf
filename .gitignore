@@ -1,3 +1,24 @@
 # 环境变量文件（全局忽略，但保留模板文件）
 **/.env*
 !**/.env.template
+
+# 本地编译产物
+server/build
+server/server
+server/mrya-waf
+server/ai-waf-server
+server/test-build
+mcp-server/mcp-server
+mcp-server/ai-waf-mcp
+mcp-server/server-http
+coraza-spoa/mcp-server
+
+# 开发/调试遗留文件
+*.bak
+server/context.txt
+server/prompt.txt
+mcp-server/quick_audit.txt
+mcp-server/evaluation.xml
+mcp-server/fix_jsonschema_tags.py
+mcp-server/audit_mcp.py
+coraza-spoa/readem.md

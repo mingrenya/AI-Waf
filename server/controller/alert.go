@@ -53,9 +53,9 @@ func NewAlertController(alertService service.AlertService) AlertController {
 // @Accept json
 // @Produce json
 // @Param request body dto.CreateAlertChannelRequest true "创建渠道请求"
-// @Success 200 {object} response.Response{data=dto.AlertChannelResponse}
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=dto.AlertChannelResponse}
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/channels [post]
 func (c *alertControllerImpl) CreateChannel(ctx *gin.Context) {
@@ -82,8 +82,8 @@ func (c *alertControllerImpl) CreateChannel(ctx *gin.Context) {
 // @Description 获取所有告警渠道
 // @Tags Alert
 // @Produce json
-// @Success 200 {object} response.Response{data=[]dto.AlertChannelResponse}
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=[]dto.AlertChannelResponse}
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/channels [get]
 func (c *alertControllerImpl) GetChannels(ctx *gin.Context) {
@@ -102,9 +102,9 @@ func (c *alertControllerImpl) GetChannels(ctx *gin.Context) {
 // @Tags Alert
 // @Produce json
 // @Param id path string true "渠道 ID"
-// @Success 200 {object} response.Response{data=dto.AlertChannelResponse}
-// @Failure 404 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=dto.AlertChannelResponse}
+// @Failure 404 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/channels/{id} [get]
 func (c *alertControllerImpl) GetChannelByID(ctx *gin.Context) {
@@ -127,9 +127,9 @@ func (c *alertControllerImpl) GetChannelByID(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "渠道 ID"
 // @Param request body dto.UpdateAlertChannelRequest true "更新渠道请求"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/channels/{id} [put]
 func (c *alertControllerImpl) UpdateChannel(ctx *gin.Context) {
@@ -155,8 +155,8 @@ func (c *alertControllerImpl) UpdateChannel(ctx *gin.Context) {
 // @Tags Alert
 // @Produce json
 // @Param id path string true "渠道 ID"
-// @Success 200 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/channels/{id} [delete]
 func (c *alertControllerImpl) DeleteChannel(ctx *gin.Context) {
@@ -178,9 +178,9 @@ func (c *alertControllerImpl) DeleteChannel(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "渠道 ID"
 // @Param request body dto.TestAlertChannelRequest true "测试请求"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/channels/{id}/test [post]
 func (c *alertControllerImpl) TestChannel(ctx *gin.Context) {
@@ -207,9 +207,9 @@ func (c *alertControllerImpl) TestChannel(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.CreateAlertRuleRequest true "创建规则请求"
-// @Success 200 {object} response.Response{data=dto.AlertRuleResponse}
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=dto.AlertRuleResponse}
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/rules [post]
 func (c *alertControllerImpl) CreateRule(ctx *gin.Context) {
@@ -236,8 +236,8 @@ func (c *alertControllerImpl) CreateRule(ctx *gin.Context) {
 // @Description 获取所有告警规则
 // @Tags Alert
 // @Produce json
-// @Success 200 {object} response.Response{data=[]dto.AlertRuleResponse}
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=[]dto.AlertRuleResponse}
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/rules [get]
 func (c *alertControllerImpl) GetRules(ctx *gin.Context) {
@@ -256,9 +256,9 @@ func (c *alertControllerImpl) GetRules(ctx *gin.Context) {
 // @Tags Alert
 // @Produce json
 // @Param id path string true "规则 ID"
-// @Success 200 {object} response.Response{data=dto.AlertRuleResponse}
-// @Failure 404 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=dto.AlertRuleResponse}
+// @Failure 404 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/rules/{id} [get]
 func (c *alertControllerImpl) GetRuleByID(ctx *gin.Context) {
@@ -281,9 +281,9 @@ func (c *alertControllerImpl) GetRuleByID(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "规则 ID"
 // @Param request body dto.UpdateAlertRuleRequest true "更新规则请求"
-// @Success 200 {object} response.Response
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/rules/{id} [put]
 func (c *alertControllerImpl) UpdateRule(ctx *gin.Context) {
@@ -309,8 +309,8 @@ func (c *alertControllerImpl) UpdateRule(ctx *gin.Context) {
 // @Tags Alert
 // @Produce json
 // @Param id path string true "规则 ID"
-// @Success 200 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/rules/{id} [delete]
 func (c *alertControllerImpl) DeleteRule(ctx *gin.Context) {
@@ -336,9 +336,9 @@ func (c *alertControllerImpl) DeleteRule(ctx *gin.Context) {
 // @Param endTime query string false "结束时间"
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(20)
-// @Success 200 {object} response.Response{data=[]dto.AlertHistoryResponse}
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=[]dto.AlertHistoryResponse}
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/history [get]
 func (c *alertControllerImpl) GetAlertHistory(ctx *gin.Context) {
@@ -399,7 +399,7 @@ func (c *alertControllerImpl) GetAlertHistory(ctx *gin.Context) {
 // @Tags Alert
 // @Produce json
 // @Param id path string true "告警历史ID"
-// @Success 200 {object} response.Response{data=dto.AlertHistoryResponse}
+// @Success 200 {object} model.SuccessResponse{data=dto.AlertHistoryResponse}
 // @Router /alerts/history/{id} [get]
 func (c *alertControllerImpl) GetAlertHistoryDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -425,8 +425,8 @@ func (c *alertControllerImpl) GetAlertHistoryDetail(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "告警历史 ID"
 // @Param request body dto.AcknowledgeAlertRequest false "确认请求"
-// @Success 200 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/history/{id}/acknowledge [post]
 func (c *alertControllerImpl) AcknowledgeAlert(ctx *gin.Context) {
@@ -453,8 +453,8 @@ func (c *alertControllerImpl) AcknowledgeAlert(ctx *gin.Context) {
 // @Produce json
 // @Param startTime query string false "开始时间"
 // @Param endTime query string false "结束时间"
-// @Success 200 {object} response.Response{data=dto.AlertStatisticsResponse}
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=dto.AlertStatisticsResponse}
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /alerts/statistics [get]
 func (c *alertControllerImpl) GetStatistics(ctx *gin.Context) {

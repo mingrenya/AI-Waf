@@ -3,10 +3,10 @@
     "info": {
         "description": "MRYa 应用防火墙管理系统 API",
         "title": "MRYa-WAF API",
-        "termsOfService": "https://github.com/HUAHUAI23/MRYa",
+        "termsOfService": "https://github.com/mingrenya/AI-Waf",
         "contact": {
             "name": "API Support",
-            "url": "https://github.com/HUAHUAI23/MRYa",
+            "url": "https://github.com/mingrenya/AI-Waf",
             "email": "huahua1319873800@outlook.com"
         },
         "license": {
@@ -18,6 +18,942 @@
     "host": "localhost:2333",
     "basePath": "/api/v1",
     "paths": {
+        "/ai/chat": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "与AI助手进行对话",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI"
+                ],
+                "summary": "发送AI聊天消息",
+                "parameters": [
+                    {
+                        "description": "聊天请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AIChatResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ai/chat/stream": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "流式返回AI聊天响应",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "AI"
+                ],
+                "summary": "流式AI聊天",
+                "parameters": [
+                    {
+                        "description": "聊天请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIChatStreamResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/channels": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有告警渠道",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警渠道列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.AlertChannelResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建新的告警渠道",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "创建告警渠道",
+                "parameters": [
+                    {
+                        "description": "创建渠道请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateAlertChannelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AlertChannelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/channels/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据 ID 获取告警渠道详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警渠道详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "渠道 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AlertChannelResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新告警渠道信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "更新告警渠道",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "渠道 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新渠道请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateAlertChannelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定的告警渠道",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "删除告警渠道",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "渠道 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/channels/{id}/test": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "发送测试消息到指定渠道",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "测试告警渠道",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "渠道 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "测试请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.TestAlertChannelRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/history": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "分页查询告警历史记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警历史",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则 ID",
+                        "name": "ruleId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "严重级别",
+                        "name": "severity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.AlertHistoryResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/history/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警历史详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "告警历史ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AlertHistoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/history/{id}/acknowledge": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "确认已读告警",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "确认告警",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "告警历史 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "确认请求",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AcknowledgeAlertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/rules": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取所有告警规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警规则列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.AlertRuleResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "创建新的告警规则",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "创建告警规则",
+                "parameters": [
+                    {
+                        "description": "创建规则请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateAlertRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AlertRuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/rules/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据 ID 获取告警规则详情",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警规则详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AlertRuleResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新告警规则信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "更新告警规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新规则请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateAlertRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除指定的告警规则",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "删除告警规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/alerts/statistics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取告警统计信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Alert"
+                ],
+                "summary": "获取告警统计",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AlertStatisticsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/runner/control": {
             "post": {
                 "security": [
@@ -119,6 +1055,1261 @@
                         "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取当前自适应限流系统配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "获取自适应限流配置",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.AdaptiveThrottlingConfig"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "404": {
+                        "description": "配置不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "更新自适应限流系统配置，如果配置不存在则创建",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "更新自适应限流配置",
+                "parameters": [
+                    {
+                        "description": "配置信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AdaptiveThrottlingConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.AdaptiveThrottlingConfig"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "删除自适应限流系统配置",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "删除自适应限流配置",
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling/baselines": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询当前基线值",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "获取基线值列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "类型筛选 (visit/attack/error)",
+                        "name": "type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BaselineResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling/logs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询限流阈值调整历史记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "获取调整日志列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "类型筛选 (visit/attack/error)",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AdjustmentLogResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling/patterns": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "查询流量模式历史记录",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "获取流量模式列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "类型筛选 (visit/attack/error)",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间",
+                        "name": "endTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.TrafficPatternResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling/recalculate-baseline": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "手动触发重新计算指定类型的基线值",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "重新计算基线",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "类型 (visit/attack/error)",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling/reset-learning": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "清空学习数据并重新开始学习",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "重置学习",
+                "responses": {
+                    "200": {
+                        "description": "操作成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/adaptive-throttling/stats": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取自适应限流系统实时统计信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "自适应限流"
+                ],
+                "summary": "获取统计信息",
+                "responses": {
+                    "200": {
+                        "description": "查询成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.AdaptiveThrottlingStatsDTO"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/analysis/result": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取AI分析结果",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "时间范围",
+                        "name": "timeRange",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIAnalysisResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/analyze/patterns": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "触发AI分析（MCP兼容）",
+                "parameters": [
+                    {
+                        "description": "触发参数",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TriggerAnalysisParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/config": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取AI分析器配置",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AIAnalyzerConfig"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "更新AI分析器配置",
+                "parameters": [
+                    {
+                        "description": "配置请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIAnalyzerConfigRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AIAnalyzerConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/conversations": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取MCP对话列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "关联的攻击模式ID",
+                        "name": "patternId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/conversations/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取MCP对话详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "对话ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.MCPConversation"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "删除MCP对话",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "对话ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/patterns": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取攻击模式列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "critical",
+                            "high",
+                            "medium",
+                            "low"
+                        ],
+                        "type": "string",
+                        "description": "严重程度",
+                        "name": "severity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "攻击类型",
+                        "name": "attackType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "开始时间(RFC3339)",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间(RFC3339)",
+                        "name": "endTime",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AttackPatternListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/patterns/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取攻击模式详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模式ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.AttackPattern"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "删除攻击模式",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模式ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/rules": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取生成规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "pending",
+                            "approved",
+                            "rejected",
+                            "deployed"
+                        ],
+                        "type": "string",
+                        "description": "规则状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "modsecurity",
+                            "microrule"
+                        ],
+                        "type": "string",
+                        "description": "规则类型",
+                        "name": "ruleType",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "关联的攻击模式ID",
+                        "name": "patternId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.GeneratedRuleListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/rules/pending": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取待审核规则列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/rules/review": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "审核规则",
+                "parameters": [
+                    {
+                        "description": "审核请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReviewRuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/rules/{id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取生成规则详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.GeneratedRule"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "删除生成规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/rules/{id}/deploy": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "部署规则",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/stats": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取AI分析器统计信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "开始时间(RFC3339)",
+                        "name": "startTime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "结束时间(RFC3339)",
+                        "name": "endTime",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIAnalysisStatsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/suggestions": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "获取AI规则建议列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "状态",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "严重等级",
+                        "name": "severity",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "数量",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "偏移",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AIRuleSuggestionListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/suggestions/{id}/approve": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "批准规则建议",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "建议ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/suggestions/{id}/deploy": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "部署规则建议",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "建议ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/suggestions/{id}/reject": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "拒绝规则建议",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "建议ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/ai-analyzer/trigger": {
+            "post": {
+                "description": "立即运行攻击模式检测和规则生成",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "AI分析器"
+                ],
+                "summary": "手动触发AI分析",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.APIError"
                         }
                     }
                 }
@@ -251,6 +2442,79 @@
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "手动添加一个封禁IP记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "封禁IP管理"
+                ],
+                "summary": "创建封禁IP记录",
+                "parameters": [
+                    {
+                        "description": "封禁IP信息",
+                        "name": "blockedIP",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BlockedIPCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "封禁IP创建成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.BlockedIPResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "403": {
+                        "description": "禁止访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
             }
         },
         "/api/v1/blocked-ips/cleanup": {
@@ -352,6 +2616,61 @@
                         "description": "禁止访问",
                         "schema": {
                             "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/blocked-ips/{ip}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "根据IP地址解除封禁",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "封禁IP管理"
+                ],
+                "summary": "删除封禁IP",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "IP地址",
+                        "name": "ip",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "解除封禁成功",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "封禁记录不存在",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
                         }
                     },
                     "500": {
@@ -1290,6 +3609,161 @@
                 }
             }
         },
+        "/api/v1/mcp/status": {
+            "get": {
+                "description": "返回MCP服务器的实时连接状态信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MCP"
+                ],
+                "summary": "获取MCP服务器连接状态",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MCPStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/mcp/tool-calls": {
+            "get": {
+                "description": "返回MCP工具的调用历史记录",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MCP"
+                ],
+                "summary": "获取MCP工具调用历史",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "每页数量",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "偏移量",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MCPToolCallHistoryResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/mcp/tool-calls/record": {
+            "post": {
+                "description": "MCP Server每次执行工具后调用此接口记录调用信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MCP"
+                ],
+                "summary": "记录MCP工具调用",
+                "parameters": [
+                    {
+                        "description": "工具调用记录",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RecordToolCallRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.SuccessResponseNoData"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/mcp/tools": {
+            "get": {
+                "description": "返回所有可用的MCP工具名称",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MCP"
+                ],
+                "summary": "获取MCP可用工具列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.MCPToolsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/micro-rules": {
             "get": {
                 "security": [
@@ -1653,6 +4127,335 @@
                         "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/effectiveness": {
+            "get": {
+                "description": "获取所有规则的有效性评分列表，支持排序",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取所有规则有效性评分",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "排序字段",
+                        "name": "sortBy",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "排序方向",
+                        "name": "order",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RuleEffectivenessScoreListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/effectiveness/batch-calculate": {
+            "post": {
+                "description": "批量计算所有启用规则的有效性评分",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "批量计算规则有效性评分",
+                "parameters": [
+                    {
+                        "description": "批量计算请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BatchCalculateScoresRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/effectiveness/calculate": {
+            "post": {
+                "description": "根据规则的历史数据计算有效性评分",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "计算规则有效性评分",
+                "parameters": [
+                    {
+                        "description": "计算请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CalculateScoreRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RuleEffectivenessScoreResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/effectiveness/{id}": {
+            "get": {
+                "description": "获取指定规则的有效性评分",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取规则有效性评分",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "规则ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RuleEffectivenessScoreResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/profiles": {
+            "get": {
+                "description": "获取所有预定义的保护配置文件（基础/标准/严格）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取保护配置文件列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProtectionProfileListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/profiles/apply": {
+            "post": {
+                "description": "根据配置文件批量创建WAF规则",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "一键应用保护配置文件",
+                "parameters": [
+                    {
+                        "description": "应用请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ApplyProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ApplyProfileResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/profiles/{id}": {
+            "get": {
+                "description": "根据ID获取保护配置文件详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取保护配置文件详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "配置文件ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProtectionProfileResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/templates": {
+            "get": {
+                "description": "获取OWASP Top 10规则模板列表，支持按分类和严重等级过滤",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取规则模板列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "分类过滤",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "严重等级过滤",
+                        "name": "severity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RuleTemplateListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/templates/create-rule": {
+            "post": {
+                "description": "根据模板ID创建新的WAF规则",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "从模板创建规则",
+                "parameters": [
+                    {
+                        "description": "创建请求",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateRuleFromTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MicroRuleResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/rules/templates/{id}": {
+            "get": {
+                "description": "根据ID获取规则模板详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "规则管理"
+                ],
+                "summary": "获取规则模板详情",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "模板ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.RuleTemplateResponse"
                         }
                     }
                 }
@@ -2220,6 +5023,76 @@
                 }
             }
         },
+        "/api/v1/stats/security-metrics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "获取综合安全指标仪表板数据，包括规则引擎统计、攻击类型分布、威胁等级、封禁IP等多维度安全指标",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "统计信息"
+                ],
+                "summary": "获取综合安全指标",
+                "parameters": [
+                    {
+                        "enum": [
+                            "24h",
+                            "7d",
+                            "30d"
+                        ],
+                        "type": "string",
+                        "default": "24h",
+                        "description": "时间范围：24h(24小时)、7d(7天)、30d(30天)",
+                        "name": "timeRange",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取综合安全指标成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.SecurityMetricsResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权访问",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/stats/time-series": {
             "get": {
                 "security": [
@@ -2603,6 +5476,70 @@
                     "认证"
                 ],
                 "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "登录信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserLoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "登录成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/model.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.LoginResponseData"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "用户名或密码错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrResponseDontShowError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login-service": {
+            "post": {
+                "description": "用于MCP、CLI等服务端工具，生成90天有效期的JWT令牌",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "认证"
+                ],
+                "summary": "服务账号登录",
                 "parameters": [
                     {
                         "description": "登录信息",
@@ -3050,6 +5987,337 @@
         }
     },
     "definitions": {
+        "dto.AIAnalysisResult": {
+            "type": "object",
+            "properties": {
+                "highSeverityPatterns": {
+                    "type": "integer"
+                },
+                "processingTime": {
+                    "type": "number"
+                },
+                "suggestedRules": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "totalPatterns": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.AIAnalysisStatsResponse": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "lastAnalysisTime": {
+                    "type": "string"
+                },
+                "patternStats": {
+                    "$ref": "#/definitions/dto.AttackPatternStatsResponse"
+                },
+                "ruleStats": {
+                    "$ref": "#/definitions/dto.GeneratedRuleStatsResponse"
+                }
+            }
+        },
+        "dto.AIAnalyzerConfigRequest": {
+            "type": "object",
+            "properties": {
+                "analysisInterval": {
+                    "description": "5-1440分钟",
+                    "type": "integer",
+                    "maximum": 1440,
+                    "minimum": 5
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "patternDetection": {
+                    "type": "object",
+                    "properties": {
+                        "anomalyThreshold": {
+                            "type": "number",
+                            "maximum": 10,
+                            "minimum": 0.5
+                        },
+                        "clusteringMethod": {
+                            "type": "string",
+                            "enum": [
+                                "kmeans",
+                                "dbscan"
+                            ]
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minSamples": {
+                            "type": "integer",
+                            "maximum": 10000,
+                            "minimum": 10
+                        },
+                        "timeWindow": {
+                            "description": "1-168小时",
+                            "type": "integer",
+                            "maximum": 168,
+                            "minimum": 1
+                        }
+                    }
+                },
+                "ruleGeneration": {
+                    "type": "object",
+                    "properties": {
+                        "autoDeploy": {
+                            "type": "boolean"
+                        },
+                        "confidenceThreshold": {
+                            "type": "number",
+                            "maximum": 1,
+                            "minimum": 0
+                        },
+                        "defaultAction": {
+                            "type": "string",
+                            "enum": [
+                                "block",
+                                "log"
+                            ]
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "reviewRequired": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        },
+        "dto.AIChatMessage": {
+            "type": "object",
+            "required": [
+                "content",
+                "role"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "assistant",
+                        "system"
+                    ]
+                }
+            }
+        },
+        "dto.AIChatRequest": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "messages": {
+                    "description": "历史消息上下文",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AIChatMessage"
+                    }
+                },
+                "stream": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.AIChatResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "toolCalls": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.AIChatStreamResponse": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "done": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.AIRuleSuggestion": {
+            "type": "object",
+            "properties": {
+                "confidence": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "deployedAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "patternId": {
+                    "type": "string"
+                },
+                "patternName": {
+                    "type": "string"
+                },
+                "recommendation": {
+                    "type": "string"
+                },
+                "reviewedAt": {
+                    "type": "string"
+                },
+                "ruleContent": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "ruleType": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AIRuleSuggestionListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AIRuleSuggestion"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.AcknowledgeAlertRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AdaptiveThrottlingConfigRequest": {
+            "type": "object",
+            "required": [
+                "applyTo",
+                "autoAdjustment",
+                "baseline",
+                "learningMode"
+            ],
+            "properties": {
+                "applyTo": {
+                    "description": "应用范围配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ApplyToConfigDTO"
+                        }
+                    ]
+                },
+                "autoAdjustment": {
+                    "description": "自动调整配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.AutoAdjustmentConfigDTO"
+                        }
+                    ]
+                },
+                "baseline": {
+                    "description": "基线配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.BaselineConfigDTO"
+                        }
+                    ]
+                },
+                "enabled": {
+                    "description": "是否启用",
+                    "type": "boolean"
+                },
+                "learningMode": {
+                    "description": "学习模式配置",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.LearningModeConfigDTO"
+                        }
+                    ]
+                }
+            }
+        },
+        "dto.AdaptiveThrottlingStatsDTO": {
+            "type": "object",
+            "properties": {
+                "anomalyDetected": {
+                    "description": "是否检测到异常",
+                    "type": "boolean"
+                },
+                "currentBaseline": {
+                    "description": "当前基线",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.BaselineStatsDTO"
+                        }
+                    ]
+                },
+                "currentThreshold": {
+                    "description": "当前阈值",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ThresholdStatsDTO"
+                        }
+                    ]
+                },
+                "lastUpdateTime": {
+                    "description": "最后更新时间",
+                    "type": "string"
+                },
+                "learningProgress": {
+                    "description": "学习进度",
+                    "type": "number"
+                },
+                "recentAdjustments": {
+                    "description": "近期调整次数",
+                    "type": "integer"
+                }
+            }
+        },
         "dto.AddIPToBlacklistRequest": {
             "description": "添加IP地址或CIDR到系统默认黑名单的请求",
             "type": "object",
@@ -3061,6 +6329,193 @@
                     "description": "IP地址或CIDR",
                     "type": "string",
                     "example": "192.168.1.1"
+                }
+            }
+        },
+        "dto.AdjustmentLogResponse": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "description": "当前页",
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "description": "每页数量",
+                    "type": "integer"
+                },
+                "results": {
+                    "description": "调整日志列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ThrottleAdjustmentLogDTO"
+                    }
+                },
+                "totalCount": {
+                    "description": "总数",
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "description": "总页数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.AlertChannelResponse": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AlertHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "acknowledgedAt": {
+                    "type": "string"
+                },
+                "acknowledgedBy": {
+                    "type": "string"
+                },
+                "channels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "details": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "errorMessage": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "ruleId": {
+                    "type": "string"
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "sentAt": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "triggeredAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AlertRuleResponse": {
+            "type": "object",
+            "properties": {
+                "channels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "conditions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AlertCondition"
+                    }
+                },
+                "cooldown": {
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdBy": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "logic": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "template": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AlertStatisticsResponse": {
+            "type": "object",
+            "properties": {
+                "alertsBySeverity": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "alertsByStatus": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "recentAlerts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AlertHistoryResponse"
+                    }
+                },
+                "topAlertRules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TopAlertRule"
+                    }
+                },
+                "totalAlerts": {
+                    "type": "integer"
                 }
             }
         },
@@ -3125,6 +6580,52 @@
                     "description": "事务超时时间(毫秒)",
                     "type": "integer",
                     "example": 60000
+                }
+            }
+        },
+        "dto.ApplyProfileRequest": {
+            "type": "object",
+            "required": [
+                "profile_id"
+            ],
+            "properties": {
+                "profile_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ApplyProfileResponse": {
+            "type": "object",
+            "properties": {
+                "created_count": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "rule_names": {
+                    "description": "创建的规则名称列表",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.ApplyToConfigDTO": {
+            "type": "object",
+            "properties": {
+                "attackLimit": {
+                    "description": "应用到攻击限流",
+                    "type": "boolean"
+                },
+                "errorLimit": {
+                    "description": "应用到错误限流",
+                    "type": "boolean"
+                },
+                "visitLimit": {
+                    "description": "应用到访问限流",
+                    "type": "boolean"
                 }
             }
         },
@@ -3248,6 +6749,126 @@
                 }
             }
         },
+        "dto.AttackPatternListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "description": "直接返回model以避免转换",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AttackPattern"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.AttackPatternStatsResponse": {
+            "type": "object",
+            "properties": {
+                "activePatterns": {
+                    "type": "integer"
+                },
+                "bySeverity": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "byType": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "recentDetections": {
+                    "description": "最近24小时",
+                    "type": "integer"
+                },
+                "totalPatterns": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.AttackTypeStats": {
+            "description": "攻击类型分布统计",
+            "type": "object",
+            "properties": {
+                "category": {
+                    "description": "攻击类别",
+                    "type": "string",
+                    "example": "SQL注入"
+                },
+                "count": {
+                    "description": "数量",
+                    "type": "integer",
+                    "example": 512
+                },
+                "percentage": {
+                    "description": "占比(百分比)",
+                    "type": "number",
+                    "example": 51.2
+                }
+            }
+        },
+        "dto.AutoAdjustmentConfigDTO": {
+            "type": "object",
+            "required": [
+                "adjustmentFactor",
+                "adjustmentStepRatio",
+                "anomalyThreshold",
+                "cooldownPeriod",
+                "maxThreshold",
+                "minThreshold"
+            ],
+            "properties": {
+                "adjustmentFactor": {
+                    "description": "调整因子",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "adjustmentStepRatio": {
+                    "description": "调整步长比例",
+                    "type": "number",
+                    "minimum": 0.01
+                },
+                "anomalyThreshold": {
+                    "description": "异常阈值倍数",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "cooldownPeriod": {
+                    "description": "冷却期(秒)",
+                    "type": "integer",
+                    "minimum": 60
+                },
+                "enabled": {
+                    "description": "是否启用自动调整",
+                    "type": "boolean"
+                },
+                "gradualAdjustment": {
+                    "description": "是否渐进式调整",
+                    "type": "boolean"
+                },
+                "maxThreshold": {
+                    "description": "最大阈值",
+                    "type": "integer",
+                    "minimum": 100
+                },
+                "minThreshold": {
+                    "description": "最小阈值",
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
         "dto.BackendDTO": {
             "type": "object",
             "required": [
@@ -3264,6 +6885,116 @@
                 }
             }
         },
+        "dto.BaselineConfigDTO": {
+            "type": "object",
+            "required": [
+                "calculationMethod",
+                "historyWindow",
+                "percentile",
+                "updateInterval"
+            ],
+            "properties": {
+                "calculationMethod": {
+                    "description": "计算方法",
+                    "type": "string",
+                    "enum": [
+                        "mean",
+                        "median",
+                        "percentile"
+                    ]
+                },
+                "historyWindow": {
+                    "description": "历史窗口(秒)",
+                    "type": "integer",
+                    "minimum": 86400
+                },
+                "percentile": {
+                    "description": "百分位数",
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 0
+                },
+                "updateInterval": {
+                    "description": "更新间隔(秒)",
+                    "type": "integer",
+                    "minimum": 60
+                }
+            }
+        },
+        "dto.BaselineResponse": {
+            "type": "object",
+            "properties": {
+                "results": {
+                    "description": "基线列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.BaselineValueDTO"
+                    }
+                }
+            }
+        },
+        "dto.BaselineStatsDTO": {
+            "type": "object",
+            "properties": {
+                "attack": {
+                    "description": "攻击基线",
+                    "type": "number"
+                },
+                "error": {
+                    "description": "错误基线",
+                    "type": "number"
+                },
+                "visit": {
+                    "description": "访问基线",
+                    "type": "number"
+                }
+            }
+        },
+        "dto.BaselineValueDTO": {
+            "type": "object",
+            "properties": {
+                "calculatedAt": {
+                    "description": "计算时间",
+                    "type": "string"
+                },
+                "confidenceLevel": {
+                    "description": "置信度",
+                    "type": "number"
+                },
+                "sampleSize": {
+                    "description": "样本数量",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "类型",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "基线值",
+                    "type": "number"
+                }
+            }
+        },
+        "dto.BatchCalculateScoresRequest": {
+            "type": "object",
+            "required": [
+                "period"
+            ],
+            "properties": {
+                "period": {
+                    "type": "string",
+                    "enum": [
+                        "24h",
+                        "7d",
+                        "30d"
+                    ]
+                }
+            }
+        },
         "dto.BlockedIPCleanupResponse": {
             "description": "清理过期封禁IP记录的响应数据",
             "type": "object",
@@ -3277,6 +7008,37 @@
                     "description": "操作结果消息",
                     "type": "string",
                     "example": "已成功清理过期的封禁IP记录"
+                }
+            }
+        },
+        "dto.BlockedIPCreateRequest": {
+            "description": "创建封禁IP记录的请求参数",
+            "type": "object",
+            "required": [
+                "ip",
+                "reason"
+            ],
+            "properties": {
+                "duration": {
+                    "description": "封禁时长（秒），0表示永久封禁",
+                    "type": "integer",
+                    "minimum": 0,
+                    "example": 3600
+                },
+                "ip": {
+                    "description": "IP地址",
+                    "type": "string",
+                    "example": "192.168.1.1"
+                },
+                "reason": {
+                    "description": "封禁原因",
+                    "type": "string",
+                    "example": "手动封禁可疑IP地址"
+                },
+                "requestUri": {
+                    "description": "请求URI",
+                    "type": "string",
+                    "example": "/api/v1/login"
                 }
             }
         },
@@ -3370,6 +7132,42 @@
                 }
             }
         },
+        "dto.BlockedIPStats": {
+            "description": "IP封禁统计信息",
+            "type": "object",
+            "properties": {
+                "activeBlocked": {
+                    "description": "当前活跃封禁数",
+                    "type": "integer",
+                    "example": 128
+                },
+                "expiredBlocked": {
+                    "description": "已过期封禁数",
+                    "type": "integer",
+                    "example": 128
+                },
+                "highFrequencyAttack": {
+                    "description": "高频攻击封禁数",
+                    "type": "integer",
+                    "example": 70
+                },
+                "highFrequencyError": {
+                    "description": "高频错误封禁数",
+                    "type": "integer",
+                    "example": 8
+                },
+                "highFrequencyVisit": {
+                    "description": "高频访问封禁数",
+                    "type": "integer",
+                    "example": 50
+                },
+                "totalBlocked": {
+                    "description": "总封禁IP数",
+                    "type": "integer",
+                    "example": 256
+                }
+            }
+        },
         "dto.BlockedIPStatsResponse": {
             "description": "封禁IP统计信息",
             "type": "object",
@@ -3395,13 +7193,35 @@
                     "description": "按原因统计",
                     "type": "object",
                     "additionalProperties": {
-                        "type": "integer"
+                        "type": "integer",
+                        "format": "int64"
                     }
                 },
                 "totalBlocked": {
                     "description": "总封禁数量",
                     "type": "integer",
                     "example": 1000
+                }
+            }
+        },
+        "dto.CalculateScoreRequest": {
+            "type": "object",
+            "required": [
+                "period",
+                "rule_id"
+            ],
+            "properties": {
+                "period": {
+                    "description": "评估周期",
+                    "type": "string",
+                    "enum": [
+                        "24h",
+                        "7d",
+                        "30d"
+                    ]
+                },
+                "rule_id": {
+                    "type": "string"
                 }
             }
         },
@@ -3682,6 +7502,111 @@
                 }
             }
         },
+        "dto.CreateAlertChannelRequest": {
+            "type": "object",
+            "required": [
+                "config",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "webhook",
+                        "slack",
+                        "discord",
+                        "dingtalk",
+                        "wecom"
+                    ]
+                }
+            }
+        },
+        "dto.CreateAlertRuleRequest": {
+            "type": "object",
+            "required": [
+                "channels",
+                "conditions",
+                "cooldown",
+                "logic",
+                "name",
+                "severity",
+                "template"
+            ],
+            "properties": {
+                "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "conditions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/model.AlertCondition"
+                    }
+                },
+                "cooldown": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "logic": {
+                    "type": "string",
+                    "enum": [
+                        "AND",
+                        "OR"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high",
+                        "critical"
+                    ]
+                },
+                "template": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateRuleFromTemplateRequest": {
+            "type": "object",
+            "required": [
+                "template_id"
+            ],
+            "properties": {
+                "custom_name": {
+                    "description": "可选，自定义规则名称",
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateSiteRequest": {
             "description": "创建站点的请求参数",
             "type": "object",
@@ -3885,6 +7810,84 @@
                 }
             }
         },
+        "dto.GeneratedRuleListResponse": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "description": "直接返回model以避免转换",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.GeneratedRule"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.GeneratedRuleStatsResponse": {
+            "type": "object",
+            "properties": {
+                "approvedRules": {
+                    "type": "integer"
+                },
+                "byType": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "deployedRules": {
+                    "type": "integer"
+                },
+                "pendingRules": {
+                    "type": "integer"
+                },
+                "rejectedRules": {
+                    "type": "integer"
+                },
+                "totalRules": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.GeoLocationStats": {
+            "description": "攻击来源地理位置统计",
+            "type": "object",
+            "properties": {
+                "city": {
+                    "description": "城市",
+                    "type": "string",
+                    "example": "New York"
+                },
+                "count": {
+                    "description": "攻击次数",
+                    "type": "integer",
+                    "example": 128
+                },
+                "country": {
+                    "description": "国家",
+                    "type": "string",
+                    "example": "United States"
+                },
+                "countryCode": {
+                    "description": "国家代码",
+                    "type": "string",
+                    "example": "US"
+                },
+                "percentage": {
+                    "description": "占比(百分比)",
+                    "type": "number",
+                    "example": 12.8
+                }
+            }
+        },
         "dto.GetUserInfoResponseData": {
             "type": "object",
             "properties": {
@@ -4035,6 +8038,35 @@
                 }
             }
         },
+        "dto.LearningModeConfigDTO": {
+            "type": "object",
+            "required": [
+                "learningDuration",
+                "minSamples",
+                "sampleInterval"
+            ],
+            "properties": {
+                "enabled": {
+                    "description": "是否启用学习模式",
+                    "type": "boolean"
+                },
+                "learningDuration": {
+                    "description": "学习周期(秒)",
+                    "type": "integer",
+                    "minimum": 3600
+                },
+                "minSamples": {
+                    "description": "最小样本数",
+                    "type": "integer",
+                    "minimum": 10
+                },
+                "sampleInterval": {
+                    "description": "采样间隔(秒)",
+                    "type": "integer",
+                    "minimum": 10
+                }
+            }
+        },
         "dto.LimitConfigDTO": {
             "type": "object",
             "properties": {
@@ -4114,6 +8146,84 @@
                             "$ref": "#/definitions/model.User"
                         }
                     ]
+                }
+            }
+        },
+        "dto.MCPStatusResponse": {
+            "type": "object",
+            "properties": {
+                "availableTools": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "connected": {
+                    "type": "boolean"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "lastConnectedAt": {
+                    "type": "string"
+                },
+                "serverVersion": {
+                    "type": "string"
+                },
+                "totalTools": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.MCPToolCallHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.MCPToolCallRecord"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.MCPToolCallRecord": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "milliseconds",
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "parentMessageUUID": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "toolName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.MCPToolsResponse": {
+            "type": "object",
+            "properties": {
+                "tools": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -4320,6 +8430,58 @@
                 }
             }
         },
+        "dto.ProtectionProfileListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.ProtectionProfileResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ProtectionProfileResponse": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_default": {
+                    "type": "boolean"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "template_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.RealtimeQPSData": {
             "description": "实时QPS数据点，包含时间戳和值",
             "type": "object",
@@ -4349,6 +8511,32 @@
                 }
             }
         },
+        "dto.RecordToolCallRequest": {
+            "type": "object",
+            "required": [
+                "duration",
+                "toolName"
+            ],
+            "properties": {
+                "duration": {
+                    "description": "milliseconds",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "error": {
+                    "type": "string"
+                },
+                "parent_message_uuid": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "toolName": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.ResetPasswordResponseData": {
             "type": "object",
             "properties": {
@@ -4374,6 +8562,258 @@
                 "timestamp": {
                     "type": "string",
                     "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "dto.ResponseTimeStats": {
+            "description": "WAF响应时间统计",
+            "type": "object",
+            "properties": {
+                "avgResponseTime": {
+                    "description": "平均响应时间(毫秒)",
+                    "type": "number",
+                    "example": 15.5
+                },
+                "maxResponseTime": {
+                    "description": "最大响应时间(毫秒)",
+                    "type": "number",
+                    "example": 250
+                },
+                "minResponseTime": {
+                    "description": "最小响应时间(毫秒)",
+                    "type": "number",
+                    "example": 5
+                },
+                "p50ResponseTime": {
+                    "description": "P50响应时间(毫秒)",
+                    "type": "number",
+                    "example": 10
+                },
+                "p95ResponseTime": {
+                    "description": "P95响应时间(毫秒)",
+                    "type": "number",
+                    "example": 50
+                },
+                "p99ResponseTime": {
+                    "description": "P99响应时间(毫秒)",
+                    "type": "number",
+                    "example": 100
+                }
+            }
+        },
+        "dto.ReviewRuleRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "comment",
+                "ruleId"
+            ],
+            "properties": {
+                "action": {
+                    "description": "approve, reject",
+                    "type": "string",
+                    "enum": [
+                        "approve",
+                        "reject"
+                    ]
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "ruleId": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RuleEffectivenessScoreListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RuleEffectivenessScoreResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.RuleEffectivenessScoreResponse": {
+            "type": "object",
+            "properties": {
+                "avg_match_time": {
+                    "type": "number"
+                },
+                "block_count": {
+                    "type": "integer"
+                },
+                "block_rate": {
+                    "type": "number"
+                },
+                "evaluation_period": {
+                    "type": "string"
+                },
+                "false_positive": {
+                    "type": "integer"
+                },
+                "false_positive_rate": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_evaluated": {
+                    "type": "string"
+                },
+                "match_count": {
+                    "type": "integer"
+                },
+                "performance_impact": {
+                    "type": "string"
+                },
+                "recommendation": {
+                    "type": "string"
+                },
+                "rule_id": {
+                    "type": "string"
+                },
+                "rule_name": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                },
+                "true_positive": {
+                    "type": "integer"
+                },
+                "true_positive_rate": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.RuleEngineStats": {
+            "description": "规则引擎性能和效率统计",
+            "type": "object",
+            "properties": {
+                "avgMatchTime": {
+                    "description": "平均匹配时间(毫秒)",
+                    "type": "number",
+                    "example": 0.5
+                },
+                "blacklistRules": {
+                    "description": "黑名单规则数",
+                    "type": "integer",
+                    "example": 100
+                },
+                "disabledRules": {
+                    "description": "已禁用规则数",
+                    "type": "integer",
+                    "example": 8
+                },
+                "enabledRules": {
+                    "description": "已启用规则数",
+                    "type": "integer",
+                    "example": 120
+                },
+                "ruleEfficiency": {
+                    "description": "规则效率(百分比)",
+                    "type": "number",
+                    "example": 95.5
+                },
+                "totalRules": {
+                    "description": "总规则数",
+                    "type": "integer",
+                    "example": 128
+                },
+                "whitelistRules": {
+                    "description": "白名单规则数",
+                    "type": "integer",
+                    "example": 20
+                }
+            }
+        },
+        "dto.RuleTemplateListResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RuleTemplateResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.RuleTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "condition": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "integer"
+                },
+                "rule_type": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.RuleTriggerStats": {
+            "description": "规则触发统计信息",
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "触发次数",
+                    "type": "integer",
+                    "example": 128
+                },
+                "percentage": {
+                    "description": "占比(百分比)",
+                    "type": "number",
+                    "example": 12.5
+                },
+                "ruleId": {
+                    "description": "规则ID",
+                    "type": "integer",
+                    "example": 10086
+                },
+                "ruleName": {
+                    "description": "规则名称",
+                    "type": "string",
+                    "example": "SQL注入防护规则"
                 }
             }
         },
@@ -4436,6 +8876,109 @@
                 }
             }
         },
+        "dto.SecurityMetricsResponse": {
+            "description": "综合安全指标仪表板数据响应",
+            "type": "object",
+            "properties": {
+                "attackTypeDistribution": {
+                    "description": "攻击类型分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.AttackTypeStats"
+                    }
+                },
+                "blockTrend": {
+                    "description": "拦截趋势",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TimeSeriesResponse"
+                        }
+                    ]
+                },
+                "blockedIPMetrics": {
+                    "description": "封禁IP指标",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.BlockedIPStats"
+                        }
+                    ]
+                },
+                "overview": {
+                    "description": "概览统计",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.OverviewStats"
+                        }
+                    ]
+                },
+                "requestTrend": {
+                    "description": "请求趋势",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TimeSeriesResponse"
+                        }
+                    ]
+                },
+                "responseTime": {
+                    "description": "响应时间统计",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ResponseTimeStats"
+                        }
+                    ]
+                },
+                "ruleEngine": {
+                    "description": "规则引擎统计",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.RuleEngineStats"
+                        }
+                    ]
+                },
+                "severityDistribution": {
+                    "description": "严重等级分布",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.SeverityStats"
+                    }
+                },
+                "threatLevel": {
+                    "description": "威胁等级分布",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.ThreatLevelDistribution"
+                        }
+                    ]
+                },
+                "timeRange": {
+                    "description": "统计时间范围",
+                    "type": "string",
+                    "example": "24h"
+                },
+                "topAttackSources": {
+                    "description": "Top攻击来源(前10)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.GeoLocationStats"
+                    }
+                },
+                "topTriggeredRules": {
+                    "description": "Top触发规则(前10)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RuleTriggerStats"
+                    }
+                },
+                "trafficTrend": {
+                    "description": "流量趋势",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TrafficTimeSeriesResponse"
+                        }
+                    ]
+                }
+            }
+        },
         "dto.ServerDTO": {
             "type": "object",
             "required": [
@@ -4459,6 +9002,32 @@
                     "maximum": 65535,
                     "minimum": 1,
                     "example": 80
+                }
+            }
+        },
+        "dto.SeverityStats": {
+            "description": "攻击严重等级分布统计",
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "数量",
+                    "type": "integer",
+                    "example": 256
+                },
+                "level": {
+                    "description": "严重级别(0-5)",
+                    "type": "integer",
+                    "example": 2
+                },
+                "levelName": {
+                    "description": "级别名称",
+                    "type": "string",
+                    "example": "中等"
+                },
+                "percentage": {
+                    "description": "占比(百分比)",
+                    "type": "number",
+                    "example": 25.6
                 }
             }
         },
@@ -4543,6 +9112,113 @@
                 }
             }
         },
+        "dto.TestAlertChannelRequest": {
+            "type": "object",
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ThreatLevelDistribution": {
+            "description": "当前威胁等级分布统计",
+            "type": "object",
+            "properties": {
+                "critical": {
+                    "description": "严重威胁",
+                    "type": "integer",
+                    "example": 5
+                },
+                "high": {
+                    "description": "高威胁",
+                    "type": "integer",
+                    "example": 15
+                },
+                "low": {
+                    "description": "低威胁",
+                    "type": "integer",
+                    "example": 50
+                },
+                "medium": {
+                    "description": "中等威胁",
+                    "type": "integer",
+                    "example": 30
+                }
+            }
+        },
+        "dto.ThresholdStatsDTO": {
+            "type": "object",
+            "properties": {
+                "attack": {
+                    "description": "攻击阈值",
+                    "type": "integer"
+                },
+                "error": {
+                    "description": "错误阈值",
+                    "type": "integer"
+                },
+                "visit": {
+                    "description": "访问阈值",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ThrottleAdjustmentLogDTO": {
+            "type": "object",
+            "properties": {
+                "adjustmentRatio": {
+                    "description": "调整比例",
+                    "type": "number"
+                },
+                "anomalyScore": {
+                    "description": "异常分数",
+                    "type": "number"
+                },
+                "currentTraffic": {
+                    "description": "当前流量",
+                    "type": "number"
+                },
+                "id": {
+                    "description": "ID",
+                    "type": "string"
+                },
+                "newBaseline": {
+                    "description": "新基线",
+                    "type": "number"
+                },
+                "newThreshold": {
+                    "description": "新阈值",
+                    "type": "integer"
+                },
+                "oldBaseline": {
+                    "description": "旧基线",
+                    "type": "number"
+                },
+                "oldThreshold": {
+                    "description": "旧阈值",
+                    "type": "integer"
+                },
+                "reason": {
+                    "description": "原因",
+                    "type": "string"
+                },
+                "timestamp": {
+                    "description": "时间戳",
+                    "type": "string"
+                },
+                "triggeredBy": {
+                    "description": "触发方式",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "类型",
+                    "type": "string"
+                }
+            }
+        },
         "dto.TimeSeriesDataPoint": {
             "description": "时间序列图表数据点",
             "type": "object",
@@ -4582,6 +9258,23 @@
                 }
             }
         },
+        "dto.TopAlertRule": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "ruleId": {
+                    "type": "string"
+                },
+                "ruleName": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.TrafficDataPoint": {
             "description": "流量时间序列图表数据点",
             "type": "object",
@@ -4603,6 +9296,113 @@
                 }
             }
         },
+        "dto.TrafficMetricsDTO": {
+            "type": "object",
+            "properties": {
+                "avgLatency": {
+                    "description": "平均延迟",
+                    "type": "number"
+                },
+                "errorRate": {
+                    "description": "错误率",
+                    "type": "number"
+                },
+                "p95Latency": {
+                    "description": "P95延迟",
+                    "type": "number"
+                },
+                "p99Latency": {
+                    "description": "P99延迟",
+                    "type": "number"
+                },
+                "requestCount": {
+                    "description": "请求数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.TrafficPatternDTO": {
+            "type": "object",
+            "properties": {
+                "metrics": {
+                    "description": "流量指标",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TrafficMetricsDTO"
+                        }
+                    ]
+                },
+                "statistics": {
+                    "description": "统计信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/dto.TrafficStatisticsDTO"
+                        }
+                    ]
+                },
+                "timestamp": {
+                    "description": "时间戳",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "类型",
+                    "type": "string"
+                }
+            }
+        },
+        "dto.TrafficPatternResponse": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "description": "当前页",
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "description": "每页数量",
+                    "type": "integer"
+                },
+                "results": {
+                    "description": "流量模式列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.TrafficPatternDTO"
+                    }
+                },
+                "totalCount": {
+                    "description": "总数",
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "description": "总页数",
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.TrafficStatisticsDTO": {
+            "type": "object",
+            "properties": {
+                "max": {
+                    "description": "最大值",
+                    "type": "number"
+                },
+                "mean": {
+                    "description": "均值",
+                    "type": "number"
+                },
+                "median": {
+                    "description": "中位数",
+                    "type": "number"
+                },
+                "min": {
+                    "description": "最小值",
+                    "type": "number"
+                },
+                "stdDev": {
+                    "description": "标准差",
+                    "type": "number"
+                }
+            }
+        },
         "dto.TrafficTimeSeriesResponse": {
             "description": "流量时间序列图表数据响应",
             "type": "object",
@@ -4618,6 +9418,86 @@
                     "description": "时间范围",
                     "type": "string",
                     "example": "24h"
+                }
+            }
+        },
+        "dto.TriggerAnalysisParams": {
+            "type": "object",
+            "properties": {
+                "anomalyThreshold": {
+                    "type": "number"
+                },
+                "clusteringMethod": {
+                    "type": "string"
+                },
+                "minSamples": {
+                    "type": "integer"
+                },
+                "timeRange": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateAlertChannelRequest": {
+            "type": "object",
+            "properties": {
+                "config": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateAlertRuleRequest": {
+            "type": "object",
+            "properties": {
+                "channels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "conditions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.AlertCondition"
+                    }
+                },
+                "cooldown": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "logic": {
+                    "type": "string",
+                    "enum": [
+                        "AND",
+                        "OR"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string",
+                    "enum": [
+                        "low",
+                        "medium",
+                        "high",
+                        "critical"
+                    ]
+                },
+                "template": {
+                    "type": "string"
                 }
             }
         },
@@ -4767,6 +9647,98 @@
                 }
             }
         },
+        "gin.H": {
+            "type": "object",
+            "additionalProperties": {}
+        },
+        "model.AIAnalyzerConfig": {
+            "description": "AI安全分析器的配置信息",
+            "type": "object",
+            "properties": {
+                "analysisInterval": {
+                    "description": "分析周期",
+                    "type": "integer"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "description": "全局开关",
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "patternDetection": {
+                    "description": "模式检测配置",
+                    "type": "object",
+                    "properties": {
+                        "anomalyThreshold": {
+                            "description": "异常阈值",
+                            "type": "number"
+                        },
+                        "clusteringMethod": {
+                            "description": "聚类方法",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "minSamples": {
+                            "description": "最小样本数",
+                            "type": "integer"
+                        },
+                        "timeWindow": {
+                            "description": "时间窗口(小时)",
+                            "type": "integer"
+                        }
+                    }
+                },
+                "ruleGeneration": {
+                    "description": "规则生成配置",
+                    "type": "object",
+                    "properties": {
+                        "autoDeploy": {
+                            "description": "是否自动部署",
+                            "type": "boolean"
+                        },
+                        "confidenceThreshold": {
+                            "description": "置信度阈值",
+                            "type": "number"
+                        },
+                        "defaultAction": {
+                            "description": "默认动作",
+                            "type": "string"
+                        },
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "reviewRequired": {
+                            "description": "是否需要审核",
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.APIError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "err": {},
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "model.APIResponse": {
             "description": "API响应的标准格式",
             "type": "object",
@@ -4803,6 +9775,223 @@
                     "description": "响应时间戳",
                     "type": "string",
                     "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.AdaptiveThrottlingConfig": {
+            "description": "基于流量模式的自适应限流配置",
+            "type": "object",
+            "properties": {
+                "applyTo": {
+                    "description": "应用范围",
+                    "type": "object",
+                    "properties": {
+                        "attackLimit": {
+                            "type": "boolean",
+                            "example": true
+                        },
+                        "errorLimit": {
+                            "type": "boolean",
+                            "example": false
+                        },
+                        "visitLimit": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    }
+                },
+                "autoAdjustment": {
+                    "description": "自动调整策略",
+                    "type": "object",
+                    "properties": {
+                        "adjustmentFactor": {
+                            "type": "number",
+                            "example": 1.5
+                        },
+                        "adjustmentStepRatio": {
+                            "type": "number",
+                            "example": 0.1
+                        },
+                        "anomalyThreshold": {
+                            "type": "number",
+                            "example": 2
+                        },
+                        "cooldownPeriod": {
+                            "type": "integer",
+                            "example": 300
+                        },
+                        "enabled": {
+                            "type": "boolean",
+                            "example": true
+                        },
+                        "gradualAdjustment": {
+                            "type": "boolean",
+                            "example": true
+                        },
+                        "maxThreshold": {
+                            "type": "integer",
+                            "example": 10000
+                        },
+                        "minThreshold": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                },
+                "baseline": {
+                    "description": "基线配置",
+                    "type": "object",
+                    "properties": {
+                        "calculationMethod": {
+                            "type": "string",
+                            "example": "percentile"
+                        },
+                        "historyWindow": {
+                            "type": "integer",
+                            "example": 604800
+                        },
+                        "percentile": {
+                            "type": "number",
+                            "example": 95
+                        },
+                        "updateInterval": {
+                            "type": "integer",
+                            "example": 3600
+                        }
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "id": {
+                    "type": "string"
+                },
+                "learningMode": {
+                    "description": "学习模式配置",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean",
+                            "example": true
+                        },
+                        "learningDuration": {
+                            "type": "integer",
+                            "example": 86400
+                        },
+                        "minSamples": {
+                            "type": "integer",
+                            "example": 100
+                        },
+                        "sampleInterval": {
+                            "type": "integer",
+                            "example": 60
+                        }
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.AlertCondition": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "持续时间（分钟）",
+                    "type": "integer"
+                },
+                "metric": {
+                    "description": "qps, block_rate, error_rate, attack_count, etc.",
+                    "type": "string"
+                },
+                "operator": {
+                    "description": "\u003e, \u003c, \u003e=, \u003c=, ==, !=",
+                    "type": "string"
+                },
+                "threshold": {
+                    "description": "阈值"
+                }
+            }
+        },
+        "model.AttackPattern": {
+            "description": "AI检测到的攻击模式",
+            "type": "object",
+            "properties": {
+                "confidence": {
+                    "description": "置信度 0-1",
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "模式描述",
+                    "type": "string"
+                },
+                "firstSeen": {
+                    "description": "首次发现时间",
+                    "type": "string"
+                },
+                "frequency": {
+                    "description": "频率(次/秒)",
+                    "type": "number"
+                },
+                "generatedRuleIds": {
+                    "description": "关联规则",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ipPattern": {
+                    "description": "IP模式(CIDR)",
+                    "type": "string"
+                },
+                "lastSeen": {
+                    "description": "最后发现时间",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "模式名称",
+                    "type": "string"
+                },
+                "pathPattern": {
+                    "description": "路径模式",
+                    "type": "string"
+                },
+                "patternType": {
+                    "description": "模式类型: sql_injection, xss, path_traversal等",
+                    "type": "string"
+                },
+                "payloadRegex": {
+                    "description": "载荷正则表达式",
+                    "type": "string"
+                },
+                "sampleCount": {
+                    "description": "统计信息",
+                    "type": "integer"
+                },
+                "severity": {
+                    "description": "严重程度: low, medium, high, critical",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "元信息",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "urlPattern": {
+                    "description": "模式特征",
+                    "type": "string"
                 }
             }
         },
@@ -4952,6 +10141,105 @@
                 "timestamp": {
                     "type": "string",
                     "example": "2023-01-01T12:00:00Z"
+                }
+            }
+        },
+        "model.GeneratedRule": {
+            "description": "基于攻击模式生成的ModSecurity规则",
+            "type": "object",
+            "properties": {
+                "action": {
+                    "description": "动作: block, log",
+                    "type": "string"
+                },
+                "blockCount": {
+                    "description": "拦截次数",
+                    "type": "integer"
+                },
+                "confidence": {
+                    "description": "规则配置",
+                    "type": "number"
+                },
+                "createdAt": {
+                    "description": "元信息",
+                    "type": "string"
+                },
+                "deployedAt": {
+                    "description": "部署信息",
+                    "type": "string"
+                },
+                "deployedRuleId": {
+                    "description": "部署后的规则ID",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "规则描述",
+                    "type": "string"
+                },
+                "falsePositive": {
+                    "description": "误报次数",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "matchCount": {
+                    "description": "效果统计",
+                    "type": "integer"
+                },
+                "microRuleCondition": {
+                    "description": "MicroRule规则",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "name": {
+                    "description": "规则名称",
+                    "type": "string"
+                },
+                "patternId": {
+                    "description": "关联信息",
+                    "type": "string"
+                },
+                "patternName": {
+                    "description": "模式名称",
+                    "type": "string"
+                },
+                "reviewComment": {
+                    "description": "审核意见",
+                    "type": "string"
+                },
+                "reviewRequired": {
+                    "description": "是否需要审核",
+                    "type": "boolean"
+                },
+                "reviewedAt": {
+                    "description": "审核时间",
+                    "type": "string"
+                },
+                "reviewedBy": {
+                    "description": "审核人",
+                    "type": "string"
+                },
+                "ruleType": {
+                    "description": "规则类型: modsecurity, micro_rule",
+                    "type": "string"
+                },
+                "secLangDirective": {
+                    "description": "ModSecurity规则",
+                    "type": "string"
+                },
+                "severity": {
+                    "description": "严重程度",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "部署状态",
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
                 }
             }
         },
@@ -5141,6 +10429,37 @@
                     "description": "严重级别(0-5)",
                     "type": "integer",
                     "example": 2
+                }
+            }
+        },
+        "model.MCPConversation": {
+            "description": "MCP与LLM的对话历史",
+            "type": "object",
+            "properties": {
+                "content": {
+                    "description": "对话内容",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "元信息",
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "patternId": {
+                    "description": "关联信息",
+                    "type": "string"
+                },
+                "role": {
+                    "description": "角色: user, assistant, system",
+                    "type": "string"
+                },
+                "ruleId": {
+                    "type": "string"
+                },
+                "sessionId": {
+                    "type": "string"
                 }
             }
         },
@@ -5460,6 +10779,10 @@
                 "WAFModeObservation": "观察模式",
                 "WAFModeProtection": "防护模式"
             },
+            "x-enum-descriptions": [
+                "防护模式",
+                "观察模式"
+            ],
             "x-enum-varnames": [
                 "WAFModeProtection",
                 "WAFModeObservation"

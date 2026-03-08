@@ -1,10 +1,16 @@
 {
+  "_readme": [
+    "推荐方式：设置 WAF_USERNAME + WAF_PASSWORD，MCP Server 启动时自动登录并获取 90 天 Token，Token 过期后自动刷新。",
+    "备选方式：仅设置 WAF_API_TOKEN（已有 Token 时使用），无需填写用户名密码。",
+    "command 路径请替换为本机实际路径。"
+  ],
   "mcpServers": {
     "ai-waf": {
-      "command": "/Users/duheling/Downloads/AI-Waf/mcp-server/ai-waf-mcp",
+      "command": "/path/to/AI-Waf/mcp-server/ai-waf-mcp",
       "env": {
         "WAF_BACKEND_URL": "http://localhost:2333",
-        "WAF_API_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTY2MWM1NDI3YmFlMmZmM2YzN2Q3NzEiLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sZSI6ImFkbWluIiwiaXNzIjoiTVJZYSIsInN1YiI6IjY5NjYxYzU0MjdiYWUyZmYzZjM3ZDc3MSIsImV4cCI6MTc2ODU1ODIyNiwibmJmIjoxNzY4NDcxODI2LCJpYXQiOjE3Njg0NzE4MjZ9.WWkZASwN1ITv7WwceVBTgheKse8pex-PxRFoyzQ3uNA"
+        "WAF_USERNAME": "admin",
+        "WAF_PASSWORD": "your-password-here"
       }
     }
   }

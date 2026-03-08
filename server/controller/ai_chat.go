@@ -31,9 +31,9 @@ func NewAIChatController(chatService service.AIChatService) AIChatController {
 // @Accept json
 // @Produce json
 // @Param request body dto.AIChatRequest true "聊天请求"
-// @Success 200 {object} response.Response{data=dto.AIChatResponse}
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Success 200 {object} model.SuccessResponse{data=dto.AIChatResponse}
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /ai/chat [post]
 func (c *aiChatControllerImpl) Chat(ctx *gin.Context) {
@@ -66,8 +66,8 @@ func (c *aiChatControllerImpl) Chat(ctx *gin.Context) {
 // @Produce text/event-stream
 // @Param request body dto.AIChatRequest true "聊天请求"
 // @Success 200 {object} dto.AIChatStreamResponse
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
+// @Failure 400 {object} model.ErrResponseDontShowError
+// @Failure 500 {object} model.ErrResponseDontShowError
 // @Security BearerAuth
 // @Router /ai/chat/stream [post]
 func (c *aiChatControllerImpl) ChatStream(ctx *gin.Context) {

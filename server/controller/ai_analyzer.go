@@ -137,7 +137,7 @@ func (c *AIAnalyzerControllerImpl) GetAttackPattern(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "模式ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/patterns/{id} [delete]
 func (c *AIAnalyzerControllerImpl) DeleteAttackPattern(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -220,7 +220,7 @@ func (c *AIAnalyzerControllerImpl) GetGeneratedRule(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "规则ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/rules/{id} [delete]
 func (c *AIAnalyzerControllerImpl) DeleteGeneratedRule(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -245,7 +245,7 @@ func (c *AIAnalyzerControllerImpl) DeleteGeneratedRule(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.ReviewRuleRequest true "审核请求"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/rules/review [post]
 func (c *AIAnalyzerControllerImpl) ReviewRule(ctx *gin.Context) {
 	var req dto.ReviewRuleRequest
@@ -278,7 +278,7 @@ func (c *AIAnalyzerControllerImpl) ReviewRule(ctx *gin.Context) {
 // @Produce json
 // @Param page query int false "页码" default(1)
 // @Param size query int false "每页数量" default(10)
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/rules/pending [get]
 func (c *AIAnalyzerControllerImpl) GetPendingRules(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -305,7 +305,7 @@ func (c *AIAnalyzerControllerImpl) GetPendingRules(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "规则ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/rules/{id}/deploy [post]
 func (c *AIAnalyzerControllerImpl) DeployRule(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -383,7 +383,7 @@ func (c *AIAnalyzerControllerImpl) UpdateAnalyzerConfig(ctx *gin.Context) {
 // @Param patternId query string false "关联的攻击模式ID"
 // @Param page query int false "页码" default(1)
 // @Param size query int false "每页数量" default(10)
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/conversations [get]
 func (c *AIAnalyzerControllerImpl) ListMCPConversations(ctx *gin.Context) {
 	patternID := ctx.Query("patternId")
@@ -441,7 +441,7 @@ func (c *AIAnalyzerControllerImpl) GetMCPConversation(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "对话ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/conversations/{id} [delete]
 func (c *AIAnalyzerControllerImpl) DeleteMCPConversation(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -628,7 +628,7 @@ func (c *AIAnalyzerControllerImpl) ListRuleSuggestions(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "建议ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/suggestions/{id}/approve [post]
 func (c *AIAnalyzerControllerImpl) ApproveRuleSuggestion(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -658,7 +658,7 @@ func (c *AIAnalyzerControllerImpl) ApproveRuleSuggestion(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "建议ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/suggestions/{id}/reject [post]
 func (c *AIAnalyzerControllerImpl) RejectRuleSuggestion(ctx *gin.Context) {
 	type rejectRequest struct {
@@ -700,7 +700,7 @@ func (c *AIAnalyzerControllerImpl) RejectRuleSuggestion(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "建议ID"
-// @Success 200 {object} response.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/ai-analyzer/suggestions/{id}/deploy [post]
 func (c *AIAnalyzerControllerImpl) DeployRuleSuggestion(ctx *gin.Context) {
 	id := ctx.Param("id")

@@ -1,5 +1,222 @@
 basePath: /api/v1
 definitions:
+  dto.AIAnalysisResult:
+    properties:
+      highSeverityPatterns:
+        type: integer
+      processingTime:
+        type: number
+      suggestedRules:
+        type: integer
+      timestamp:
+        type: string
+      totalPatterns:
+        type: integer
+    type: object
+  dto.AIAnalysisStatsResponse:
+    properties:
+      enabled:
+        type: boolean
+      lastAnalysisTime:
+        type: string
+      patternStats:
+        $ref: '#/definitions/dto.AttackPatternStatsResponse'
+      ruleStats:
+        $ref: '#/definitions/dto.GeneratedRuleStatsResponse'
+    type: object
+  dto.AIAnalyzerConfigRequest:
+    properties:
+      analysisInterval:
+        description: 5-1440分钟
+        maximum: 1440
+        minimum: 5
+        type: integer
+      enabled:
+        type: boolean
+      patternDetection:
+        properties:
+          anomalyThreshold:
+            maximum: 10
+            minimum: 0.5
+            type: number
+          clusteringMethod:
+            enum:
+            - kmeans
+            - dbscan
+            type: string
+          enabled:
+            type: boolean
+          minSamples:
+            maximum: 10000
+            minimum: 10
+            type: integer
+          timeWindow:
+            description: 1-168小时
+            maximum: 168
+            minimum: 1
+            type: integer
+        type: object
+      ruleGeneration:
+        properties:
+          autoDeploy:
+            type: boolean
+          confidenceThreshold:
+            maximum: 1
+            minimum: 0
+            type: number
+          defaultAction:
+            enum:
+            - block
+            - log
+            type: string
+          enabled:
+            type: boolean
+          reviewRequired:
+            type: boolean
+        type: object
+    type: object
+  dto.AIChatMessage:
+    properties:
+      content:
+        type: string
+      role:
+        enum:
+        - user
+        - assistant
+        - system
+        type: string
+    required:
+    - content
+    - role
+    type: object
+  dto.AIChatRequest:
+    properties:
+      message:
+        type: string
+      messages:
+        description: 历史消息上下文
+        items:
+          $ref: '#/definitions/dto.AIChatMessage'
+        type: array
+      stream:
+        type: boolean
+    required:
+    - message
+    type: object
+  dto.AIChatResponse:
+    properties:
+      message:
+        type: string
+      timestamp:
+        type: string
+      toolCalls:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.AIChatStreamResponse:
+    properties:
+      content:
+        type: string
+      done:
+        type: boolean
+    type: object
+  dto.AIRuleSuggestion:
+    properties:
+      confidence:
+        type: number
+      createdAt:
+        type: string
+      deployedAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      patternId:
+        type: string
+      patternName:
+        type: string
+      recommendation:
+        type: string
+      reviewedAt:
+        type: string
+      ruleContent:
+        additionalProperties: true
+        type: object
+      ruleName:
+        type: string
+      ruleType:
+        type: string
+      severity:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.AIRuleSuggestionListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.AIRuleSuggestion'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.AcknowledgeAlertRequest:
+    properties:
+      comment:
+        type: string
+    type: object
+  dto.AdaptiveThrottlingConfigRequest:
+    properties:
+      applyTo:
+        allOf:
+        - $ref: '#/definitions/dto.ApplyToConfigDTO'
+        description: 应用范围配置
+      autoAdjustment:
+        allOf:
+        - $ref: '#/definitions/dto.AutoAdjustmentConfigDTO'
+        description: 自动调整配置
+      baseline:
+        allOf:
+        - $ref: '#/definitions/dto.BaselineConfigDTO'
+        description: 基线配置
+      enabled:
+        description: 是否启用
+        type: boolean
+      learningMode:
+        allOf:
+        - $ref: '#/definitions/dto.LearningModeConfigDTO'
+        description: 学习模式配置
+    required:
+    - applyTo
+    - autoAdjustment
+    - baseline
+    - learningMode
+    type: object
+  dto.AdaptiveThrottlingStatsDTO:
+    properties:
+      anomalyDetected:
+        description: 是否检测到异常
+        type: boolean
+      currentBaseline:
+        allOf:
+        - $ref: '#/definitions/dto.BaselineStatsDTO'
+        description: 当前基线
+      currentThreshold:
+        allOf:
+        - $ref: '#/definitions/dto.ThresholdStatsDTO'
+        description: 当前阈值
+      lastUpdateTime:
+        description: 最后更新时间
+        type: string
+      learningProgress:
+        description: 学习进度
+        type: number
+      recentAdjustments:
+        description: 近期调整次数
+        type: integer
+    type: object
   dto.AddIPToBlacklistRequest:
     description: 添加IP地址或CIDR到系统默认黑名单的请求
     properties:
@@ -9,6 +226,132 @@ definitions:
         type: string
     required:
     - ip
+    type: object
+  dto.AdjustmentLogResponse:
+    properties:
+      currentPage:
+        description: 当前页
+        type: integer
+      pageSize:
+        description: 每页数量
+        type: integer
+      results:
+        description: 调整日志列表
+        items:
+          $ref: '#/definitions/dto.ThrottleAdjustmentLogDTO'
+        type: array
+      totalCount:
+        description: 总数
+        type: integer
+      totalPages:
+        description: 总页数
+        type: integer
+    type: object
+  dto.AlertChannelResponse:
+    properties:
+      config:
+        additionalProperties: true
+        type: object
+      createdAt:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.AlertHistoryResponse:
+    properties:
+      acknowledgedAt:
+        type: string
+      acknowledgedBy:
+        type: string
+      channels:
+        items:
+          type: string
+        type: array
+      details:
+        additionalProperties: true
+        type: object
+      errorMessage:
+        type: string
+      id:
+        type: string
+      message:
+        type: string
+      ruleId:
+        type: string
+      ruleName:
+        type: string
+      sentAt:
+        type: string
+      severity:
+        type: string
+      status:
+        type: string
+      triggeredAt:
+        type: string
+    type: object
+  dto.AlertRuleResponse:
+    properties:
+      channels:
+        items:
+          type: string
+        type: array
+      conditions:
+        items:
+          $ref: '#/definitions/model.AlertCondition'
+        type: array
+      cooldown:
+        type: integer
+      createdAt:
+        type: string
+      createdBy:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: string
+      logic:
+        type: string
+      name:
+        type: string
+      severity:
+        type: string
+      template:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  dto.AlertStatisticsResponse:
+    properties:
+      alertsBySeverity:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      alertsByStatus:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+      recentAlerts:
+        items:
+          $ref: '#/definitions/dto.AlertHistoryResponse'
+        type: array
+      topAlertRules:
+        items:
+          $ref: '#/definitions/dto.TopAlertRule'
+        type: array
+      totalAlerts:
+        type: integer
     type: object
   dto.AppConfigDTO:
     properties:
@@ -57,6 +400,37 @@ definitions:
         description: 事务超时时间(毫秒)
         example: 60000
         type: integer
+    type: object
+  dto.ApplyProfileRequest:
+    properties:
+      profile_id:
+        type: string
+    required:
+    - profile_id
+    type: object
+  dto.ApplyProfileResponse:
+    properties:
+      created_count:
+        type: integer
+      message:
+        type: string
+      rule_names:
+        description: 创建的规则名称列表
+        items:
+          type: string
+        type: array
+    type: object
+  dto.ApplyToConfigDTO:
+    properties:
+      attackLimit:
+        description: 应用到攻击限流
+        type: boolean
+      errorLimit:
+        description: 应用到错误限流
+        type: boolean
+      visitLimit:
+        description: 应用到访问限流
+        type: boolean
     type: object
   dto.AttackEventAggregateResult:
     description: 攻击事件的聚合统计结果，提供IP、域名、端口维度的攻击信息汇总，包含攻击次数、首次和最近攻击时间、持续时间等关键指标
@@ -148,6 +522,94 @@ definitions:
         example: 13
         type: integer
     type: object
+  dto.AttackPatternListResponse:
+    properties:
+      list:
+        description: 直接返回model以避免转换
+        items:
+          $ref: '#/definitions/model.AttackPattern'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.AttackPatternStatsResponse:
+    properties:
+      activePatterns:
+        type: integer
+      bySeverity:
+        additionalProperties:
+          type: integer
+        type: object
+      byType:
+        additionalProperties:
+          type: integer
+        type: object
+      recentDetections:
+        description: 最近24小时
+        type: integer
+      totalPatterns:
+        type: integer
+    type: object
+  dto.AttackTypeStats:
+    description: 攻击类型分布统计
+    properties:
+      category:
+        description: 攻击类别
+        example: SQL注入
+        type: string
+      count:
+        description: 数量
+        example: 512
+        type: integer
+      percentage:
+        description: 占比(百分比)
+        example: 51.2
+        type: number
+    type: object
+  dto.AutoAdjustmentConfigDTO:
+    properties:
+      adjustmentFactor:
+        description: 调整因子
+        minimum: 1
+        type: number
+      adjustmentStepRatio:
+        description: 调整步长比例
+        minimum: 0.01
+        type: number
+      anomalyThreshold:
+        description: 异常阈值倍数
+        minimum: 1
+        type: number
+      cooldownPeriod:
+        description: 冷却期(秒)
+        minimum: 60
+        type: integer
+      enabled:
+        description: 是否启用自动调整
+        type: boolean
+      gradualAdjustment:
+        description: 是否渐进式调整
+        type: boolean
+      maxThreshold:
+        description: 最大阈值
+        minimum: 100
+        type: integer
+      minThreshold:
+        description: 最小阈值
+        minimum: 1
+        type: integer
+    required:
+    - adjustmentFactor
+    - adjustmentStepRatio
+    - anomalyThreshold
+    - cooldownPeriod
+    - maxThreshold
+    - minThreshold
+    type: object
   dto.BackendDTO:
     properties:
       servers:
@@ -158,6 +620,86 @@ definitions:
         type: array
     required:
     - servers
+    type: object
+  dto.BaselineConfigDTO:
+    properties:
+      calculationMethod:
+        description: 计算方法
+        enum:
+        - mean
+        - median
+        - percentile
+        type: string
+      historyWindow:
+        description: 历史窗口(秒)
+        minimum: 86400
+        type: integer
+      percentile:
+        description: 百分位数
+        maximum: 100
+        minimum: 0
+        type: integer
+      updateInterval:
+        description: 更新间隔(秒)
+        minimum: 60
+        type: integer
+    required:
+    - calculationMethod
+    - historyWindow
+    - percentile
+    - updateInterval
+    type: object
+  dto.BaselineResponse:
+    properties:
+      results:
+        description: 基线列表
+        items:
+          $ref: '#/definitions/dto.BaselineValueDTO'
+        type: array
+    type: object
+  dto.BaselineStatsDTO:
+    properties:
+      attack:
+        description: 攻击基线
+        type: number
+      error:
+        description: 错误基线
+        type: number
+      visit:
+        description: 访问基线
+        type: number
+    type: object
+  dto.BaselineValueDTO:
+    properties:
+      calculatedAt:
+        description: 计算时间
+        type: string
+      confidenceLevel:
+        description: 置信度
+        type: number
+      sampleSize:
+        description: 样本数量
+        type: integer
+      type:
+        description: 类型
+        type: string
+      updatedAt:
+        description: 更新时间
+        type: string
+      value:
+        description: 基线值
+        type: number
+    type: object
+  dto.BatchCalculateScoresRequest:
+    properties:
+      period:
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        type: string
+    required:
+    - period
     type: object
   dto.BlockedIPCleanupResponse:
     description: 清理过期封禁IP记录的响应数据
@@ -170,6 +712,30 @@ definitions:
         description: 操作结果消息
         example: 已成功清理过期的封禁IP记录
         type: string
+    type: object
+  dto.BlockedIPCreateRequest:
+    description: 创建封禁IP记录的请求参数
+    properties:
+      duration:
+        description: 封禁时长（秒），0表示永久封禁
+        example: 3600
+        minimum: 0
+        type: integer
+      ip:
+        description: IP地址
+        example: 192.168.1.1
+        type: string
+      reason:
+        description: 封禁原因
+        example: 手动封禁可疑IP地址
+        type: string
+      requestUri:
+        description: 请求URI
+        example: /api/v1/login
+        type: string
+    required:
+    - ip
+    - reason
     type: object
   dto.BlockedIPHourlyStats:
     description: 按小时的封禁统计
@@ -240,6 +806,34 @@ definitions:
         example: /api/v1/login
         type: string
     type: object
+  dto.BlockedIPStats:
+    description: IP封禁统计信息
+    properties:
+      activeBlocked:
+        description: 当前活跃封禁数
+        example: 128
+        type: integer
+      expiredBlocked:
+        description: 已过期封禁数
+        example: 128
+        type: integer
+      highFrequencyAttack:
+        description: 高频攻击封禁数
+        example: 70
+        type: integer
+      highFrequencyError:
+        description: 高频错误封禁数
+        example: 8
+        type: integer
+      highFrequencyVisit:
+        description: 高频访问封禁数
+        example: 50
+        type: integer
+      totalBlocked:
+        description: 总封禁IP数
+        example: 256
+        type: integer
+    type: object
   dto.BlockedIPStatsResponse:
     description: 封禁IP统计信息
     properties:
@@ -258,6 +852,7 @@ definitions:
         type: array
       reasonStats:
         additionalProperties:
+          format: int64
           type: integer
         description: 按原因统计
         type: object
@@ -265,6 +860,21 @@ definitions:
         description: 总封禁数量
         example: 1000
         type: integer
+    type: object
+  dto.CalculateScoreRequest:
+    properties:
+      period:
+        description: 评估周期
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        type: string
+      rule_id:
+        type: string
+    required:
+    - period
+    - rule_id
     type: object
   dto.CertificateCreateRequest:
     description: 创建证书的请求参数
@@ -462,6 +1072,82 @@ definitions:
         description: 更新时间
         type: string
     type: object
+  dto.CreateAlertChannelRequest:
+    properties:
+      config:
+        additionalProperties: true
+        type: object
+      enabled:
+        type: boolean
+      name:
+        type: string
+      type:
+        enum:
+        - webhook
+        - slack
+        - discord
+        - dingtalk
+        - wecom
+        type: string
+    required:
+    - config
+    - name
+    - type
+    type: object
+  dto.CreateAlertRuleRequest:
+    properties:
+      channels:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      conditions:
+        items:
+          $ref: '#/definitions/model.AlertCondition'
+        minItems: 1
+        type: array
+      cooldown:
+        minimum: 1
+        type: integer
+      description:
+        type: string
+      enabled:
+        type: boolean
+      logic:
+        enum:
+        - AND
+        - OR
+        type: string
+      name:
+        type: string
+      severity:
+        enum:
+        - low
+        - medium
+        - high
+        - critical
+        type: string
+      template:
+        type: string
+    required:
+    - channels
+    - conditions
+    - cooldown
+    - logic
+    - name
+    - severity
+    - template
+    type: object
+  dto.CreateRuleFromTemplateRequest:
+    properties:
+      custom_name:
+        description: 可选，自定义规则名称
+        type: string
+      template_id:
+        type: string
+    required:
+    - template_id
+    type: object
   dto.CreateSiteRequest:
     description: 创建站点的请求参数
     properties:
@@ -594,6 +1280,61 @@ definitions:
         - $ref: '#/definitions/dto.LimitConfigPatchDTO'
         description: 访问频率限制配置
     type: object
+  dto.GeneratedRuleListResponse:
+    properties:
+      list:
+        description: 直接返回model以避免转换
+        items:
+          $ref: '#/definitions/model.GeneratedRule'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      total:
+        type: integer
+    type: object
+  dto.GeneratedRuleStatsResponse:
+    properties:
+      approvedRules:
+        type: integer
+      byType:
+        additionalProperties:
+          type: integer
+        type: object
+      deployedRules:
+        type: integer
+      pendingRules:
+        type: integer
+      rejectedRules:
+        type: integer
+      totalRules:
+        type: integer
+    type: object
+  dto.GeoLocationStats:
+    description: 攻击来源地理位置统计
+    properties:
+      city:
+        description: 城市
+        example: New York
+        type: string
+      count:
+        description: 攻击次数
+        example: 128
+        type: integer
+      country:
+        description: 国家
+        example: United States
+        type: string
+      countryCode:
+        description: 国家代码
+        example: US
+        type: string
+      percentage:
+        description: 占比(百分比)
+        example: 12.8
+        type: number
+    type: object
   dto.GetUserInfoResponseData:
     properties:
       id:
@@ -704,6 +1445,28 @@ definitions:
         example: 内部服务器
         type: string
     type: object
+  dto.LearningModeConfigDTO:
+    properties:
+      enabled:
+        description: 是否启用学习模式
+        type: boolean
+      learningDuration:
+        description: 学习周期(秒)
+        minimum: 3600
+        type: integer
+      minSamples:
+        description: 最小样本数
+        minimum: 10
+        type: integer
+      sampleInterval:
+        description: 采样间隔(秒)
+        minimum: 10
+        type: integer
+    required:
+    - learningDuration
+    - minSamples
+    - sampleInterval
+    type: object
   dto.LimitConfigDTO:
     properties:
       blockDuration:
@@ -762,6 +1525,57 @@ definitions:
         allOf:
         - $ref: '#/definitions/model.User'
         description: 用户信息
+    type: object
+  dto.MCPStatusResponse:
+    properties:
+      availableTools:
+        items:
+          type: string
+        type: array
+      connected:
+        type: boolean
+      error:
+        type: string
+      lastConnectedAt:
+        type: string
+      serverVersion:
+        type: string
+      totalTools:
+        type: integer
+    type: object
+  dto.MCPToolCallHistoryResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.MCPToolCallRecord'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.MCPToolCallRecord:
+    properties:
+      duration:
+        description: milliseconds
+        type: integer
+      error:
+        type: string
+      id:
+        type: string
+      parentMessageUUID:
+        type: string
+      success:
+        type: boolean
+      timestamp:
+        type: string
+      toolName:
+        type: string
+    type: object
+  dto.MCPToolsResponse:
+    properties:
+      tools:
+        items:
+          type: string
+        type: array
     type: object
   dto.MicroRuleCreateRequest:
     description: 创建微规则的请求参数
@@ -919,6 +1733,40 @@ definitions:
         example: 123456
         type: integer
     type: object
+  dto.ProtectionProfileListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.ProtectionProfileResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.ProtectionProfileResponse:
+    properties:
+      categories:
+        items:
+          type: string
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_default:
+        type: boolean
+      level:
+        type: string
+      name:
+        type: string
+      template_ids:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+    type: object
   dto.RealtimeQPSData:
     description: 实时QPS数据点，包含时间戳和值
     properties:
@@ -940,6 +1788,24 @@ definitions:
           $ref: '#/definitions/dto.RealtimeQPSData'
         type: array
     type: object
+  dto.RecordToolCallRequest:
+    properties:
+      duration:
+        description: milliseconds
+        minimum: 0
+        type: integer
+      error:
+        type: string
+      parent_message_uuid:
+        type: string
+      success:
+        type: boolean
+      toolName:
+        type: string
+    required:
+    - duration
+    - toolName
+    type: object
   dto.ResetPasswordResponseData:
     properties:
       code:
@@ -958,6 +1824,185 @@ definitions:
         type: boolean
       timestamp:
         example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  dto.ResponseTimeStats:
+    description: WAF响应时间统计
+    properties:
+      avgResponseTime:
+        description: 平均响应时间(毫秒)
+        example: 15.5
+        type: number
+      maxResponseTime:
+        description: 最大响应时间(毫秒)
+        example: 250
+        type: number
+      minResponseTime:
+        description: 最小响应时间(毫秒)
+        example: 5
+        type: number
+      p50ResponseTime:
+        description: P50响应时间(毫秒)
+        example: 10
+        type: number
+      p95ResponseTime:
+        description: P95响应时间(毫秒)
+        example: 50
+        type: number
+      p99ResponseTime:
+        description: P99响应时间(毫秒)
+        example: 100
+        type: number
+    type: object
+  dto.ReviewRuleRequest:
+    properties:
+      action:
+        description: approve, reject
+        enum:
+        - approve
+        - reject
+        type: string
+      comment:
+        type: string
+      ruleId:
+        type: string
+    required:
+    - action
+    - comment
+    - ruleId
+    type: object
+  dto.RuleEffectivenessScoreListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.RuleEffectivenessScoreResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.RuleEffectivenessScoreResponse:
+    properties:
+      avg_match_time:
+        type: number
+      block_count:
+        type: integer
+      block_rate:
+        type: number
+      evaluation_period:
+        type: string
+      false_positive:
+        type: integer
+      false_positive_rate:
+        type: number
+      id:
+        type: string
+      last_evaluated:
+        type: string
+      match_count:
+        type: integer
+      performance_impact:
+        type: string
+      recommendation:
+        type: string
+      rule_id:
+        type: string
+      rule_name:
+        type: string
+      score:
+        type: number
+      true_positive:
+        type: integer
+      true_positive_rate:
+        type: number
+    type: object
+  dto.RuleEngineStats:
+    description: 规则引擎性能和效率统计
+    properties:
+      avgMatchTime:
+        description: 平均匹配时间(毫秒)
+        example: 0.5
+        type: number
+      blacklistRules:
+        description: 黑名单规则数
+        example: 100
+        type: integer
+      disabledRules:
+        description: 已禁用规则数
+        example: 8
+        type: integer
+      enabledRules:
+        description: 已启用规则数
+        example: 120
+        type: integer
+      ruleEfficiency:
+        description: 规则效率(百分比)
+        example: 95.5
+        type: number
+      totalRules:
+        description: 总规则数
+        example: 128
+        type: integer
+      whitelistRules:
+        description: 白名单规则数
+        example: 20
+        type: integer
+    type: object
+  dto.RuleTemplateListResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/dto.RuleTemplateResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  dto.RuleTemplateResponse:
+    properties:
+      category:
+        type: string
+      condition:
+        items:
+          type: integer
+        type: array
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      priority:
+        type: integer
+      rule_type:
+        type: string
+      severity:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+    type: object
+  dto.RuleTriggerStats:
+    description: 规则触发统计信息
+    properties:
+      count:
+        description: 触发次数
+        example: 128
+        type: integer
+      percentage:
+        description: 占比(百分比)
+        example: 12.5
+        type: number
+      ruleId:
+        description: 规则ID
+        example: 10086
+        type: integer
+      ruleName:
+        description: 规则名称
+        example: SQL注入防护规则
         type: string
     type: object
   dto.RunnerControlRequest:
@@ -1004,6 +2049,66 @@ definitions:
         example: running
         type: string
     type: object
+  dto.SecurityMetricsResponse:
+    description: 综合安全指标仪表板数据响应
+    properties:
+      attackTypeDistribution:
+        description: 攻击类型分布
+        items:
+          $ref: '#/definitions/dto.AttackTypeStats'
+        type: array
+      blockTrend:
+        allOf:
+        - $ref: '#/definitions/dto.TimeSeriesResponse'
+        description: 拦截趋势
+      blockedIPMetrics:
+        allOf:
+        - $ref: '#/definitions/dto.BlockedIPStats'
+        description: 封禁IP指标
+      overview:
+        allOf:
+        - $ref: '#/definitions/dto.OverviewStats'
+        description: 概览统计
+      requestTrend:
+        allOf:
+        - $ref: '#/definitions/dto.TimeSeriesResponse'
+        description: 请求趋势
+      responseTime:
+        allOf:
+        - $ref: '#/definitions/dto.ResponseTimeStats'
+        description: 响应时间统计
+      ruleEngine:
+        allOf:
+        - $ref: '#/definitions/dto.RuleEngineStats'
+        description: 规则引擎统计
+      severityDistribution:
+        description: 严重等级分布
+        items:
+          $ref: '#/definitions/dto.SeverityStats'
+        type: array
+      threatLevel:
+        allOf:
+        - $ref: '#/definitions/dto.ThreatLevelDistribution'
+        description: 威胁等级分布
+      timeRange:
+        description: 统计时间范围
+        example: 24h
+        type: string
+      topAttackSources:
+        description: Top攻击来源(前10)
+        items:
+          $ref: '#/definitions/dto.GeoLocationStats'
+        type: array
+      topTriggeredRules:
+        description: Top触发规则(前10)
+        items:
+          $ref: '#/definitions/dto.RuleTriggerStats'
+        type: array
+      trafficTrend:
+        allOf:
+        - $ref: '#/definitions/dto.TrafficTimeSeriesResponse'
+        description: 流量趋势
+    type: object
   dto.ServerDTO:
     properties:
       host:
@@ -1023,6 +2128,26 @@ definitions:
     required:
     - host
     - port
+    type: object
+  dto.SeverityStats:
+    description: 攻击严重等级分布统计
+    properties:
+      count:
+        description: 数量
+        example: 256
+        type: integer
+      level:
+        description: 严重级别(0-5)
+        example: 2
+        type: integer
+      levelName:
+        description: 级别名称
+        example: 中等
+        type: string
+      percentage:
+        description: 占比(百分比)
+        example: 25.6
+        type: number
     type: object
   dto.SiteListResponse:
     description: 站点列表响应
@@ -1077,6 +2202,84 @@ definitions:
         - $ref: '#/definitions/model.WAFMode'
         description: WAF防护模式
     type: object
+  dto.TestAlertChannelRequest:
+    properties:
+      message:
+        type: string
+    required:
+    - message
+    type: object
+  dto.ThreatLevelDistribution:
+    description: 当前威胁等级分布统计
+    properties:
+      critical:
+        description: 严重威胁
+        example: 5
+        type: integer
+      high:
+        description: 高威胁
+        example: 15
+        type: integer
+      low:
+        description: 低威胁
+        example: 50
+        type: integer
+      medium:
+        description: 中等威胁
+        example: 30
+        type: integer
+    type: object
+  dto.ThresholdStatsDTO:
+    properties:
+      attack:
+        description: 攻击阈值
+        type: integer
+      error:
+        description: 错误阈值
+        type: integer
+      visit:
+        description: 访问阈值
+        type: integer
+    type: object
+  dto.ThrottleAdjustmentLogDTO:
+    properties:
+      adjustmentRatio:
+        description: 调整比例
+        type: number
+      anomalyScore:
+        description: 异常分数
+        type: number
+      currentTraffic:
+        description: 当前流量
+        type: number
+      id:
+        description: ID
+        type: string
+      newBaseline:
+        description: 新基线
+        type: number
+      newThreshold:
+        description: 新阈值
+        type: integer
+      oldBaseline:
+        description: 旧基线
+        type: number
+      oldThreshold:
+        description: 旧阈值
+        type: integer
+      reason:
+        description: 原因
+        type: string
+      timestamp:
+        description: 时间戳
+        type: string
+      triggeredBy:
+        description: 触发方式
+        type: string
+      type:
+        description: 类型
+        type: string
+    type: object
   dto.TimeSeriesDataPoint:
     description: 时间序列图表数据点
     properties:
@@ -1106,6 +2309,17 @@ definitions:
         example: 24h
         type: string
     type: object
+  dto.TopAlertRule:
+    properties:
+      count:
+        type: integer
+      ruleId:
+        type: string
+      ruleName:
+        type: string
+      severity:
+        type: string
+    type: object
   dto.TrafficDataPoint:
     description: 流量时间序列图表数据点
     properties:
@@ -1122,6 +2336,79 @@ definitions:
         example: "2024-01-01T12:00:00Z"
         type: string
     type: object
+  dto.TrafficMetricsDTO:
+    properties:
+      avgLatency:
+        description: 平均延迟
+        type: number
+      errorRate:
+        description: 错误率
+        type: number
+      p95Latency:
+        description: P95延迟
+        type: number
+      p99Latency:
+        description: P99延迟
+        type: number
+      requestCount:
+        description: 请求数
+        type: integer
+    type: object
+  dto.TrafficPatternDTO:
+    properties:
+      metrics:
+        allOf:
+        - $ref: '#/definitions/dto.TrafficMetricsDTO'
+        description: 流量指标
+      statistics:
+        allOf:
+        - $ref: '#/definitions/dto.TrafficStatisticsDTO'
+        description: 统计信息
+      timestamp:
+        description: 时间戳
+        type: string
+      type:
+        description: 类型
+        type: string
+    type: object
+  dto.TrafficPatternResponse:
+    properties:
+      currentPage:
+        description: 当前页
+        type: integer
+      pageSize:
+        description: 每页数量
+        type: integer
+      results:
+        description: 流量模式列表
+        items:
+          $ref: '#/definitions/dto.TrafficPatternDTO'
+        type: array
+      totalCount:
+        description: 总数
+        type: integer
+      totalPages:
+        description: 总页数
+        type: integer
+    type: object
+  dto.TrafficStatisticsDTO:
+    properties:
+      max:
+        description: 最大值
+        type: number
+      mean:
+        description: 均值
+        type: number
+      median:
+        description: 中位数
+        type: number
+      min:
+        description: 最小值
+        type: number
+      stdDev:
+        description: 标准差
+        type: number
+    type: object
   dto.TrafficTimeSeriesResponse:
     description: 流量时间序列图表数据响应
     properties:
@@ -1133,6 +2420,60 @@ definitions:
       timeRange:
         description: 时间范围
         example: 24h
+        type: string
+    type: object
+  dto.TriggerAnalysisParams:
+    properties:
+      anomalyThreshold:
+        type: number
+      clusteringMethod:
+        type: string
+      minSamples:
+        type: integer
+      timeRange:
+        type: string
+    type: object
+  dto.UpdateAlertChannelRequest:
+    properties:
+      config:
+        additionalProperties: true
+        type: object
+      enabled:
+        type: boolean
+      name:
+        type: string
+    type: object
+  dto.UpdateAlertRuleRequest:
+    properties:
+      channels:
+        items:
+          type: string
+        type: array
+      conditions:
+        items:
+          $ref: '#/definitions/model.AlertCondition'
+        type: array
+      cooldown:
+        type: integer
+      description:
+        type: string
+      enabled:
+        type: boolean
+      logic:
+        enum:
+        - AND
+        - OR
+        type: string
+      name:
+        type: string
+      severity:
+        enum:
+        - low
+        - medium
+        - high
+        - critical
+        type: string
+      template:
         type: string
     type: object
   dto.UpdateSiteRequest:
@@ -1239,6 +2580,71 @@ definitions:
         minLength: 3
         type: string
     type: object
+  gin.H:
+    additionalProperties: {}
+    type: object
+  model.AIAnalyzerConfig:
+    description: AI安全分析器的配置信息
+    properties:
+      analysisInterval:
+        description: 分析周期
+        type: integer
+      createdAt:
+        type: string
+      enabled:
+        description: 全局开关
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      patternDetection:
+        description: 模式检测配置
+        properties:
+          anomalyThreshold:
+            description: 异常阈值
+            type: number
+          clusteringMethod:
+            description: 聚类方法
+            type: string
+          enabled:
+            type: boolean
+          minSamples:
+            description: 最小样本数
+            type: integer
+          timeWindow:
+            description: 时间窗口(小时)
+            type: integer
+        type: object
+      ruleGeneration:
+        description: 规则生成配置
+        properties:
+          autoDeploy:
+            description: 是否自动部署
+            type: boolean
+          confidenceThreshold:
+            description: 置信度阈值
+            type: number
+          defaultAction:
+            description: 默认动作
+            type: string
+          enabled:
+            type: boolean
+          reviewRequired:
+            description: 是否需要审核
+            type: boolean
+        type: object
+      updatedAt:
+        type: string
+    type: object
+  model.APIError:
+    properties:
+      code:
+        type: integer
+      err: {}
+      message:
+        type: string
+    type: object
   model.APIResponse:
     description: API响应的标准格式
     properties:
@@ -1267,6 +2673,163 @@ definitions:
       timestamp:
         description: 响应时间戳
         example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.AdaptiveThrottlingConfig:
+    description: 基于流量模式的自适应限流配置
+    properties:
+      applyTo:
+        description: 应用范围
+        properties:
+          attackLimit:
+            example: true
+            type: boolean
+          errorLimit:
+            example: false
+            type: boolean
+          visitLimit:
+            example: true
+            type: boolean
+        type: object
+      autoAdjustment:
+        description: 自动调整策略
+        properties:
+          adjustmentFactor:
+            example: 1.5
+            type: number
+          adjustmentStepRatio:
+            example: 0.1
+            type: number
+          anomalyThreshold:
+            example: 2
+            type: number
+          cooldownPeriod:
+            example: 300
+            type: integer
+          enabled:
+            example: true
+            type: boolean
+          gradualAdjustment:
+            example: true
+            type: boolean
+          maxThreshold:
+            example: 10000
+            type: integer
+          minThreshold:
+            example: 10
+            type: integer
+        type: object
+      baseline:
+        description: 基线配置
+        properties:
+          calculationMethod:
+            example: percentile
+            type: string
+          historyWindow:
+            example: 604800
+            type: integer
+          percentile:
+            example: 95
+            type: number
+          updateInterval:
+            example: 3600
+            type: integer
+        type: object
+      createdAt:
+        type: string
+      enabled:
+        example: true
+        type: boolean
+      id:
+        type: string
+      learningMode:
+        description: 学习模式配置
+        properties:
+          enabled:
+            example: true
+            type: boolean
+          learningDuration:
+            example: 86400
+            type: integer
+          minSamples:
+            example: 100
+            type: integer
+          sampleInterval:
+            example: 60
+            type: integer
+        type: object
+      updatedAt:
+        type: string
+    type: object
+  model.AlertCondition:
+    properties:
+      duration:
+        description: 持续时间（分钟）
+        type: integer
+      metric:
+        description: qps, block_rate, error_rate, attack_count, etc.
+        type: string
+      operator:
+        description: '>, <, >=, <=, ==, !='
+        type: string
+      threshold:
+        description: 阈值
+    type: object
+  model.AttackPattern:
+    description: AI检测到的攻击模式
+    properties:
+      confidence:
+        description: 置信度 0-1
+        type: number
+      createdAt:
+        type: string
+      description:
+        description: 模式描述
+        type: string
+      firstSeen:
+        description: 首次发现时间
+        type: string
+      frequency:
+        description: 频率(次/秒)
+        type: number
+      generatedRuleIds:
+        description: 关联规则
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      ipPattern:
+        description: IP模式(CIDR)
+        type: string
+      lastSeen:
+        description: 最后发现时间
+        type: string
+      name:
+        description: 模式名称
+        type: string
+      pathPattern:
+        description: 路径模式
+        type: string
+      patternType:
+        description: '模式类型: sql_injection, xss, path_traversal等'
+        type: string
+      payloadRegex:
+        description: 载荷正则表达式
+        type: string
+      sampleCount:
+        description: 统计信息
+        type: integer
+      severity:
+        description: '严重程度: low, medium, high, critical'
+        type: string
+      status:
+        description: 元信息
+        type: string
+      updatedAt:
+        type: string
+      urlPattern:
+        description: 模式特征
         type: string
     type: object
   model.Backend:
@@ -1375,6 +2938,79 @@ definitions:
         type: boolean
       timestamp:
         example: "2023-01-01T12:00:00Z"
+        type: string
+    type: object
+  model.GeneratedRule:
+    description: 基于攻击模式生成的ModSecurity规则
+    properties:
+      action:
+        description: '动作: block, log'
+        type: string
+      blockCount:
+        description: 拦截次数
+        type: integer
+      confidence:
+        description: 规则配置
+        type: number
+      createdAt:
+        description: 元信息
+        type: string
+      deployedAt:
+        description: 部署信息
+        type: string
+      deployedRuleId:
+        description: 部署后的规则ID
+        type: string
+      description:
+        description: 规则描述
+        type: string
+      falsePositive:
+        description: 误报次数
+        type: integer
+      id:
+        type: string
+      matchCount:
+        description: 效果统计
+        type: integer
+      microRuleCondition:
+        description: MicroRule规则
+        items:
+          type: integer
+        type: array
+      name:
+        description: 规则名称
+        type: string
+      patternId:
+        description: 关联信息
+        type: string
+      patternName:
+        description: 模式名称
+        type: string
+      reviewComment:
+        description: 审核意见
+        type: string
+      reviewRequired:
+        description: 是否需要审核
+        type: boolean
+      reviewedAt:
+        description: 审核时间
+        type: string
+      reviewedBy:
+        description: 审核人
+        type: string
+      ruleType:
+        description: '规则类型: modsecurity, micro_rule'
+        type: string
+      secLangDirective:
+        description: ModSecurity规则
+        type: string
+      severity:
+        description: 严重程度
+        type: string
+      status:
+        description: 部署状态
+        type: string
+      updatedAt:
         type: string
     type: object
   model.IPGroup:
@@ -1521,6 +3157,28 @@ definitions:
         description: 严重级别(0-5)
         example: 2
         type: integer
+    type: object
+  model.MCPConversation:
+    description: MCP与LLM的对话历史
+    properties:
+      content:
+        description: 对话内容
+        type: string
+      createdAt:
+        description: 元信息
+        type: string
+      id:
+        type: string
+      patternId:
+        description: 关联信息
+        type: string
+      role:
+        description: '角色: user, assistant, system'
+        type: string
+      ruleId:
+        type: string
+      sessionId:
+        type: string
     type: object
   model.Server:
     properties:
@@ -1756,6 +3414,9 @@ definitions:
     x-enum-comments:
       WAFModeObservation: 观察模式
       WAFModeProtection: 防护模式
+    x-enum-descriptions:
+    - 防护模式
+    - 观察模式
     x-enum-varnames:
     - WAFModeProtection
     - WAFModeObservation
@@ -1773,6 +3434,573 @@ info:
   title: MRYa-WAF API
   version: "1.0"
 paths:
+  /ai/chat:
+    post:
+      consumes:
+      - application/json
+      description: 与AI助手进行对话
+      parameters:
+      - description: 聊天请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AIChatResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 发送AI聊天消息
+      tags:
+      - AI
+  /ai/chat/stream:
+    post:
+      consumes:
+      - application/json
+      description: 流式返回AI聊天响应
+      parameters:
+      - description: 聊天请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIChatRequest'
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AIChatStreamResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 流式AI聊天
+      tags:
+      - AI
+  /alerts/channels:
+    get:
+      description: 获取所有告警渠道
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.AlertChannelResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取告警渠道列表
+      tags:
+      - Alert
+    post:
+      consumes:
+      - application/json
+      description: 创建新的告警渠道
+      parameters:
+      - description: 创建渠道请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAlertChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AlertChannelResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建告警渠道
+      tags:
+      - Alert
+  /alerts/channels/{id}:
+    delete:
+      description: 删除指定的告警渠道
+      parameters:
+      - description: 渠道 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除告警渠道
+      tags:
+      - Alert
+    get:
+      description: 根据 ID 获取告警渠道详情
+      parameters:
+      - description: 渠道 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AlertChannelResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取告警渠道详情
+      tags:
+      - Alert
+    put:
+      consumes:
+      - application/json
+      description: 更新告警渠道信息
+      parameters:
+      - description: 渠道 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新渠道请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAlertChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新告警渠道
+      tags:
+      - Alert
+  /alerts/channels/{id}/test:
+    post:
+      consumes:
+      - application/json
+      description: 发送测试消息到指定渠道
+      parameters:
+      - description: 渠道 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 测试请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TestAlertChannelRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 测试告警渠道
+      tags:
+      - Alert
+  /alerts/history:
+    get:
+      description: 分页查询告警历史记录
+      parameters:
+      - description: 规则 ID
+        in: query
+        name: ruleId
+        type: string
+      - description: 严重级别
+        in: query
+        name: severity
+        type: string
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 开始时间
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.AlertHistoryResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取告警历史
+      tags:
+      - Alert
+  /alerts/history/{id}:
+    get:
+      parameters:
+      - description: 告警历史ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AlertHistoryResponse'
+              type: object
+      summary: 获取告警历史详情
+      tags:
+      - Alert
+  /alerts/history/{id}/acknowledge:
+    post:
+      consumes:
+      - application/json
+      description: 确认已读告警
+      parameters:
+      - description: 告警历史 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 确认请求
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/dto.AcknowledgeAlertRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 确认告警
+      tags:
+      - Alert
+  /alerts/rules:
+    get:
+      description: 获取所有告警规则
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.AlertRuleResponse'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取告警规则列表
+      tags:
+      - Alert
+    post:
+      consumes:
+      - application/json
+      description: 创建新的告警规则
+      parameters:
+      - description: 创建规则请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateAlertRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AlertRuleResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建告警规则
+      tags:
+      - Alert
+  /alerts/rules/{id}:
+    delete:
+      description: 删除指定的告警规则
+      parameters:
+      - description: 规则 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除告警规则
+      tags:
+      - Alert
+    get:
+      description: 根据 ID 获取告警规则详情
+      parameters:
+      - description: 规则 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AlertRuleResponse'
+              type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取告警规则详情
+      tags:
+      - Alert
+    put:
+      consumes:
+      - application/json
+      description: 更新告警规则信息
+      parameters:
+      - description: 规则 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: 更新规则请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateAlertRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新告警规则
+      tags:
+      - Alert
+  /alerts/statistics:
+    get:
+      description: 获取告警统计信息
+      parameters:
+      - description: 开始时间
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AlertStatisticsResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取告警统计
+      tags:
+      - Alert
   /api/runner/control:
     post:
       consumes:
@@ -1834,6 +4062,798 @@ paths:
       summary: 获取后台运行器状态
       tags:
       - 运行器管理
+  /api/v1/adaptive-throttling:
+    delete:
+      description: 删除自适应限流系统配置
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除自适应限流配置
+      tags:
+      - 自适应限流
+    get:
+      description: 获取当前自适应限流系统配置
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AdaptiveThrottlingConfig'
+              type: object
+        "404":
+          description: 配置不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取自适应限流配置
+      tags:
+      - 自适应限流
+    put:
+      consumes:
+      - application/json
+      description: 更新自适应限流系统配置，如果配置不存在则创建
+      parameters:
+      - description: 配置信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AdaptiveThrottlingConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.AdaptiveThrottlingConfig'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 更新自适应限流配置
+      tags:
+      - 自适应限流
+  /api/v1/adaptive-throttling/baselines:
+    get:
+      description: 查询当前基线值
+      parameters:
+      - description: 类型筛选 (visit/attack/error)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BaselineResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取基线值列表
+      tags:
+      - 自适应限流
+  /api/v1/adaptive-throttling/logs:
+    get:
+      description: 查询限流阈值调整历史记录
+      parameters:
+      - description: 类型筛选 (visit/attack/error)
+        in: query
+        name: type
+        type: string
+      - description: 开始时间
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdjustmentLogResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取调整日志列表
+      tags:
+      - 自适应限流
+  /api/v1/adaptive-throttling/patterns:
+    get:
+      description: 查询流量模式历史记录
+      parameters:
+      - description: 类型筛选 (visit/attack/error)
+        in: query
+        name: type
+        type: string
+      - description: 开始时间
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间
+        in: query
+        name: endTime
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TrafficPatternResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取流量模式列表
+      tags:
+      - 自适应限流
+  /api/v1/adaptive-throttling/recalculate-baseline:
+    post:
+      description: 手动触发重新计算指定类型的基线值
+      parameters:
+      - description: 类型 (visit/attack/error)
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 重新计算基线
+      tags:
+      - 自适应限流
+  /api/v1/adaptive-throttling/reset-learning:
+    post:
+      description: 清空学习数据并重新开始学习
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 操作成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 重置学习
+      tags:
+      - 自适应限流
+  /api/v1/adaptive-throttling/stats:
+    get:
+      description: 获取自适应限流系统实时统计信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 查询成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.AdaptiveThrottlingStatsDTO'
+              type: object
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取统计信息
+      tags:
+      - 自适应限流
+  /api/v1/ai-analyzer/analysis/result:
+    get:
+      parameters:
+      - description: 时间范围
+        in: query
+        name: timeRange
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AIAnalysisResult'
+      summary: 获取AI分析结果
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/analyze/patterns:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 触发参数
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/dto.TriggerAnalysisParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+      summary: 触发AI分析（MCP兼容）
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/config:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AIAnalyzerConfig'
+      summary: 获取AI分析器配置
+      tags:
+      - AI分析器
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 配置请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AIAnalyzerConfigRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AIAnalyzerConfig'
+      summary: 更新AI分析器配置
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/conversations:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关联的攻击模式ID
+        in: query
+        name: patternId
+        type: string
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 获取MCP对话列表
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/conversations/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 对话ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 删除MCP对话
+      tags:
+      - AI分析器
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 对话ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MCPConversation'
+      summary: 获取MCP对话详情
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/patterns:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 严重程度
+        enum:
+        - critical
+        - high
+        - medium
+        - low
+        in: query
+        name: severity
+        type: string
+      - description: 攻击类型
+        in: query
+        name: attackType
+        type: string
+      - description: 开始时间(RFC3339)
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间(RFC3339)
+        in: query
+        name: endTime
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AttackPatternListResponse'
+      summary: 获取攻击模式列表
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/patterns/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 模式ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 删除攻击模式
+      tags:
+      - AI分析器
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 模式ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.AttackPattern'
+      summary: 获取攻击模式详情
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/rules:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      - description: 规则状态
+        enum:
+        - pending
+        - approved
+        - rejected
+        - deployed
+        in: query
+        name: status
+        type: string
+      - description: 规则类型
+        enum:
+        - modsecurity
+        - microrule
+        in: query
+        name: ruleType
+        type: string
+      - description: 关联的攻击模式ID
+        in: query
+        name: patternId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GeneratedRuleListResponse'
+      summary: 获取生成规则列表
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/rules/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 删除生成规则
+      tags:
+      - AI分析器
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GeneratedRule'
+      summary: 获取生成规则详情
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/rules/{id}/deploy:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 部署规则
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/rules/pending:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 获取待审核规则列表
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/rules/review:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 审核请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewRuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 审核规则
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/stats:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 开始时间(RFC3339)
+        in: query
+        name: startTime
+        type: string
+      - description: 结束时间(RFC3339)
+        in: query
+        name: endTime
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AIAnalysisStatsResponse'
+      summary: 获取AI分析器统计信息
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/suggestions:
+    get:
+      parameters:
+      - description: 状态
+        in: query
+        name: status
+        type: string
+      - description: 严重等级
+        in: query
+        name: severity
+        type: string
+      - default: 20
+        description: 数量
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: 偏移
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.AIRuleSuggestionListResponse'
+      summary: 获取AI规则建议列表
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/suggestions/{id}/approve:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 建议ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 批准规则建议
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/suggestions/{id}/deploy:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 建议ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 部署规则建议
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/suggestions/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 建议ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 拒绝规则建议
+      tags:
+      - AI分析器
+  /api/v1/ai-analyzer/trigger:
+    post:
+      consumes:
+      - application/json
+      description: 立即运行攻击模式检测和规则生成
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.APIResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.APIError'
+      summary: 手动触发AI分析
+      tags:
+      - AI分析器
   /api/v1/blocked-ips:
     get:
       description: 获取被封禁的IP地址列表，支持分页、过滤和排序
@@ -1918,6 +4938,85 @@ paths:
       security:
       - BearerAuth: []
       summary: 获取封禁IP列表
+      tags:
+      - 封禁IP管理
+    post:
+      consumes:
+      - application/json
+      description: 手动添加一个封禁IP记录
+      parameters:
+      - description: 封禁IP信息
+        in: body
+        name: blockedIP
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BlockedIPCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 封禁IP创建成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.BlockedIPResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "403":
+          description: 禁止访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 创建封禁IP记录
+      tags:
+      - 封禁IP管理
+  /api/v1/blocked-ips/{ip}:
+    delete:
+      consumes:
+      - application/json
+      description: 根据IP地址解除封禁
+      parameters:
+      - description: IP地址
+        in: path
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 解除封禁成功
+          schema:
+            $ref: '#/definitions/model.SuccessResponse'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "404":
+          description: 封禁记录不存在
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 删除封禁IP
       tags:
       - 封禁IP管理
   /api/v1/blocked-ips/cleanup:
@@ -2552,6 +5651,99 @@ paths:
       summary: 添加IP到黑名单
       tags:
       - IP组管理
+  /api/v1/mcp/status:
+    get:
+      consumes:
+      - application/json
+      description: 返回MCP服务器的实时连接状态信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MCPStatusResponse'
+              type: object
+      summary: 获取MCP服务器连接状态
+      tags:
+      - MCP
+  /api/v1/mcp/tool-calls:
+    get:
+      consumes:
+      - application/json
+      description: 返回MCP工具的调用历史记录
+      parameters:
+      - default: 50
+        description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: 偏移量
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MCPToolCallHistoryResponse'
+              type: object
+      summary: 获取MCP工具调用历史
+      tags:
+      - MCP
+  /api/v1/mcp/tool-calls/record:
+    post:
+      consumes:
+      - application/json
+      description: MCP Server每次执行工具后调用此接口记录调用信息
+      parameters:
+      - description: 工具调用记录
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RecordToolCallRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.SuccessResponseNoData'
+      summary: 记录MCP工具调用
+      tags:
+      - MCP
+  /api/v1/mcp/tools:
+    get:
+      consumes:
+      - application/json
+      description: 返回所有可用的MCP工具名称
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.MCPToolsResponse'
+              type: object
+      summary: 获取MCP可用工具列表
+      tags:
+      - MCP
   /api/v1/micro-rules:
     get:
       description: 获取所有WAF微规则列表，支持分页
@@ -2776,6 +5968,220 @@ paths:
       security:
       - BearerAuth: []
       summary: 更新微规则
+      tags:
+      - 规则管理
+  /api/v1/rules/effectiveness:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有规则的有效性评分列表，支持排序
+      parameters:
+      - description: 排序字段
+        in: query
+        name: sortBy
+        type: string
+      - description: 排序方向
+        in: query
+        name: order
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RuleEffectivenessScoreListResponse'
+      summary: 获取所有规则有效性评分
+      tags:
+      - 规则管理
+  /api/v1/rules/effectiveness/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定规则的有效性评分
+      parameters:
+      - description: 规则ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RuleEffectivenessScoreResponse'
+      summary: 获取规则有效性评分
+      tags:
+      - 规则管理
+  /api/v1/rules/effectiveness/batch-calculate:
+    post:
+      consumes:
+      - application/json
+      description: 批量计算所有启用规则的有效性评分
+      parameters:
+      - description: 批量计算请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BatchCalculateScoresRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: 批量计算规则有效性评分
+      tags:
+      - 规则管理
+  /api/v1/rules/effectiveness/calculate:
+    post:
+      consumes:
+      - application/json
+      description: 根据规则的历史数据计算有效性评分
+      parameters:
+      - description: 计算请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CalculateScoreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RuleEffectivenessScoreResponse'
+      summary: 计算规则有效性评分
+      tags:
+      - 规则管理
+  /api/v1/rules/profiles:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有预定义的保护配置文件（基础/标准/严格）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProtectionProfileListResponse'
+      summary: 获取保护配置文件列表
+      tags:
+      - 规则管理
+  /api/v1/rules/profiles/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据ID获取保护配置文件详情
+      parameters:
+      - description: 配置文件ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProtectionProfileResponse'
+      summary: 获取保护配置文件详情
+      tags:
+      - 规则管理
+  /api/v1/rules/profiles/apply:
+    post:
+      consumes:
+      - application/json
+      description: 根据配置文件批量创建WAF规则
+      parameters:
+      - description: 应用请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ApplyProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ApplyProfileResponse'
+      summary: 一键应用保护配置文件
+      tags:
+      - 规则管理
+  /api/v1/rules/templates:
+    get:
+      consumes:
+      - application/json
+      description: 获取OWASP Top 10规则模板列表，支持按分类和严重等级过滤
+      parameters:
+      - description: 分类过滤
+        in: query
+        name: category
+        type: string
+      - description: 严重等级过滤
+        in: query
+        name: severity
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RuleTemplateListResponse'
+      summary: 获取规则模板列表
+      tags:
+      - 规则管理
+  /api/v1/rules/templates/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 根据ID获取规则模板详情
+      parameters:
+      - description: 模板ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RuleTemplateResponse'
+      summary: 获取规则模板详情
+      tags:
+      - 规则管理
+  /api/v1/rules/templates/create-rule:
+    post:
+      consumes:
+      - application/json
+      description: 根据模板ID创建新的WAF规则
+      parameters:
+      - description: 创建请求
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRuleFromTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.MicroRuleResponse'
+      summary: 从模板创建规则
       tags:
       - 规则管理
   /api/v1/site:
@@ -3122,6 +6528,49 @@ paths:
       summary: 获取实时QPS数据
       tags:
       - 统计信息
+  /api/v1/stats/security-metrics:
+    get:
+      description: 获取综合安全指标仪表板数据，包括规则引擎统计、攻击类型分布、威胁等级、封禁IP等多维度安全指标
+      parameters:
+      - default: 24h
+        description: 时间范围：24h(24小时)、7d(7天)、30d(30天)
+        enum:
+        - 24h
+        - 7d
+        - 30d
+        in: query
+        name: timeRange
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取综合安全指标成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.SecurityMetricsResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 未授权访问
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      security:
+      - BearerAuth: []
+      summary: 获取综合安全指标
+      tags:
+      - 统计信息
   /api/v1/stats/time-series:
     get:
       description: 获取指定时间范围和指标类型的时间序列数据，用于图表展示
@@ -3392,6 +6841,45 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrResponseDontShowError'
       summary: 用户登录
+      tags:
+      - 认证
+  /auth/login-service:
+    post:
+      consumes:
+      - application/json
+      description: 用于MCP、CLI等服务端工具，生成90天有效期的JWT令牌
+      parameters:
+      - description: 登录信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.LoginResponseData'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/model.ErrResponse'
+        "401":
+          description: 用户名或密码错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/model.ErrResponseDontShowError'
+      summary: 服务账号登录
       tags:
       - 认证
   /auth/me:

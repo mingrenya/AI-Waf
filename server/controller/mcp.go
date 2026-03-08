@@ -27,7 +27,7 @@ func NewMCPController(mcpService *service.MCPService) *MCPController {
 // @Tags MCP
 // @Accept json
 // @Produce json
-// @Success 200 {object} model.Response{data=dto.MCPStatusResponse}
+// @Success 200 {object} model.SuccessResponse{data=dto.MCPStatusResponse}
 // @Router /api/v1/mcp/status [get]
 func (c *MCPController) GetMCPStatus(ctx *gin.Context) {
 	status, err := c.mcpService.GetMCPStatus(ctx)
@@ -44,7 +44,7 @@ func (c *MCPController) GetMCPStatus(ctx *gin.Context) {
 // @Tags MCP
 // @Accept json
 // @Produce json
-// @Success 200 {object} model.Response{data=dto.MCPToolsResponse}
+// @Success 200 {object} model.SuccessResponse{data=dto.MCPToolsResponse}
 // @Router /api/v1/mcp/tools [get]
 func (c *MCPController) GetMCPTools(ctx *gin.Context) {
 	tools, err := c.mcpService.GetMCPTools(ctx)
@@ -63,7 +63,7 @@ func (c *MCPController) GetMCPTools(ctx *gin.Context) {
 // @Produce json
 // @Param limit query int false "每页数量" default(50)
 // @Param offset query int false "偏移量" default(0)
-// @Success 200 {object} model.Response{data=dto.MCPToolCallHistoryResponse}
+// @Success 200 {object} model.SuccessResponse{data=dto.MCPToolCallHistoryResponse}
 // @Router /api/v1/mcp/tool-calls [get]
 func (c *MCPController) GetMCPToolCallHistory(ctx *gin.Context) {
 	var req dto.MCPToolCallHistoryRequest
@@ -96,7 +96,7 @@ func (c *MCPController) GetMCPToolCallHistory(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.RecordToolCallRequest true "工具调用记录"
-// @Success 200 {object} model.Response
+// @Success 200 {object} model.SuccessResponseNoData
 // @Router /api/v1/mcp/tool-calls/record [post]
 func (c *MCPController) RecordToolCall(ctx *gin.Context) {
 	var req dto.RecordToolCallRequest

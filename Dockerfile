@@ -42,9 +42,15 @@ FROM haproxy:3.0.10
 # 确保以root用户进行初始化设置
 USER root
 
-# 安装Linux capabilities管理工具
-RUN apt-get update && apt-get install -y libcap2-bin && \
-    rm -rf /var/lib/apt/lists/*
+# 安装Linux capabilities管理工具及常用调试工具
+RUN apt-get update && apt-get install -y \
+    libcap2-bin \
+    curl \
+    iputils-ping \
+    iproute2 \
+    net-tools \
+    dnsutils \
+    && rm -rf /var/lib/apt/lists/*
 
 # 创建 mrya 用户和组
 RUN groupadd --gid 1000 mrya && \
