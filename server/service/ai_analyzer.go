@@ -15,11 +15,11 @@ import (
 )
 
 var (
-	ErrInvalidStatus            = errors.New("无效的规则状态")
-	ErrInvalidSeverity          = errors.New("无效的严重程度")
-	ErrRuleNotPending           = errors.New("规则不在待审核状态")
-	ErrInvalidTimeRange         = errors.New("无效的时间范围")
-	ErrMCPConfigNotSet          = errors.New("MCP配置未设置")
+	ErrInvalidStatus    = errors.New("无效的规则状态")
+	ErrInvalidSeverity  = errors.New("无效的严重程度")
+	ErrRuleNotPending   = errors.New("规则不在待审核状态")
+	ErrInvalidTimeRange = errors.New("无效的时间范围")
+	ErrMCPConfigNotSet  = errors.New("MCP配置未设置")
 )
 
 // AIAnalyzerService AI分析器服务接口
@@ -50,7 +50,7 @@ type AIAnalyzerService interface {
 
 	// 统计分析相关
 	GetAnalyzerStats(ctx context.Context, req *dto.TriggerAnalysisRequest) (*dto.AIAnalysisStatsResponse, error)
-	
+
 	// 手动触发AI分析
 	TriggerAnalysis(ctx context.Context) error
 }
@@ -412,7 +412,7 @@ func (s *AIAnalyzerServiceImpl) UpdateAnalyzerConfig(ctx context.Context, req *d
 		config.PatternDetection.TimeWindow = req.PatternDetection.TimeWindow
 	}
 	config.PatternDetection.Enabled = req.PatternDetection.Enabled
-	
+
 	// 更新规则生成配置
 	if req.RuleGeneration.ConfidenceThreshold != 0 {
 		if req.RuleGeneration.ConfidenceThreshold < 0.5 || req.RuleGeneration.ConfidenceThreshold > 1.0 {
@@ -514,7 +514,7 @@ func (s *AIAnalyzerServiceImpl) GetAnalyzerStats(ctx context.Context, req *dto.T
 	if err != nil {
 		return nil, err
 	}
-	
+
 	activePatterns, err := s.patternRepo.Count(ctx, bson.D{{Key: "status", Value: "active"}})
 	if err != nil {
 		return nil, err
@@ -525,36 +525,53 @@ func (s *AIAnalyzerServiceImpl) GetAnalyzerStats(ctx context.Context, req *dto.T
 	if err != nil {
 		return nil, err
 	}
-	
+
 	pendingRules, err := s.ruleRepo.Count(ctx, bson.D{{Key: "status", Value: "pending"}})
 	if err != nil {
 		return nil, err
 	}
-	
+
 	approvedRules, err := s.ruleRepo.Count(ctx, bson.D{{Key: "status", Value: "approved"}})
 	if err != nil {
 		return nil, err
 	}
-	
+
 	deployedRules, err := s.ruleRepo.Count(ctx, bson.D{{Key: "status", Value: "deployed"}})
 	if err != nil {
 		return nil, err
 	}
-	
+
 	rejectedRules, err := s.ruleRepo.Count(ctx, bson.D{{Key: "status", Value: "rejected"}})
 	if err != nil {
 		return nil, err
 	}
 
+	// 查询最近一次分析时间：取最新创建的攻击模式的 createdAt
+	var lastAnalysisTime time.Time
+	latestPatterns, _, listErr := s.patternRepo.List(ctx, bson.D{}, 1, 1)
+	if listErr == nil && len(latestPatterns) > 0 {
+		lastAnalysisTime = latestPatterns[0].CreatedAt
+	}
+
+	// 查询最近 24 小时内新增的攻击模式数量
+	recentDetections, err := s.patternRepo.Count(ctx, bson.D{
+		{Key: "createdAt", Value: bson.D{
+			{Key: "$gte", Value: time.Now().Add(-24 * time.Hour)},
+		}},
+	})
+	if err != nil {
+		recentDetections = 0
+	}
+
 	return &dto.AIAnalysisStatsResponse{
 		Enabled:          config.Enabled,
-		LastAnalysisTime: time.Now(), // TODO: 从实际分析记录获取
+		LastAnalysisTime: lastAnalysisTime,
 		PatternStats: &dto.AttackPatternStatsResponse{
 			TotalPatterns:    totalPatterns,
 			ActivePatterns:   activePatterns,
 			ByType:           make(map[string]int),
 			BySeverity:       make(map[string]int),
-			RecentDetections: 0, // TODO: 查询最近24小时
+			RecentDetections: int(recentDetections),
 		},
 		RuleStats: &dto.GeneratedRuleStatsResponse{
 			TotalRules:    totalRules,
@@ -570,19 +587,19 @@ func (s *AIAnalyzerServiceImpl) GetAnalyzerStats(ctx context.Context, req *dto.T
 // TriggerAnalysis 手动触发AI分析
 func (s *AIAnalyzerServiceImpl) TriggerAnalysis(ctx context.Context) error {
 	s.logger.Info().Msg("手动触发AI分析")
-	
+
 	// 创建AI引擎实例
 	engine := NewAIEngine(s.patternRepo.GetDB())
-	
+
 	// 运行攻击模式检测
 	patterns, err := engine.RunAttackPatternDetection(ctx)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("攻击模式检测失败")
 		return err
 	}
-	
+
 	s.logger.Info().Int("pattern_count", len(patterns)).Msg("检测到攻击模式")
-	
+
 	// 为高危模式生成规则
 	var highRiskPatterns []*model.AttackPattern
 	for i := range patterns {
@@ -590,7 +607,7 @@ func (s *AIAnalyzerServiceImpl) TriggerAnalysis(ctx context.Context) error {
 			highRiskPatterns = append(highRiskPatterns, patterns[i])
 		}
 	}
-	
+
 	if len(highRiskPatterns) > 0 {
 		s.logger.Info().Int("high_risk_count", len(highRiskPatterns)).Msg("为高危模式生成规则")
 		_, err = engine.GenerateRulesForPatterns(ctx, highRiskPatterns, 0.7)
@@ -599,6 +616,6 @@ func (s *AIAnalyzerServiceImpl) TriggerAnalysis(ctx context.Context) error {
 			return err
 		}
 	}
-	
+
 	return nil
 }

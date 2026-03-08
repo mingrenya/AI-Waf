@@ -162,7 +162,7 @@ func SecurityAudit(db *mongo.Database) gin.HandlerFunc {
 }
 
 // determineAction 根据HTTP方法和路径确定操作类型
-func determineAction(method, path string) string {
+func determineAction(method, _ string) string {
 	switch method {
 	case "POST":
 		return "CREATE"

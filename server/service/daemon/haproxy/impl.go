@@ -18,8 +18,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/mingrenya/AI-Waf/server/config"
-	"github.com/mingrenya/AI-Waf/server/model"
 	client_native "github.com/haproxytech/client-native/v6"
 	"github.com/haproxytech/client-native/v6/configuration"
 	cfg_opt "github.com/haproxytech/client-native/v6/configuration/options"
@@ -28,6 +26,8 @@ import (
 	runtime_api "github.com/haproxytech/client-native/v6/runtime"
 	runtime_options "github.com/haproxytech/client-native/v6/runtime/options"
 	spoe "github.com/haproxytech/client-native/v6/spoe"
+	"github.com/mingrenya/AI-Waf/server/config"
+	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/rs/zerolog"
 )
 
@@ -255,9 +255,10 @@ func (s *HAProxyServiceImpl) AddSiteConfig(site model.Site) error {
 					rule: &models.HTTPRequestRule{
 						Type:    "set-header",
 						HdrName: "Host",
-						// TODO: 在 k8s 中，如果后端域名有多个，这里只是传递了第一个后端域名，在碰到其他后端时，透明传递的 Host 头是错误的，
-						// TODO: 待解决,不同后端域名，透明传递的 Host 头是不同的，需要根据后端域名来传递 Host 头
-						HdrFormat: site.Backend.Servers[0].Host,
+						// 使用客户端原始 Host 头实现透明代理（适用于单项目多后端场景）。
+						// 如需分别为各后端服务设置不同的 Host（如 k8s 多个不同域名的 Service），
+						// 需采用「每个后端建立独立的 HAProxy Backend」实现每后端独立设置 Header。
+						HdrFormat: "%[req.hdr(host)]",
 					},
 				},
 			}
@@ -977,15 +978,6 @@ func (s *HAProxyServiceImpl) ensureRuntimeClient() error {
 	return nil
 }
 
-func (s *HAProxyServiceImpl) ensureClientNative() error {
-	if s.clientNative == nil {
-		if err := s.initClients(); err != nil {
-			return fmt.Errorf("初始化完整客户端失败: %v", err)
-		}
-	}
-	return nil
-}
-
 func (s *HAProxyServiceImpl) initClients() error {
 	// 初始化配置客户端
 	if err := s.initConfClient(); err != nil {
@@ -1177,24 +1169,6 @@ func (s *HAProxyServiceImpl) addSiteCert(site model.Site) error {
 	// 写入私钥文件（覆盖模式）
 	if err := os.WriteFile(keyPath, []byte(site.Certificate.PrivateKey), 0600); err != nil {
 		return fmt.Errorf("failed to write private key file: %w", err)
-	}
-
-	return nil
-}
-
-func (s *HAProxyServiceImpl) removeSiteCert(site model.Site) error {
-	// 构建证书文件路径
-	certPath := filepath.Join(s.CertDir, site.Domain+".crt")
-	keyPath := filepath.Join(s.CertDir, site.Domain+".key")
-
-	// 删除证书文件，忽略不存在的情况
-	if err := os.Remove(certPath); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to remove certificate file: %w", err)
-	}
-
-	// 删除私钥文件，忽略不存在的情况
-	if err := os.Remove(keyPath); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to remove private key file: %w", err)
 	}
 
 	return nil

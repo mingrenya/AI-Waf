@@ -93,7 +93,9 @@ export function AIAssistantDialog({ open, onOpenChange }: AIAssistantDialogProps
 
       setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
-      console.error('Chat error:', error)
+      if (import.meta.env.DEV) {
+        console.error('Chat error:', error)
+      }
       toast({
         title: '错误',
         description: error instanceof Error ? error.message : '发送消息失败，请检查DEEPSEEK_API_KEY配置',

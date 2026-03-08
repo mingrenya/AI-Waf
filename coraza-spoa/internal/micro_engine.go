@@ -768,33 +768,6 @@ func isValidIPOrCIDR(s string) bool {
 	return isValidIP(s) || isValidCIDR(s)
 }
 
-// isValidIPPattern 检查IP模式是否有效
-func isValidIPPattern(pattern string) bool {
-	parts := strings.Split(pattern, ".")
-	if len(parts) != 4 {
-		return false
-	}
-
-	for _, part := range parts {
-		if part != "*" {
-			if part == "" {
-				return false
-			}
-
-			var num int
-			if _, err := fmt.Sscanf(part, "%d", &num); err != nil {
-				return false
-			}
-
-			if num < 0 || num > 255 {
-				return false
-			}
-		}
-	}
-
-	return true
-}
-
 // isIPInCIDR 检查IP是否在CIDR范围内
 func isIPInCIDR(ipStr, cidrStr string) (bool, error) {
 	ip := net.ParseIP(ipStr)
@@ -885,8 +858,23 @@ func (e *RuleEngine) matchRegex(s, pattern string) (bool, error) {
 		e.regexCache.set(pattern, re)
 	}
 
-	// TODO: 添加正则匹配超时保护(context.WithTimeout)
-	return re.MatchString(s), nil
+	// Go 的 regexp 包使用 RE2 语义（线性时间匹配），不会出现灾难性回溯。
+	// 此处额外使用 goroutine + channel 提供超时保护，防止极端构造下的意外阻塞。
+	const matchTimeout = 100 * time.Millisecond
+	type matchResult struct {
+		matched bool
+		err     error
+	}
+	resultCh := make(chan matchResult, 1)
+	go func() {
+		resultCh <- matchResult{matched: re.MatchString(s)}
+	}()
+	select {
+	case r := <-resultCh:
+		return r.matched, r.err
+	case <-time.After(matchTimeout):
+		return false, fmt.Errorf("正则匹配超时(>%v): pattern=%s", matchTimeout, pattern)
+	}
 }
 
 // validateSimpleCondition 验证简单条件

@@ -7,6 +7,7 @@ import (
 
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/rs/zerolog"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -69,10 +70,10 @@ type AIAnalyzerConfig struct {
 
 	// 规则生成配置
 	RuleGeneration struct {
-		Enabled           bool    // 是否启用规则生成
+		Enabled             bool    // 是否启用规则生成
 		ConfidenceThreshold float64 // 置信度阈值
-		AutoDeploy        bool    // 是否自动部署
-		ReviewRequired    bool    // 是否需要人工审核
+		AutoDeploy          bool    // 是否自动部署
+		ReviewRequired      bool    // 是否需要人工审核
 	}
 
 	// 分析周期
@@ -181,11 +182,19 @@ func (a *AISecurityAnalyzer) Stop() {
 
 // GetStats 获取统计信息
 func (a *AISecurityAnalyzer) GetStats() map[string]interface{} {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	patternsDetected, _ := a.db.Collection("attack_patterns").CountDocuments(ctx, bson.D{})
+
+	rulesAll, _ := a.db.Collection("generated_rules").CountDocuments(ctx, bson.D{})
+	rulesDeployed, _ := a.db.Collection("generated_rules").CountDocuments(ctx, bson.M{"status": "deployed"})
+
 	return map[string]interface{}{
 		"enabled":          a.config.Enabled,
-		"patternsDetected": 0, // TODO: 实现实际统计
-		"rulesGenerated":   0,
-		"rulesDeployed":    0,
+		"patternsDetected": patternsDetected,
+		"rulesGenerated":   rulesAll,
+		"rulesDeployed":    rulesDeployed,
 	}
 }
 

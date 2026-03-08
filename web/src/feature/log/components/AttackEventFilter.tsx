@@ -281,7 +281,9 @@ export function AttackEventFilter({
                                                         const formattedDate = isoString.substring(0, 19) + 'Z' // 取YYYY-MM-DDTHH:MM:SS并添加Z
                                                         field.onChange(formattedDate)
                                                     } catch (error) {
-                                                        console.error("Invalid date format:", error)
+                                                        if (import.meta.env.DEV) {
+                                                            console.error("Invalid date format:", error)
+                                                        }
                                                         field.onChange("")
                                                     }
                                                 }}
@@ -314,7 +316,9 @@ export function AttackEventFilter({
                                                         const formattedDate = isoString.substring(0, 19) + 'Z' // 取YYYY-MM-DDTHH:MM:SS并添加Z
                                                         field.onChange(formattedDate)
                                                     } catch (error) {
-                                                        console.error("Invalid date format:", error)
+                                                        if (import.meta.env.DEV) {
+                                                            console.error("Invalid date format:", error)
+                                                        }
                                                         field.onChange("")
                                                     }
                                                 }}

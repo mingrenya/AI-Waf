@@ -26,90 +26,43 @@ interface FlowControlFormProps {
     onSuccess?: () => void
 }
 
+// 单个配置区骨架屏
+const SectionSkeleton = () => (
+    <div className="bg-background/50 rounded-xl p-6 space-y-6">
+        <div className="space-y-2">
+            <Skeleton className="h-7 w-40" />
+            <Skeleton className="h-4 w-96" />
+        </div>
+        <div className="flex flex-row items-center justify-between py-4">
+            <div className="space-y-1">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-32" />
+            </div>
+            <Skeleton className="h-6 w-11 rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-3 w-32" />
+                </div>
+            ))}
+        </div>
+    </div>
+)
+
 // 流控配置表单骨架屏组件
 const FlowControlFormSkeleton = () => {
     return (
         <AnimatedContainer>
             <div className="space-y-8">
                 {/* 访问频率限制配置骨架 */}
-                <div className="bg-background/50 rounded-xl p-6 space-y-6">
-                    <div className="space-y-2">
-                        <Skeleton className="h-7 w-40" />
-                        <Skeleton className="h-4 w-96" />
-                    </div>
-                    
-                    {/* 启用开关骨架 */}
-                    <div className="flex flex-row items-center justify-between py-4">
-                        <div className="space-y-1">
-                            <Skeleton className="h-5 w-24" />
-                            <Skeleton className="h-4 w-32" />
-                        </div>
-                        <Skeleton className="h-6 w-11 rounded-full" />
-                    </div>
-
-                    {/* 配置项网格骨架 */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.from({ length: 5 }).map((_, index) => (
-                            <div key={index} className="space-y-2">
-                                <Skeleton className="h-4 w-20" />
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-3 w-32" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
+                <SectionSkeleton />
                 {/* 攻击频率限制配置骨架 */}
-                <div className="bg-background/50 rounded-xl p-6 space-y-6">
-                    <div className="space-y-2">
-                        <Skeleton className="h-7 w-40" />
-                        <Skeleton className="h-4 w-96" />
-                    </div>
-                    
-                    <div className="flex flex-row items-center justify-between py-4">
-                        <div className="space-y-1">
-                            <Skeleton className="h-5 w-24" />
-                            <Skeleton className="h-4 w-32" />
-                        </div>
-                        <Skeleton className="h-6 w-11 rounded-full" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.from({ length: 5 }).map((_, index) => (
-                            <div key={index} className="space-y-2">
-                                <Skeleton className="h-4 w-20" />
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-3 w-32" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
+                <SectionSkeleton />
                 {/* 错误频率限制配置骨架 */}
-                <div className="bg-background/50 rounded-xl p-6 space-y-6">
-                    <div className="space-y-2">
-                        <Skeleton className="h-7 w-40" />
-                        <Skeleton className="h-4 w-96" />
-                    </div>
-                    
-                    <div className="flex flex-row items-center justify-between py-4">
-                        <div className="space-y-1">
-                            <Skeleton className="h-5 w-24" />
-                            <Skeleton className="h-4 w-32" />
-                        </div>
-                        <Skeleton className="h-6 w-11 rounded-full" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.from({ length: 5 }).map((_, index) => (
-                            <div key={index} className="space-y-2">
-                                <Skeleton className="h-4 w-20" />
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-3 w-32" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <SectionSkeleton />
 
                 {/* 提交按钮骨架 */}
                 <div className="flex justify-end pt-4">

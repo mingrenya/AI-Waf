@@ -51,33 +51,7 @@ func NewAuthService(userRepo repository.UserRepository, roleRepo repository.Role
 
 // Login 用户登录
 func (s *AuthServiceImpl) Login(ctx context.Context, req dto.UserLoginRequest) (string, *model.User, error) {
-	// 查找用户
-	user, err := s.userRepo.FindByUsername(ctx, req.Username)
-	if err != nil {
-		return "", nil, err
-	}
-	if user == nil {
-		return "", nil, ErrUserNotFound
-	}
-
-	// 验证密码
-	if !user.CheckPassword(req.Password) {
-		return "", nil, ErrInvalidPassword
-	}
-
-	// 更新最后登录时间
-	err = s.userRepo.UpdateLastLogin(ctx, user.ID)
-	if err != nil {
-		s.logger.Warn().Err(err).Str("userId", user.ID.Hex()).Msg("更新登录时间失败")
-	}
-
-	// 生成令牌（默认24小时）
-	token, err := jwt.GenerateToken(*user, 24*time.Hour)
-	if err != nil {
-		return "", nil, err
-	}
-
-	return token, user, nil
+	return s.LoginWithCustomExpiration(ctx, req, 24*time.Hour)
 }
 
 // LoginWithCustomExpiration 支持自定义过期时间的登录（用于服务账号）
@@ -102,7 +76,7 @@ func (s *AuthServiceImpl) LoginWithCustomExpiration(ctx context.Context, req dto
 		s.logger.Warn().Err(err).Str("userId", user.ID.Hex()).Msg("更新登录时间失败")
 	}
 
-	// 生成令牌（自定义过期时间）
+	// 生成令牌
 	token, err := jwt.GenerateToken(*user, expiration)
 	if err != nil {
 		return "", nil, err

@@ -89,7 +89,9 @@ export function CertificateForm({
             // 如果之前有解析错误，清除相关表单错误
             form.clearErrors('publicKey')
         } catch (error) {
-            console.error('证书解析错误:', error)
+            if (import.meta.env.DEV) {
+                console.error('证书解析错误:', error)
+            }
 
             // 清除已解析信息
             setParsedInfo(null)
@@ -118,7 +120,9 @@ export function CertificateForm({
                 // 尝试解析证书
                 tryParseCertificate(content)
             } catch (error) {
-                console.error('文件读取错误:', error)
+                if (import.meta.env.DEV) {
+                    console.error('文件读取错误:', error)
+                }
 
                 // 文件读取错误显示在表单上
                 const errorMessage = error instanceof Error ? error.message : t("certificate.dialog.unknownError")
@@ -142,7 +146,9 @@ export function CertificateForm({
                 form.setValue('privateKey', content)
                 setPrivateKeyFile(file.name)
             } catch (error) {
-                console.error('文件读取错误:', error)
+                if (import.meta.env.DEV) {
+                    console.error('文件读取错误:', error)
+                }
 
                 // 文件读取错误显示在表单上
                 const errorMessage = error instanceof Error ? error.message : t("certificate.dialog.unknownError")

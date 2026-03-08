@@ -257,7 +257,9 @@ export function AttackLogFilter({ onFilter, onRefresh, defaultValues = {} }: Att
                                                         const formattedDate = isoString.substring(0, 19) + 'Z'
                                                         field.onChange(formattedDate)
                                                     } catch (error) {
-                                                        console.error("Invalid date format:", error)
+                                                        if (import.meta.env.DEV) {
+                                                            console.error("Invalid date format:", error)
+                                                        }
                                                         field.onChange("")
                                                     }
                                                 }}
@@ -290,7 +292,9 @@ export function AttackLogFilter({ onFilter, onRefresh, defaultValues = {} }: Att
                                                         const formattedDate = isoString.substring(0, 19) + 'Z'
                                                         field.onChange(formattedDate)
                                                     } catch (error) {
-                                                        console.error("Invalid date format:", error)
+                                                        if (import.meta.env.DEV) {
+                                                            console.error("Invalid date format:", error)
+                                                        }
                                                         field.onChange("")
                                                     }
                                                 }}

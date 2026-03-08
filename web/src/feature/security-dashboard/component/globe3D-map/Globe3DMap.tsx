@@ -293,14 +293,18 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
             window.addEventListener('resize', handleResize)
 
         } catch (error) {
-            console.error('Failed to create WebGL context:', error)
+            if (import.meta.env.DEV) {
+                console.error('Failed to create WebGL context:', error)
+            }
             wafSecurityGlobeInstance.isCreating = false
         }
     }
 
     // 清理全局实例
     const cleanupGlobalInstance = () => {
-        console.log('Cleaning up global WebGL context...')
+        if (import.meta.env.DEV) {
+            console.log('Cleaning up global WebGL context...')
+        }
 
         if (wafSecurityGlobeInstance.animationId) {
             cancelAnimationFrame(wafSecurityGlobeInstance.animationId)
@@ -343,7 +347,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
             return
         }
 
-        console.log('Updating globe data, trajectoryData length:', wafAttackTrajectoryData.length)
+        if (import.meta.env.DEV) {
+            console.log('Updating globe data, trajectoryData length:', wafAttackTrajectoryData.length)
+        }
 
         const globe = wafSecurityGlobeInstance.globe
 
@@ -396,7 +402,9 @@ const Globe3DMap = React.memo(({ wafAttackTrajectoryData }: { wafAttackTrajector
             .pointsMerge(true)
             .pointRadius(0.25)
 
-        console.log('Globe data updated successfully!')
+        if (import.meta.env.DEV) {
+            console.log('Globe data updated successfully!')
+        }
     }, [wafAttackTrajectoryData])
 
     return <div className="w-full h-full" ref={globeRef}></div>

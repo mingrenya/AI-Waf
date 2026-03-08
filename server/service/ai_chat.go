@@ -119,8 +119,13 @@ func (s *aiChatServiceImpl) Chat(ctx context.Context, req *dto.AIChatRequest) (*
 		Content: "你是一个AI安全助手，专门帮助用户分析WAF日志、生成防护规则、评估安全威胁。请用简洁专业的语言回答问题。",
 	})
 
-	// 添加历史消息
-	for _, msg := range req.Messages {
+	// 截断历史消息，保留最近 20 条，防止超出 Token 上限
+	const maxHistoryMessages = 20
+	history := req.Messages
+	if len(history) > maxHistoryMessages {
+		history = history[len(history)-maxHistoryMessages:]
+	}
+	for _, msg := range history {
 		messages = append(messages, deepseekChatMessage{
 			Role:    msg.Role,
 			Content: msg.Content,
@@ -213,8 +218,13 @@ func (s *aiChatServiceImpl) ChatStream(ctx context.Context, req *dto.AIChatReque
 		Content: "你是一个AI安全助手，专门帮助用户分析WAF日志、生成防护规则、评估安全威胁。请用简洁专业的语言回答问题。",
 	})
 
-	// 添加历史消息
-	for _, msg := range req.Messages {
+	// 截断历史消息，保留最近 20 条，防止超出 Token 上限
+	const maxHistoryMessages = 20
+	history := req.Messages
+	if len(history) > maxHistoryMessages {
+		history = history[len(history)-maxHistoryMessages:]
+	}
+	for _, msg := range history {
 		messages = append(messages, deepseekChatMessage{
 			Role:    msg.Role,
 			Content: msg.Content,
