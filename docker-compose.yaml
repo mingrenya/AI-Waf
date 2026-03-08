@@ -15,6 +15,12 @@ services:
       - "27017:27017"
     networks:
       - waf-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     # 可选：添加命令行参数
     command: --wiredTigerCacheSizeGB 1.5
 
@@ -26,7 +32,8 @@ services:
     container_name: mrya-waf
     restart: always
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     env_file:
       - .env
     environment:
@@ -51,6 +58,12 @@ services:
       - ./geo-ip:/home/mrya/mrya-waf/geo-ip:ro
     networks:
       - waf-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2333/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # MCP Server 服务 - 基于官方go-sdk的标准实现
   mcp-server:
@@ -60,7 +73,8 @@ services:
     container_name: ai-waf-mcp-server
     restart: always
     depends_on:
-      - mrya
+      mrya:
+        condition: service_healthy
     env_file:
       - .env  # 加载环境变量配置文件
     environment:

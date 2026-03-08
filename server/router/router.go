@@ -16,8 +16,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-// Setup configures all the routes for the application
-func Setup(route *gin.Engine, db *mongo.Database) {
+// Setup configures all the routes for the application.
+// 返回的 cleanup 函数应在 main.go 中 defer 调用，用于优雅关闭告警后台 goroutine。
+func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	// 基础中间件
 	route.Use(middleware.RequestID())
 	route.Use(middleware.Logger())
@@ -78,16 +79,16 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 		logger.Warn().Err(err).Msg("Failed to initialize protection profiles")
 	}
 
+	var alertCleanupFn func()
 	alertCleanup, err := alertChecker.Start(alertService, logger)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to start alert checker")
+		alertCleanupFn = func() {}
 	} else {
 		logger.Info().Msg("Alert checker started successfully")
-		// 注册清理函数到 Gin 的 shutdown hook
-		// 注意: 这里我们不能直接 defer，因为 Setup 函数会返回
-		// 实际应用中，应该在 main.go 中管理清理函数
-		_ = alertCleanup // 保留引用避免未使用变量错误
+		alertCleanupFn = alertCleanup
 	}
+	cleanup = alertCleanupFn
 
 	// 创建控制器
 	authController := controller.NewAuthController(authService)
@@ -410,4 +411,6 @@ func Setup(route *gin.Engine, db *mongo.Database) {
 
 	// ===== 前端静态资源托管 =====
 	SetStaticFileRouter(route)
+
+	return
 }

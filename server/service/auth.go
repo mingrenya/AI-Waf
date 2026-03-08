@@ -28,6 +28,8 @@ type AuthService interface {
 	LoginWithCustomExpiration(ctx context.Context, req dto.UserLoginRequest, expiration time.Duration) (string, *model.User, error)
 	ResetPassword(ctx context.Context, userID bson.ObjectID, req dto.UserPasswordResetRequest) error
 	CreateUser(ctx context.Context, adminID bson.ObjectID, req dto.UserCreateRequest) (*model.User, error)
+	UpdateUser(ctx context.Context, adminID bson.ObjectID, userID bson.ObjectID, req dto.UserUpdateRequest) (*model.User, error)
+	DeleteUser(ctx context.Context, adminID bson.ObjectID, userID bson.ObjectID) error
 	GetUsers(ctx context.Context) ([]*model.User, error)
 }
 
@@ -189,4 +191,62 @@ func (s *AuthServiceImpl) GetUsers(ctx context.Context) ([]*model.User, error) {
 	// 实现获取所有用户的逻辑
 	// 这需要在 UserRepository 中添加 FindAll 方法
 	return s.userRepo.FindAll(ctx)
+}
+
+// UpdateUser 更新用户信息（仅管理员可用）
+func (s *AuthServiceImpl) UpdateUser(ctx context.Context, adminID bson.ObjectID, userID bson.ObjectID, req dto.UserUpdateRequest) (*model.User, error) {
+	admin, err := s.userRepo.FindByID(ctx, adminID)
+	if err != nil {
+		return nil, err
+	}
+	if admin == nil || admin.Role != model.RoleAdmin {
+		return nil, ErrForbidden
+	}
+
+	user, err := s.userRepo.FindByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, ErrUserNotFound
+	}
+
+	if req.Username != "" {
+		user.Username = req.Username
+	}
+	if req.Role != "" {
+		user.Role = req.Role
+	}
+	if req.NeedReset != nil {
+		user.NeedReset = *req.NeedReset
+	}
+	if req.Password != "" {
+		user.Password = req.Password
+		if err := user.HashPassword(); err != nil {
+			return nil, err
+		}
+	}
+	user.UpdatedAt = time.Now()
+
+	if err := s.userRepo.Update(ctx, user); err != nil {
+		return nil, err
+	}
+
+	user.Password = ""
+	return user, nil
+}
+
+// DeleteUser 删除用户（仅管理员可用，不能删除自己）
+func (s *AuthServiceImpl) DeleteUser(ctx context.Context, adminID bson.ObjectID, userID bson.ObjectID) error {
+	admin, err := s.userRepo.FindByID(ctx, adminID)
+	if err != nil {
+		return err
+	}
+	if admin == nil || admin.Role != model.RoleAdmin {
+		return ErrForbidden
+	}
+	if adminID == userID {
+		return ErrForbidden // 不能删除自己
+	}
+	return s.userRepo.Delete(ctx, userID)
 }

@@ -142,8 +142,4 @@ func (s *MCPService) RecordToolCall(ctx context.Context, toolName string, durati
 	return s.mcpRepo.RecordToolCall(ctx, toolName, duration, success, errorMsg, parentMessageUUID)
 }
 
-// checkMCPServerConnection 检查MCP服务器连接
-func (s *MCPService) checkMCPServerConnection() bool {
-	// 旧的简化检测方法保留为兼容（不再主动使用）
-	return true
-}
+

@@ -18,6 +18,7 @@ type UserRepository interface {
 	FindByUsername(ctx context.Context, username string) (*model.User, error)
 	Create(ctx context.Context, user *model.User) error
 	Update(ctx context.Context, user *model.User) error
+	Delete(ctx context.Context, id bson.ObjectID) error
 	UpdateLastLogin(ctx context.Context, id bson.ObjectID) error
 	FindAll(ctx context.Context) ([]*model.User, error)
 	InitAdminUser() error
@@ -121,6 +122,19 @@ func (r *MongoUserRepository) Update(ctx context.Context, user *model.User) erro
 	if err != nil {
 		r.logger.Error().Err(err).Str("id", user.ID.Hex()).Msg("更新用户失败")
 		return err
+	}
+	return nil
+}
+
+// Delete 删除用户
+func (r *MongoUserRepository) Delete(ctx context.Context, id bson.ObjectID) error {
+	result, err := r.collection.DeleteOne(ctx, bson.D{{Key: "_id", Value: id}})
+	if err != nil {
+		r.logger.Error().Err(err).Str("id", id.Hex()).Msg("删除用户失败")
+		return err
+	}
+	if result.DeletedCount == 0 {
+		return mongo.ErrNoDocuments
 	}
 	return nil
 }

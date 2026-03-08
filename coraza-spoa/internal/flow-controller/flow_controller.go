@@ -17,6 +17,12 @@ import (
 	"github.com/mingrenya/AI-Waf/pkg/model"
 )
 
+// BlockedIPRecorder 定义流控模块依赖的最小IP记录器接口
+type BlockedIPRecorder interface {
+	RecordBlockedIP(ip, reason, requestUri string, duration time.Duration) error
+	Close() error
+}
+
 // FlowControlConfig 定义流控配置
 type FlowControlConfig struct {
 	// 高频访问限制配置
@@ -54,7 +60,7 @@ type FlowControlConfig struct {
 type FlowController struct {
 	config      FlowControlConfig // 配置
 	logger      zerolog.Logger    // 日志
-	ipRecorder  IPRecorder        // IP记录器
+	ipRecorder  BlockedIPRecorder // IP记录器
 	initialized bool              // 是否已初始化
 	mutex       sync.Mutex        // 互斥锁
 }
@@ -112,7 +118,7 @@ var (
 // @Param recorder IPRecorder - IP记录器
 // @Return *FlowController - 创建的流控处理器
 // @Return error - 错误信息
-func NewFlowControllerFromMongoConfig(client *mongo.Client, database string, logger zerolog.Logger, recorder IPRecorder) (*FlowController, error) {
+func NewFlowControllerFromMongoConfig(client *mongo.Client, database string, logger zerolog.Logger, recorder BlockedIPRecorder) (*FlowController, error) {
 	flowControllerMutex.Lock()
 	defer flowControllerMutex.Unlock()
 
@@ -137,7 +143,7 @@ func NewFlowControllerFromMongoConfig(client *mongo.Client, database string, log
 }
 
 // 从MongoDB加载流控配置
-func loadFlowControlConfig(client *mongo.Client, database string, logger zerolog.Logger) (FlowControlConfig, error) {
+func loadFlowControlConfig(client *mongo.Client, database string, _ zerolog.Logger) (FlowControlConfig, error) {
 	var cfg model.Config
 	db := client.Database(database)
 	collection := db.Collection(cfg.GetCollectionName())
@@ -223,7 +229,7 @@ func (fc *FlowController) UpdateThreshold(typ string, threshold int64) error {
 }
 
 // NewFlowController 创建新的流控处理器
-func NewFlowController(config FlowControlConfig, logger zerolog.Logger, recorder IPRecorder) *FlowController {
+func NewFlowController(config FlowControlConfig, logger zerolog.Logger, recorder BlockedIPRecorder) *FlowController {
 	return &FlowController{
 		config:     config,
 		logger:     logger,
@@ -360,10 +366,9 @@ func (fc *FlowController) setupAllRules() {
 
 // CheckVisit 检查IP访问请求是否被允许
 func (fc *FlowController) CheckVisit(ip string, requestUri string) (bool, error) {
-	if !fc.initialized {
-		if err := fc.Initialize(); err != nil {
-			return true, err
-		}
+	// Initialize 内部已做并发保护和幂等处理，这里直接调用避免 initialized 的并发读写。
+	if err := fc.Initialize(); err != nil {
+		return false, err
 	}
 
 	// 使用热点参数限流，将IP作为第一个参数传入
@@ -374,7 +379,11 @@ func (fc *FlowController) CheckVisit(ip string, requestUri string) (bool, error)
 
 	if blockError != nil {
 		// 记录被限制的IP
-		fc.ipRecorder.RecordBlockedIP(ip, "high_frequency_visit", requestUri, fc.config.VisitLimit.BlockDuration)
+		if fc.ipRecorder != nil {
+			if err := fc.ipRecorder.RecordBlockedIP(ip, "high_frequency_visit", requestUri, fc.config.VisitLimit.BlockDuration); err != nil {
+				fc.logger.Error().Err(err).Str("ip", ip).Msg("记录受限IP失败")
+			}
+		}
 		fc.logger.Warn().
 			Str("ip", ip).
 			Str("reason", "high_frequency_visit").
@@ -390,10 +399,9 @@ func (fc *FlowController) CheckVisit(ip string, requestUri string) (bool, error)
 
 // RecordAttack 记录IP触发的攻击检测，返回是否被限制
 func (fc *FlowController) RecordAttack(ip string, requestUri string) (bool, error) {
-	if !fc.initialized {
-		if err := fc.Initialize(); err != nil {
-			return false, err
-		}
+	// Initialize 内部已做并发保护和幂等处理，这里直接调用避免 initialized 的并发读写。
+	if err := fc.Initialize(); err != nil {
+		return false, err
 	}
 
 	// 使用热点参数限流，将IP作为第一个参数传入
@@ -404,7 +412,11 @@ func (fc *FlowController) RecordAttack(ip string, requestUri string) (bool, erro
 
 	if blockError != nil {
 		// 记录被限制的IP
-		fc.ipRecorder.RecordBlockedIP(ip, "high_frequency_attack", requestUri, fc.config.AttackLimit.BlockDuration)
+		if fc.ipRecorder != nil {
+			if err := fc.ipRecorder.RecordBlockedIP(ip, "high_frequency_attack", requestUri, fc.config.AttackLimit.BlockDuration); err != nil {
+				fc.logger.Error().Err(err).Str("ip", ip).Msg("记录受限IP失败")
+			}
+		}
 		fc.logger.Warn().
 			Str("ip", ip).
 			Str("reason", "high_frequency_attack").
@@ -420,10 +432,9 @@ func (fc *FlowController) RecordAttack(ip string, requestUri string) (bool, erro
 
 // RecordError 记录IP返回的错误响应，返回是否被限制
 func (fc *FlowController) RecordError(ip string, requestUri string) (bool, error) {
-	if !fc.initialized {
-		if err := fc.Initialize(); err != nil {
-			return false, err
-		}
+	// Initialize 内部已做并发保护和幂等处理，这里直接调用避免 initialized 的并发读写。
+	if err := fc.Initialize(); err != nil {
+		return false, err
 	}
 
 	// 使用热点参数限流，将IP作为第一个参数传入
@@ -434,7 +445,11 @@ func (fc *FlowController) RecordError(ip string, requestUri string) (bool, error
 
 	if blockError != nil {
 		// 记录被限制的IP
-		fc.ipRecorder.RecordBlockedIP(ip, "high_frequency_error", requestUri, fc.config.ErrorLimit.BlockDuration)
+		if fc.ipRecorder != nil {
+			if err := fc.ipRecorder.RecordBlockedIP(ip, "high_frequency_error", requestUri, fc.config.ErrorLimit.BlockDuration); err != nil {
+				fc.logger.Error().Err(err).Str("ip", ip).Msg("记录受限IP失败")
+			}
+		}
 		fc.logger.Warn().
 			Str("ip", ip).
 			Str("reason", "high_frequency_error").

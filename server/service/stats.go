@@ -195,7 +195,7 @@ func (s *StatsServiceImpl) GetTimeSeriesData(ctx context.Context, timeRange stri
 		dataPoints, err = s.getRequestTimeSeries(ctx, startTime, interval, groupByFields)
 	case "blocks":
 		// 拦截数时间序列
-		dataPoints, err = s.getBlockTimeSeries(ctx, startTime, interval, groupByFields)
+		dataPoints, err = s.getBlockTimeSeries(ctx, startTime, interval)
 	default:
 		return nil, fmt.Errorf("无效的指标类型: %s", metric)
 	}
@@ -261,7 +261,7 @@ func (s *StatsServiceImpl) GetCombinedTimeSeriesData(ctx context.Context, timeRa
 
 	// 获取拦截数据
 	go func() {
-		data, err := s.getBlockTimeSeries(ctx, startTime, interval, groupByFields)
+		data, err := s.getBlockTimeSeries(ctx, startTime, interval)
 		blockCh <- struct {
 			data []dto.TimeSeriesDataPoint
 			err  error
@@ -343,7 +343,8 @@ func (s *StatsServiceImpl) GetTrafficTimeSeriesData(ctx context.Context, timeRan
 	// 构建分组条件
 	var groupStage bson.D
 
-	if interval == "6hour" {
+	switch interval {
+	case "6hour":
 		// 使用预计算的HourGroupSix字段进行分组
 		groupStage = bson.D{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: bson.D{
@@ -354,7 +355,7 @@ func (s *StatsServiceImpl) GetTrafficTimeSeriesData(ctx context.Context, timeRan
 			{Key: "outboundTraffic", Value: bson.D{{Key: "$sum", Value: "$bout"}}},
 			{Key: "timestamp", Value: bson.D{{Key: "$min", Value: "$timestamp"}}},
 		}}}
-	} else {
+	default:
 		// 构建常规分组ID
 		groupID := bson.D{}
 		for _, field := range groupByFields {
@@ -625,7 +626,8 @@ func (s *StatsServiceImpl) getRequestTimeSeries(ctx context.Context, startTime t
 	// 构建分组条件
 	var groupStage bson.D
 
-	if interval == "6hour" {
+	switch interval {
+	case "6hour":
 		// 使用预计算的HourGroupSix字段进行分组
 		groupStage = bson.D{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: bson.D{
@@ -635,7 +637,7 @@ func (s *StatsServiceImpl) getRequestTimeSeries(ctx context.Context, startTime t
 			{Key: "requests", Value: bson.D{{Key: "$sum", Value: "$req_tot"}}},
 			{Key: "timestamp", Value: bson.D{{Key: "$min", Value: "$timestamp"}}},
 		}}}
-	} else {
+	default:
 		// 构建常规分组ID
 		groupID := bson.D{}
 		for _, field := range groupByFields {
@@ -688,7 +690,7 @@ func (s *StatsServiceImpl) getRequestTimeSeries(ctx context.Context, startTime t
 }
 
 // 辅助方法 - 获取拦截数时间序列
-func (s *StatsServiceImpl) getBlockTimeSeries(ctx context.Context, startTime time.Time, interval string, groupByFields []string) ([]dto.TimeSeriesDataPoint, error) {
+func (s *StatsServiceImpl) getBlockTimeSeries(ctx context.Context, startTime time.Time, interval string) ([]dto.TimeSeriesDataPoint, error) {
 	// 获取MongoDB数据库连接
 	db, err := mongodb.GetDatabase(s.dbName)
 	if err != nil {
@@ -705,7 +707,8 @@ func (s *StatsServiceImpl) getBlockTimeSeries(ctx context.Context, startTime tim
 	// 根据interval决定如何分组
 	var groupStage bson.D
 
-	if interval == "hour" {
+	switch interval {
+	case "hour":
 		// 按小时分组
 		groupStage = bson.D{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: bson.D{
@@ -715,7 +718,7 @@ func (s *StatsServiceImpl) getBlockTimeSeries(ctx context.Context, startTime tim
 			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 			{Key: "timestamp", Value: bson.D{{Key: "$min", Value: "$createdAt"}}},
 		}}}
-	} else if interval == "6hour" {
+	case "6hour":
 		// 使用预计算的HourGroupSix字段分组
 		groupStage = bson.D{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: bson.D{
@@ -725,7 +728,7 @@ func (s *StatsServiceImpl) getBlockTimeSeries(ctx context.Context, startTime tim
 			{Key: "count", Value: bson.D{{Key: "$sum", Value: 1}}},
 			{Key: "timestamp", Value: bson.D{{Key: "$min", Value: "$createdAt"}}},
 		}}}
-	} else {
+	default:
 		// 按日期分组
 		groupStage = bson.D{{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: bson.D{{Key: "date", Value: "$date"}}},
@@ -795,18 +798,18 @@ func (s *StatsServiceImpl) GetSecurityMetrics(ctx context.Context, timeRange str
 
 	// 并行获取各项指标
 	var (
-		overview                *dto.OverviewStats
-		ruleEngine              *dto.RuleEngineStats
-		topTriggeredRules       []dto.RuleTriggerStats
-		severityDistribution    []dto.SeverityStats
-		attackTypeDistribution  []dto.AttackTypeStats
-		topAttackSources        []dto.GeoLocationStats
-		blockedIPMetrics        *dto.BlockedIPStats
-		threatLevel             *dto.ThreatLevelDistribution
-		responseTime            *dto.ResponseTimeStats
-		requestTrend            *dto.TimeSeriesResponse
-		blockTrend              *dto.TimeSeriesResponse
-		trafficTrend            *dto.TrafficTimeSeriesResponse
+		overview               *dto.OverviewStats
+		ruleEngine             *dto.RuleEngineStats
+		topTriggeredRules      []dto.RuleTriggerStats
+		severityDistribution   []dto.SeverityStats
+		attackTypeDistribution []dto.AttackTypeStats
+		topAttackSources       []dto.GeoLocationStats
+		blockedIPMetrics       *dto.BlockedIPStats
+		threatLevel            *dto.ThreatLevelDistribution
+		responseTime           *dto.ResponseTimeStats
+		requestTrend           *dto.TimeSeriesResponse
+		blockTrend             *dto.TimeSeriesResponse
+		trafficTrend           *dto.TrafficTimeSeriesResponse
 	)
 
 	// 1. 获取概览统计
@@ -958,8 +961,8 @@ func (s *StatsServiceImpl) getRuleEngineStats(ctx context.Context) (*dto.RuleEng
 		DisabledRules:  disabledRules,
 		WhitelistRules: whitelistRules,
 		BlacklistRules: blacklistRules,
-		AvgMatchTime:   0.5,   // 这个值可以从实际监控系统获取
-		RuleEfficiency: 95.5,  // 这个值可以基于规则触发率和误报率计算
+		AvgMatchTime:   0.5,  // 这个值可以从实际监控系统获取
+		RuleEfficiency: 95.5, // 这个值可以基于规则触发率和误报率计算
 	}, nil
 }
 
@@ -1267,7 +1270,7 @@ func (s *StatsServiceImpl) getBlockedIPMetrics(ctx context.Context, db *mongo.Da
 }
 
 // getThreatLevelDistribution 获取威胁等级分布
-func (s *StatsServiceImpl) getThreatLevelDistribution(ctx context.Context, db *mongo.Database, startTime time.Time) (*dto.ThreatLevelDistribution, error) {
+func (s *StatsServiceImpl) getThreatLevelDistribution(ctx context.Context, db *mongo.Database, _ time.Time) (*dto.ThreatLevelDistribution, error) {
 	collection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
 
 	// 最近时间窗口内的威胁分布 (最近1小时)
@@ -1317,7 +1320,7 @@ func (s *StatsServiceImpl) getThreatLevelDistribution(ctx context.Context, db *m
 }
 
 // getResponseTimeStats 获取响应时间统计
-func (s *StatsServiceImpl) getResponseTimeStats(ctx context.Context, db *mongo.Database, startTime time.Time) (*dto.ResponseTimeStats, error) {
+func (s *StatsServiceImpl) getResponseTimeStats(_ context.Context, _ *mongo.Database, _ time.Time) (*dto.ResponseTimeStats, error) {
 	// 从 HAProxy 统计数据中获取响应时间信息
 	// 这里使用模拟数据，实际应该从 HAProxy metrics 中获取
 	return &dto.ResponseTimeStats{

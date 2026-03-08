@@ -637,13 +637,14 @@ func (cb *CircuitBreaker) IsOpen() bool {
 // RecordSuccess 记录成功
 func (cb *CircuitBreaker) RecordSuccess() {
 	state := cb.state.Load()
-	if state == 2 { // half-open
+	switch state {
+case 2: // half-open
 		count := cb.successCount.Add(1)
 		if count >= cb.recoveryCount {
 			cb.state.Store(0) // closed
 			cb.failures.Store(0)
 		}
-	} else if state == 0 { // closed
+	case 0: // closed
 		cb.failures.Store(0)
 	}
 }

@@ -18,8 +18,8 @@ import (
 	"github.com/mingrenya/AI-Waf/server/config"
 	_ "github.com/mingrenya/AI-Waf/server/docs" // 导入 swagger 文档
 	"github.com/mingrenya/AI-Waf/server/router"
-	haproxyStats "github.com/mingrenya/AI-Waf/server/service/cornjob/haproxy"
 	aiAnalyzerTask "github.com/mingrenya/AI-Waf/server/service/cornjob/ai_analyzer"
+	haproxyStats "github.com/mingrenya/AI-Waf/server/service/cornjob/haproxy"
 	"github.com/mingrenya/AI-Waf/server/service/daemon"
 	"github.com/mingrenya/AI-Waf/server/validator"
 )
@@ -109,8 +109,9 @@ func main() {
 	// Initialize the Gin route
 	route := gin.New()
 
-	// Setup the router
-	router.Setup(route, db)
+	// Setup the router；接收告警 checker 的清理函数，应用退出时优雅关闭后台 goroutine
+	alertCleanup := router.Setup(route, db)
+	defer alertCleanup()
 
 	// 初始化验证器
 	validator.InitValidators()

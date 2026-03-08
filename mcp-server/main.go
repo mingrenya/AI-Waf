@@ -19,17 +19,25 @@ func main() {
 	}
 
 	apiToken := os.Getenv("WAF_API_TOKEN")
+	username := os.Getenv("WAF_USERNAME")
+	password := os.Getenv("WAF_PASSWORD")
 	if apiToken == "" {
-		log.Fatal("错误: WAF_API_TOKEN 环境变量未设置，MCP Server 无法启动")
+		// 尝试用用户名密码自动登录
+		if username != "" && password != "" {
+			log.Println("[认证] WAF_API_TOKEN 未设置，尝试用 WAF_USERNAME/WAF_PASSWORD 自动登录...")
+			token, err := tools.AutoLogin(backendURL, username, password)
+			if err != nil {
+				log.Fatalf("错误: 自动登录失败: %v", err)
+			}
+			apiToken = token
+			log.Printf("[认证] 自动登录成功，Token 已获取 (长度: %d 字符，90天有效)", len(apiToken))
+		} else {
+			log.Fatal("错误: 请设置 WAF_API_TOKEN，或同时设置 WAF_USERNAME 和 WAF_PASSWORD 以自动登录")
+		}
 	}
-	// 基础格式验证：JWT应该有两个点且长度合理
-	if len(apiToken) < 50 {
-		log.Fatalf("错误: WAF_API_TOKEN 格式不正确（长度: %d < 50），请检查Token", len(apiToken))
-	}
-	log.Printf("[认证] Token已加载 (长度: %d 字符)", len(apiToken))
 
-	// 创建后端API客户端
-	client := tools.NewAPIClient(backendURL, apiToken)
+	// 创建后端API客户端（传入凭据支持 Token 过期后自动刷新）
+	client := tools.NewAPIClientWithCredentials(backendURL, apiToken, username, password)
 
 	// 创建MCP Server
 	server := mcp.NewServer(&mcp.Implementation{

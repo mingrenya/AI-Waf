@@ -278,7 +278,36 @@ func (c *AuthControllerImpl) GetUserInfo(ctx *gin.Context) {
 //	@Failure		500	{object}	model.APIResponse	"服务器内部错误"
 //	@Router			/users/{id} [delete]
 func (c *AuthControllerImpl) DeleteUser(ctx *gin.Context) {
-	// 待实现
+	adminIDStr, exists := ctx.Get("userID")
+	if !exists {
+		response.Unauthorized(ctx, nil)
+		return
+	}
+	adminID, err := bson.ObjectIDFromHex(adminIDStr.(string))
+	if err != nil {
+		response.Unauthorized(ctx, nil)
+		return
+	}
+
+	userID, err := bson.ObjectIDFromHex(ctx.Param("id"))
+	if err != nil {
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	if err := c.authService.DeleteUser(ctx, adminID, userID); err != nil {
+		if errors.Is(err, service.ErrForbidden) {
+			response.Forbidden(ctx, err)
+			return
+		} else if errors.Is(err, service.ErrUserNotFound) {
+			response.Error(ctx, model.NewAPIError(http.StatusNotFound, "用户不存在", err), false)
+			return
+		}
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+
+	response.Success(ctx, "用户删除成功", nil)
 }
 
 // UpdateUser 更新用户
@@ -299,5 +328,41 @@ func (c *AuthControllerImpl) DeleteUser(ctx *gin.Context) {
 //	@Failure		500	{object}	model.APIResponse	"服务器内部错误"
 //	@Router			/users/{id} [put]
 func (c *AuthControllerImpl) UpdateUser(ctx *gin.Context) {
-	// 待实现
+	adminIDStr, exists := ctx.Get("userID")
+	if !exists {
+		response.Unauthorized(ctx, nil)
+		return
+	}
+	adminID, err := bson.ObjectIDFromHex(adminIDStr.(string))
+	if err != nil {
+		response.Unauthorized(ctx, nil)
+		return
+	}
+
+	userID, err := bson.ObjectIDFromHex(ctx.Param("id"))
+	if err != nil {
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	var req dto.UserUpdateRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(ctx, err, true)
+		return
+	}
+
+	user, err := c.authService.UpdateUser(ctx, adminID, userID, req)
+	if err != nil {
+		if errors.Is(err, service.ErrForbidden) {
+			response.Forbidden(ctx, err)
+			return
+		} else if errors.Is(err, service.ErrUserNotFound) {
+			response.Error(ctx, model.NewAPIError(http.StatusNotFound, "用户不存在", err), false)
+			return
+		}
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+
+	response.Success(ctx, "用户更新成功", user)
 }

@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math"
+	"sort"
 	"time"
 
 	"github.com/mingrenya/AI-Waf/pkg/model"
@@ -289,12 +292,7 @@ func (s *AdaptiveThrottlingServiceImpl) GetStats(ctx context.Context) (*dto.Adap
 
 	// 构建基线统计
 	baselineStats := dto.BaselineStatsDTO{}
-	thresholdStats := dto.ThresholdStatsDTO{
-		Visit:  100, // 默认值，实际应从配置或其他地方获取
-		Attack: 50,
-		Error:  30,
-	}
-
+	baselineMap := make(map[string]float64)
 	for _, b := range baselines {
 		switch b.Type {
 		case "visit":
@@ -304,14 +302,28 @@ func (s *AdaptiveThrottlingServiceImpl) GetStats(ctx context.Context) (*dto.Adap
 		case "error":
 			baselineStats.Error = b.Value
 		}
+		baselineMap[b.Type] = b.Value
 	}
 
-	// 计算学习进度
+	// 从最新调整日志中获取当前阈值，没有则从基线推算
+	thresholdStats := dto.ThresholdStatsDTO{}
+	for _, typ := range []string{"visit", "attack", "error"} {
+		threshold := s.resolveCurrentThreshold(ctx, typ, baselineMap[typ], cfg)
+		switch typ {
+		case "visit":
+			thresholdStats.Visit = threshold
+		case "attack":
+			thresholdStats.Attack = threshold
+		case "error":
+			thresholdStats.Error = threshold
+		}
+	}
+
+	// 计算学习进度（基于配置创建时间和学习周期）
 	learningProgress := 100.0
-	if cfg.LearningMode.Enabled {
-		// 这里应该根据实际学习时长计算进度
-		// 简化处理，实际需要从数据库获取学习开始时间
-		learningProgress = 75.0
+	if cfg.LearningMode.Enabled && cfg.LearningMode.LearningDuration > 0 {
+		elapsed := time.Since(cfg.CreatedAt).Seconds()
+		learningProgress = math.Min(elapsed/float64(cfg.LearningMode.LearningDuration)*100, 100)
 	}
 
 	// 获取最近24小时调整次数
@@ -322,8 +334,20 @@ func (s *AdaptiveThrottlingServiceImpl) GetStats(ctx context.Context) (*dto.Adap
 		recentAdjustments = 0
 	}
 
-	// 检测异常（简化处理）
+	// 检测最近是否有异常调整（1小时内有调整记录视为有异常）
 	anomalyDetected := false
+	recentHour, _ := s.repo.GetRecentAdjustmentCount(ctx, time.Now().Add(-1*time.Hour))
+	if recentHour > 0 {
+		anomalyDetected = true
+	}
+
+	// 最后更新时间取基线中最新的 UpdatedAt
+	lastUpdate := cfg.UpdatedAt
+	for _, b := range baselines {
+		if b.UpdatedAt.After(lastUpdate) {
+			lastUpdate = b.UpdatedAt
+		}
+	}
 
 	return &dto.AdaptiveThrottlingStatsDTO{
 		CurrentBaseline:   baselineStats,
@@ -331,22 +355,133 @@ func (s *AdaptiveThrottlingServiceImpl) GetStats(ctx context.Context) (*dto.Adap
 		LearningProgress:  learningProgress,
 		RecentAdjustments: int(recentAdjustments),
 		AnomalyDetected:   anomalyDetected,
-		LastUpdateTime:    time.Now(),
+		LastUpdateTime:    lastUpdate,
 	}, nil
+}
+
+// resolveCurrentThreshold 获取指定类型的当前阈值
+// 优先使用最新调整日志，其次用基线×调整因子，最后用配置默认值
+func (s *AdaptiveThrottlingServiceImpl) resolveCurrentThreshold(ctx context.Context, typ string, baselineValue float64, cfg *model.AdaptiveThrottlingConfig) int {
+	log, err := s.repo.GetLatestAdjustmentByType(ctx, typ)
+	if err == nil && log != nil {
+		return int(log.NewThreshold)
+	}
+	if baselineValue > 0 && cfg.AutoAdjustment.AdjustmentFactor > 0 {
+		v := int(baselineValue * cfg.AutoAdjustment.AdjustmentFactor)
+		if v < int(cfg.AutoAdjustment.MinThreshold) {
+			return int(cfg.AutoAdjustment.MinThreshold)
+		}
+		if v > int(cfg.AutoAdjustment.MaxThreshold) {
+			return int(cfg.AutoAdjustment.MaxThreshold)
+		}
+		return v
+	}
+	return int(cfg.AutoAdjustment.MinThreshold)
 }
 
 // RecalculateBaseline 重新计算基线
 func (s *AdaptiveThrottlingServiceImpl) RecalculateBaseline(ctx context.Context, typ string) error {
-	// TODO: 实现基线重新计算逻辑
-	s.logger.Info().Str("type", typ).Msg("重新计算基线")
+	if typ != "visit" && typ != "attack" && typ != "error" {
+		return errors.New("无效的基线类型，必须为 visit/attack/error")
+	}
+
+	cfg, err := s.repo.GetConfig(ctx)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return ErrAdaptiveThrottlingConfigNotFound
+		}
+		return err
+	}
+
+	// 查询历史窗口内该类型的流量模式
+	historyStart := time.Now().Add(-time.Duration(cfg.Baseline.HistoryWindow) * time.Second)
+	filter := bson.M{
+		"type":      typ,
+		"timestamp": bson.M{"$gte": historyStart},
+	}
+	// limit=0 在 MongoDB 中表示不限制数量
+	patterns, _, err := s.repo.GetTrafficPatterns(ctx, filter, 0, 0)
+	if err != nil {
+		return err
+	}
+
+	var values []float64
+	for _, p := range patterns {
+		if p.Metrics.RequestRate > 0 {
+			values = append(values, p.Metrics.RequestRate)
+		}
+	}
+
+	if int64(len(values)) < cfg.LearningMode.MinSamples {
+		return fmt.Errorf("样本数不足：需要 %d 个，当前 %d 个", cfg.LearningMode.MinSamples, len(values))
+	}
+
+	baselineValue := s.calculateBaselineValue(values, cfg)
+	confidence := math.Min(float64(len(values))/float64(cfg.LearningMode.MinSamples*10), 1.0)
+
+	baseline := &model.BaselineValue{
+		Type:            typ,
+		Value:           baselineValue,
+		ConfidenceLevel: confidence,
+		SampleSize:      int64(len(values)),
+		CalculatedAt:    time.Now(),
+		UpdatedAt:       time.Now(),
+	}
+
+	if err := s.repo.UpsertBaseline(ctx, baseline); err != nil {
+		s.logger.Error().Err(err).Str("type", typ).Msg("保存基线失败")
+		return err
+	}
+
+	s.logger.Info().Str("type", typ).Float64("value", baselineValue).Int("samples", len(values)).Msg("基线重新计算完成")
 	return nil
 }
 
 // ResetLearning 重置学习
 func (s *AdaptiveThrottlingServiceImpl) ResetLearning(ctx context.Context) error {
-	// TODO: 实现学习重置逻辑
-	s.logger.Info().Msg("重置学习")
+	if err := s.repo.DeleteAllBaselines(ctx); err != nil {
+		s.logger.Error().Err(err).Msg("删除基线数据失败")
+		return err
+	}
+	if err := s.repo.DeleteAllTrafficPatterns(ctx); err != nil {
+		s.logger.Error().Err(err).Msg("删除流量模式数据失败")
+		return err
+	}
+	s.logger.Info().Msg("学习数据已重置")
 	return nil
+}
+
+// calculateBaselineValue 根据配置的方法计算基线值
+func (s *AdaptiveThrottlingServiceImpl) calculateBaselineValue(values []float64, cfg *model.AdaptiveThrottlingConfig) float64 {
+	switch cfg.Baseline.CalculationMethod {
+	case "mean":
+		sum := 0.0
+		for _, v := range values {
+			sum += v
+		}
+		return sum / float64(len(values))
+	case "median":
+		return s.calcPercentile(values, 50)
+	case "percentile":
+		return s.calcPercentile(values, int(cfg.Baseline.Percentile))
+	default:
+		return s.calcPercentile(values, 50)
+	}
+}
+
+// calcPercentile 计算百分位数
+func (s *AdaptiveThrottlingServiceImpl) calcPercentile(values []float64, percentile int) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+	sorted := make([]float64, len(values))
+	copy(sorted, values)
+	sort.Float64s(sorted)
+	index := int(float64(len(sorted)) * float64(percentile) / 100.0)
+	if index >= len(sorted) {
+		index = len(sorted) - 1
+	}
+	return sorted[index]
 }
 
 // dtoToModel 将DTO转换为模型
@@ -354,19 +489,19 @@ func (s *AdaptiveThrottlingServiceImpl) dtoToModel(req *dto.AdaptiveThrottlingCo
 	config := &model.AdaptiveThrottlingConfig{
 		Enabled: req.Enabled,
 	}
-	
+
 	// 学习模式
 	config.LearningMode.Enabled = req.LearningMode.Enabled
 	config.LearningMode.LearningDuration = req.LearningMode.LearningDuration
 	config.LearningMode.SampleInterval = req.LearningMode.SampleInterval
 	config.LearningMode.MinSamples = int64(req.LearningMode.MinSamples)
-	
+
 	// 基线配置
 	config.Baseline.CalculationMethod = req.Baseline.CalculationMethod
 	config.Baseline.Percentile = float64(req.Baseline.Percentile)
 	config.Baseline.UpdateInterval = req.Baseline.UpdateInterval
 	config.Baseline.HistoryWindow = req.Baseline.HistoryWindow
-	
+
 	// 自动调整
 	config.AutoAdjustment.Enabled = req.AutoAdjustment.Enabled
 	config.AutoAdjustment.AnomalyThreshold = req.AutoAdjustment.AnomalyThreshold
@@ -376,12 +511,12 @@ func (s *AdaptiveThrottlingServiceImpl) dtoToModel(req *dto.AdaptiveThrottlingCo
 	config.AutoAdjustment.CooldownPeriod = req.AutoAdjustment.CooldownPeriod
 	config.AutoAdjustment.GradualAdjustment = req.AutoAdjustment.GradualAdjustment
 	config.AutoAdjustment.AdjustmentStepRatio = req.AutoAdjustment.AdjustmentStepRatio
-	
+
 	// 应用范围
 	config.ApplyTo.VisitLimit = req.ApplyTo.VisitLimit
 	config.ApplyTo.AttackLimit = req.ApplyTo.AttackLimit
 	config.ApplyTo.ErrorLimit = req.ApplyTo.ErrorLimit
-	
+
 	return config
 }
 
@@ -392,10 +527,10 @@ func (s *AdaptiveThrottlingServiceImpl) trafficPatternToDTO(p *model.TrafficPatt
 		Timestamp: p.Timestamp,
 		Metrics: dto.TrafficMetricsDTO{
 			RequestCount: int(p.Metrics.RequestRate * 60), // 转换为每分钟请求数
-			AvgLatency:   0,                                // 模型中没有这个字段，使用0
-			ErrorRate:    0,                                // 模型中没有这个字段，使用0
-			P95Latency:   0,                                // 模型中没有这个字段，使用0
-			P99Latency:   0,                                // 模型中没有这个字段，使用0
+			AvgLatency:   0,                               // 模型中没有这个字段，使用0
+			ErrorRate:    0,                               // 模型中没有这个字段，使用0
+			P95Latency:   0,                               // 模型中没有这个字段，使用0
+			P99Latency:   0,                               // 模型中没有这个字段，使用0
 		},
 		Statistics: dto.TrafficStatisticsDTO{
 			Mean:   p.Statistics.Mean,

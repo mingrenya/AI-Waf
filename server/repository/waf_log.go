@@ -34,6 +34,34 @@ func NewWAFLogRepository(db *mongo.Database) WAFLogRepository {
 	collection := db.Collection(wafLog.GetCollectionName())
 	logger := config.GetRepositoryLogger("waf_log")
 
+	// 建立索引，提升高频查询性能
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	indexes := []mongo.IndexModel{
+		// 时间戳降序索引 — 支持按时间排序/范围查询
+		{
+			Keys: bson.D{{Key: "timestamp", Value: -1}},
+		},
+		// 源 IP + 时间戳复合索引 — 支持按 IP 查询攻击历史
+		{
+			Keys: bson.D{
+				{Key: "srcIp", Value: 1},
+				{Key: "timestamp", Value: -1},
+			},
+		},
+		// 域名 + 时间戳复合索引 — 支持按站点查询日志
+		{
+			Keys: bson.D{
+				{Key: "domain", Value: 1},
+				{Key: "timestamp", Value: -1},
+			},
+		},
+	}
+	if _, err := collection.Indexes().CreateMany(ctx, indexes); err != nil {
+		logger.Error().Err(err).Msg("创建 WAF 日志索引失败")
+	}
+
 	return &MongoWAFLogRepository{
 		collection: collection,
 		logger:     logger,

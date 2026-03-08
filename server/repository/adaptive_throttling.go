@@ -38,6 +38,11 @@ type AdaptiveThrottlingRepository interface {
 	GetAdjustmentLogs(ctx context.Context, filter bson.M, skip, limit int64) ([]*model.ThrottleAdjustmentLog, int64, error)
 	CreateAdjustmentLog(ctx context.Context, log *model.ThrottleAdjustmentLog) error
 	GetRecentAdjustmentCount(ctx context.Context, since time.Time) (int64, error)
+	GetLatestAdjustmentByType(ctx context.Context, typ string) (*model.ThrottleAdjustmentLog, error)
+
+	// 数据清理
+	DeleteAllBaselines(ctx context.Context) error
+	DeleteAllTrafficPatterns(ctx context.Context) error
 }
 
 type adaptiveThrottlingRepo struct {
@@ -74,19 +79,19 @@ func (r *adaptiveThrottlingRepo) CreateConfig(ctx context.Context, config *model
 func (r *adaptiveThrottlingRepo) UpdateConfig(ctx context.Context, config *model.AdaptiveThrottlingConfig) error {
 	collection := r.db.Collection(CollectionAdaptiveThrottlingConfig)
 	config.UpdatedAt = time.Now()
-	
+
 	filter := bson.M{"_id": config.ID}
 	update := bson.M{"$set": config}
-	
+
 	result, err := collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err
 	}
-	
+
 	if result.MatchedCount == 0 {
 		return mongo.ErrNoDocuments
 	}
-	
+
 	return nil
 }
 
@@ -100,30 +105,30 @@ func (r *adaptiveThrottlingRepo) DeleteConfig(ctx context.Context) error {
 // GetTrafficPatterns 获取流量模式列表
 func (r *adaptiveThrottlingRepo) GetTrafficPatterns(ctx context.Context, filter bson.M, skip, limit int64) ([]*model.TrafficPattern, int64, error) {
 	collection := r.db.Collection(CollectionTrafficPatterns)
-	
+
 	// 获取总数
 	total, err := collection.CountDocuments(ctx, filter)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// 查询数据
 	opts := options.Find().
 		SetSkip(skip).
 		SetLimit(limit).
 		SetSort(bson.M{"timestamp": -1})
-	
+
 	cursor, err := collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, 0, err
 	}
 	defer cursor.Close(ctx)
-	
+
 	var patterns []*model.TrafficPattern
 	if err = cursor.All(ctx, &patterns); err != nil {
 		return nil, 0, err
 	}
-	
+
 	return patterns, total, nil
 }
 
@@ -138,82 +143,82 @@ func (r *adaptiveThrottlingRepo) CreateTrafficPattern(ctx context.Context, patte
 // GetBaselines 获取基线值列表
 func (r *adaptiveThrottlingRepo) GetBaselines(ctx context.Context, filter bson.M) ([]*model.BaselineValue, error) {
 	collection := r.db.Collection(CollectionBaselineValues)
-	
+
 	cursor, err := collection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 	defer cursor.Close(ctx)
-	
+
 	var baselines []*model.BaselineValue
 	if err = cursor.All(ctx, &baselines); err != nil {
 		return nil, err
 	}
-	
+
 	return baselines, nil
 }
 
 // GetBaselineByType 根据类型获取基线值
 func (r *adaptiveThrottlingRepo) GetBaselineByType(ctx context.Context, typ string) (*model.BaselineValue, error) {
 	collection := r.db.Collection(CollectionBaselineValues)
-	
+
 	var baseline model.BaselineValue
 	err := collection.FindOne(ctx, bson.M{"type": typ}).Decode(&baseline)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &baseline, nil
 }
 
 // UpsertBaseline 插入或更新基线值
 func (r *adaptiveThrottlingRepo) UpsertBaseline(ctx context.Context, baseline *model.BaselineValue) error {
 	collection := r.db.Collection(CollectionBaselineValues)
-	
+
 	baseline.UpdatedAt = time.Now()
-	
+
 	filter := bson.M{"type": baseline.Type}
 	update := bson.M{
 		"$set": baseline,
 		"$setOnInsert": bson.M{
-			"_id":         bson.NewObjectID().Hex(),
+			"_id":          bson.NewObjectID().Hex(),
 			"calculatedAt": time.Now(),
 		},
 	}
-	
+
 	opts := options.UpdateOne().SetUpsert(true)
 	_, err := collection.UpdateOne(ctx, filter, update, opts)
-	
+
 	return err
 }
 
 // GetAdjustmentLogs 获取调整日志列表
 func (r *adaptiveThrottlingRepo) GetAdjustmentLogs(ctx context.Context, filter bson.M, skip, limit int64) ([]*model.ThrottleAdjustmentLog, int64, error) {
 	collection := r.db.Collection(CollectionThrottleAdjustmentLogs)
-	
+
 	// 获取总数
 	total, err := collection.CountDocuments(ctx, filter)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	// 查询数据
 	opts := options.Find().
 		SetSkip(skip).
 		SetLimit(limit).
 		SetSort(bson.M{"timestamp": -1})
-	
+
 	cursor, err := collection.Find(ctx, filter, opts)
 	if err != nil {
 		return nil, 0, err
 	}
 	defer cursor.Close(ctx)
-	
+
 	var logs []*model.ThrottleAdjustmentLog
 	if err = cursor.All(ctx, &logs); err != nil {
 		return nil, 0, err
 	}
-	
+
 	return logs, total, nil
 }
 
@@ -231,4 +236,28 @@ func (r *adaptiveThrottlingRepo) GetRecentAdjustmentCount(ctx context.Context, s
 	collection := r.db.Collection(CollectionThrottleAdjustmentLogs)
 	filter := bson.M{"timestamp": bson.M{"$gte": since}}
 	return collection.CountDocuments(ctx, filter)
+}
+
+// GetLatestAdjustmentByType 获取指定类型的最新调整记录
+func (r *adaptiveThrottlingRepo) GetLatestAdjustmentByType(ctx context.Context, typ string) (*model.ThrottleAdjustmentLog, error) {
+	collection := r.db.Collection(CollectionThrottleAdjustmentLogs)
+	opts := options.FindOne().SetSort(bson.M{"timestamp": -1})
+	var log model.ThrottleAdjustmentLog
+	err := collection.FindOne(ctx, bson.M{"type": typ}, opts).Decode(&log)
+	if err != nil {
+		return nil, err
+	}
+	return &log, nil
+}
+
+// DeleteAllBaselines 删除所有基线数据
+func (r *adaptiveThrottlingRepo) DeleteAllBaselines(ctx context.Context) error {
+	_, err := r.db.Collection(CollectionBaselineValues).DeleteMany(ctx, bson.M{})
+	return err
+}
+
+// DeleteAllTrafficPatterns 删除所有流量模式数据
+func (r *adaptiveThrottlingRepo) DeleteAllTrafficPatterns(ctx context.Context) error {
+	_, err := r.db.Collection(CollectionTrafficPatterns).DeleteMany(ctx, bson.M{})
+	return err
 }

@@ -132,8 +132,10 @@ func SecurityAudit(db *mongo.Database) gin.HandlerFunc {
 		}
 
 		// 异步保存审计日志到MongoDB
+		// 使用独立 context，避免请求结束后原 context 被取消导致写入失败
 		go func(log AuditLog) {
-			ctx := c.Request.Context()
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
 			if _, err := collection.InsertOne(ctx, log); err != nil {
 				config.Logger.Error().Err(err).Msg("Failed to save audit log")
 			}
