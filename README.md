@@ -1,300 +1,215 @@
-# MRYa WAF
+# MRYa WAF (AI-Waf)
 
 <div align="center">
-<a href="https://deepwiki.com/mingrenya/AI-Waf"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" width="160" height="30"></a>
-  <img src="https://img.shields.io/badge/Go-1.24.1-00ADD8?style=flat&logo=go" alt="Go Version" width="140" height="30">
-  <img src="https://img.shields.io/badge/HAProxy-3.0-green?style=flat&logo=haproxy" alt="HAProxy" width="140" height="30">
-  <img src="https://img.shields.io/badge/OWASP-Coraza-blue?style=flat" alt="Coraza WAF" width="140" height="30">
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat" alt="License" width="140" height="30">
+
+[![Go](https://img.shields.io/badge/Go-1.24.1-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![HAProxy](https://img.shields.io/badge/HAProxy-3.0-green?style=flat&logo=haproxy)](https://www.haproxy.org/)
+[![Coraza](https://img.shields.io/badge/OWASP-Coraza-blue?style=flat)](https://github.com/corazawaf/coraza)
+[![MongoDB](https://img.shields.io/badge/MongoDB-6.0-47A248?style=flat&logo=mongodb)](https://www.mongodb.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)](https://react.dev/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat)](./LICENSE)
+
 </div>
 
-<br>
+一个基于 `HAProxy + OWASP Coraza + Go + React` 的现代化 Web 应用防火墙管理平台，提供从流量接入、防护策略、日志告警到 AI 辅助分析的完整闭环能力。
 
-A modern web application firewall (WAF) management system built on top of [HAProxy](https://www.haproxy.org/) and [OWASP Coraza WAF](https://github.com/corazawaf/coraza) with the [Coraza SPOA](https://github.com/corazawaf/coraza-spoa) integration. This system provides a comprehensive backend API for managing HAProxy configurations, Coraza WAF rules, and traffic inspection.
+## 目录
 
-## 🌐 Click To Run
+- [项目亮点](#项目亮点)
+- [功能截图](#功能截图)
+- [核心功能](#核心功能)
+- [架构概览](#架构概览)
+- [快速开始](#快速开始)
+- [配置说明](#配置说明)
+- [文档导航](#文档导航)
+- [贡献指南](#贡献指南)
+- [版本路线图](#版本路线图)
+- [许可证](#许可证)
 
-run the application in less than 30 seconds,default username: **admin**,default password: **admin123**
+## 项目亮点
 
-[![](https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg)](https://usw.sealos.io/?openapp=system-template%3FtemplateName%3DRuiqi-Waf)
+- 多引擎防护：Coraza WAF + MicroEngine + 地理分析 + 限流控制
+- 管理闭环：站点、证书、规则、日志、告警、统计一体化
+- AI 增强：DeepSeek 对话分析 + MCP 工具化操作
+- 开源友好：模块化目录、清晰接口、可容器化部署
 
-## 📺 Demo Video
+## 功能截图
 
-https://github.com/user-attachments/assets/f74000d7-d229-4d00-843b-1ba28caeb13d
+> 截图来自当前 Web 控制台，位于 `doc/image/`。
 
-## 📸 MRYa WAF Interface Showcase
+![Dashboard](doc/image/waf-1.png)
+![Rule Management](doc/image/waf-2.png)
+![Analytics](doc/image/waf-3.png)
+![Security Config](doc/image/waf-4.png)
 
-<div align="center">
-  <table cellspacing="0" cellpadding="10" style="border-collapse: separate; border-spacing: 15px; background-color: #f8f9fa;">
-    <tr>
-      <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="MRYa WAF Dashboard" src="./doc/image/waf-1.png" style="border-radius: 6px; max-width: 100%;">
-      </td>
-      <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="MRYa WAF Rule Management" src="./doc/image/waf-2.png" style="border-radius: 6px; max-width: 100%;">
-      </td>
-    </tr>
-    <tr>
-      <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="MRYa WAF Analytics" src="./doc/image/waf-3.png" style="border-radius: 6px; max-width: 100%;">
-      </td>
-      <td align="center" style="border-radius: 8px; border: 1px solid #ddd; padding: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-        <img width="767" alt="MRYa WAF Security Config" src="./doc/image/waf-4.png" style="border-radius: 6px; max-width: 100%;">
-      </td>
-    </tr>
-  </table>
-</div>
+## 核心功能
 
-## Core Architecture
+### 1. 防护与策略
+- Coraza WAF（兼容 ModSecurity/SecLang，支持 CRS）
+- MicroEngine 微规则引擎：
+  - 支持 `IP/URL/Path` 匹配目标
+  - 支持嵌套条件与 `AND/OR` 复合逻辑
+  - 支持黑白名单与 CIDR
+- 自适应限流（Adaptive Throttling）
+- 地理位置分析与攻击来源可视化
 
-Simple WAF implements a modular architecture with HAProxy at the front handling traffic and multiple security engines providing protection:
+### 2. 平台管理
+- 站点管理（多站点、多后端）
+- 证书管理（HTTPS 配置）
+- 规则管理（创建、更新、启停、删除）
+- IP 封禁与解封
 
-1. **Coraza WAF Engine**: OWASP ModSecurity-compatible filtering
-2. **MicroEngine**: Rule-based matching engine for IP filtering, URL checking, and complex conditional logic
-3. **Geographic Analysis**: Location-based traffic filtering
-4. **Rate Limiting**: Traffic control and request throttling
+### 3. 监控与告警
+- 攻击日志查询与过滤
+- 安全指标统计与趋势分析
+- 告警规则、告警通道、告警历史
 
-The system uses a plugin architecture that allows for continuous enhancement with new security modules.
+### 4. AI 与 MCP
+- AI 助手（DeepSeek）用于日志分析、规则建议
+- MCP Server 工具化接入（可由 Claude Desktop/Agent 调用）
 
-```mermaid
-graph TD
-    Client[Client] -->|HTTP Request| HAProxy
-    HAProxy -->|TCP Connection| SPOE[Coraza SPOE Agent]
-    SPOE -->|Message Type Recognition| TypeCheck
-    TypeCheck -->|coraza-req| ReqHandler[Request Handler]
-    TypeCheck -->|coraza-res| ResHandler[Response Handler]
-    ReqHandler -->|Get App Name| ReqApp[Find Application]
-    ResHandler -->|Get App Name| ResApp[Find Application]
-    ReqApp -->|Process Request| ReqProcess[Request Processor]
-    ResApp -->|Process Response| ResProcess[Response Processor]
-    ReqProcess --> Return[Return Results to HAProxy]
-    ResProcess --> Return
-    HAProxy -->|Apply Action| Action[Allow/Deny/Log]
-    Action -->|Response| Client
-```
+## 架构概览
 
-### SPOE Communication Workflow
+请求链路：
 
-```
-[HAProxy Request] → [internal.Agent.Serve(Listener)]
-                          ↓
-                   Create spop.Agent
-                   agent := spop.Agent{
-                       Handler: a,
-                       BaseContext: a.Context,
-                   }
-                          ↓
-                [spop.Agent.Serve(Listener)]
-                          ↓
-                   Accept new connections
-                   nc, err := l.Accept()
-                          ↓
-                   Create protocol handler
-                   p := newProtocolClient(ctx, nc, as, handler)
-                          ↓
-                   Start goroutine for connection
-                   go func() {
-                       p.Serve()
-                   }()
-                          ↓
-                [protocolClient.Serve]
-                   Process frames in connection
-                          ↓
-                [frameHandler processes Frame]
-                   Dispatch based on frame type
-                          ↓
-                [onNotify handles messages]
-                   Create message scanner and objects
-                   Call Handler.HandleSPOE
-                          ↓
-                [internal.Agent.HandleSPOE processing]
-                          ↓
-                   Parse message type (coraza-req/coraza-res)
-                          ↓
-                   Get application name
-                          ↓
-                   Find Application
-                          ↓
-                   Execute message handler
-                          ↓
-                   Process return results
-                          ↓
-                [Return to HAProxy]
-```
+1. 业务请求进入 HAProxy
+2. HAProxy 通过 SPOE 与 `coraza-spoa` 交互
+3. Coraza 对请求/响应进行检测
+4. 微引擎规则参与联合决策（放行/阻断/记录）
+5. `server` 提供管理 API 与数据聚合
+6. `web` 提供可视化配置与运营界面
+7. `mcp-server` 暴露工具能力供 AI 工作流调用
 
-## Features
+更多系统描述见 `SYSTEM_OVERVIEW.md`。
 
-- **Multi-Engine Protection**
+## 快速开始
 
-  - **Coraza WAF Engine**:
+### 方式一：Docker Compose（推荐）
 
-    - OWASP Core Rule Set (CRS) support
-    - ModSecurity SecLang rule compatibility
-    - Custom rule management
-
-  - **MicroEngine**:
-
-    - Rule-based matching for IP, URL, and request path
-    - Complex condition combinations (AND/OR logic)
-    - IP blacklist/whitelist with CIDR support
-    - Efficient regex matching with caching
-
-  - **Geographic Analysis**:
-
-    - Country and region-based filtering
-    - Geographic attack visualization
-
-  - **Traffic Control**:
-    - Rate limiting and request throttling
-    - Connection control mechanisms
-
-- **HAProxy Integration**
-
-  - Full HAProxy lifecycle management (start, stop, restart)
-  - Dynamic configuration generation
-  - Real-time status monitoring
-
-- **Advanced Security**
-
-  - HTTP request inspection
-  - HTTP response inspection
-  - Real-time attack detection and prevention
-  - RBAC user permission system
-
-- **Monitoring and Logging**
-
-  - WAF attack logs and analytics
-  - Traffic statistics
-  - Performance metrics
-
-- **API-Driven Workflow**
-  - RESTful API with Gin framework
-  - Swagger/ReDoc API documentation
-  - JWT authentication
-
-## Prerequisites
-
-- Go 1.24.1 or higher
-- Node.js 23.10.0 and pnpm 10.11.0 (for frontend development)
-- HAProxy 3.0 (for local development)
-- MongoDB 6.0
-- Docker and Docker Compose (for containerized deployment)
-
-## Local Development
-
-1. Clone the repository:
+1. 在项目根目录创建或修改 `.env`
+2. 启动服务：
 
 ```bash
-git clone https://github.com/mingrenya/AI-Waf.git
-cd MRYa
+docker compose up -d --build
 ```
 
-2. Setup the frontend development environment:
+3. 访问地址：
+- 控制台：`http://localhost:2333`
+- 健康检查：`http://localhost:2333/health`
+- Swagger：`http://localhost:2333/swagger/index.html`
+- ReDoc：`http://localhost:2333/redoc`
+
+默认初始账号（首次登录请立即修改）：
+- 用户名：`admin`
+- 密码：`admin123`
+
+### 方式二：本地开发
+
+前置依赖：
+- Go `1.24.1+`
+- Node.js `23.10.0+`
+- pnpm `10.11.0+`
+- MongoDB `6.0+`
+- HAProxy `3.0+`（本地联调可选）
 
 ```bash
-cd server/web
-pnpm install
-pnpm dev # For development mode with hot reload
-# or
-pnpm build # For production build
-cd ../..
-```
-
-3. Configure backend environment:
-
-```bash
-cp server/.env.template server/.env
-# Edit .env with your configurations
-```
-
-4. Run the Go backend service:
-
-```bash
-go work use ./coraza-spoa ./pkg ./server
+# 后端
 cd server
 go run main.go
+
+# 前端（另一个终端）
+cd web
+pnpm install
+pnpm dev
 ```
 
-The development server will start with:
+## 配置说明
 
-- API server: `http://localhost:2333/api/v1`
-- Swagger UI: `http://localhost:2333/swagger/index.html`
-- ReDoc UI: `http://localhost:2333/redoc`
-- Frontend: `http://localhost:2333/`
+核心配置在根目录 `.env`，关键项包括：
 
-## Docker Deployment
+- `JWT_SECRET`：JWT 密钥（必须使用高强度随机串）
+- `MONGO_ROOT_PASSWORD`：MongoDB 密码
+- `VITE_API_BASE_URL`：前端 API 地址
+- `DEEPSEEK_API_KEY`：AI 助手密钥（可选）
+- `MCP_API_TOKEN`：MCP 服务调用令牌
 
-1. Clone the repository:
+详细参考：`ENV_CONFIG_GUIDE.md`。
+
+## 文档导航
+
+- `SYSTEM_OVERVIEW.md`：系统总览与组件关系
+- `ENV_CONFIG_GUIDE.md`：环境变量与配置说明
+- `MCP_SETUP_GUIDE.md`：MCP 部署、配置、故障排查
+- `QUICK_REFERENCE.md`：MCP 工具参数速查
+- `AI_ASSISTANT_GUIDE.md`：DeepSeek AI 助手集成
+- `SECURITY_AUDIT_REPORT.md`：安全审计结果
+
+### 提案文档（`doc/proposal`）
+
+- `micro_engine_design_zh.md` / `micro_engine_design.md`
+  - 微引擎规则执行模型、优先级、复合条件与匹配流程
+- `condition-bulid.md` / `condition-build-en.md`
+  - 前端递归条件构建器（ConditionBuilder）设计与数据流
+
+## 贡献指南
+
+欢迎通过 Issue 和 Pull Request 参与贡献。
+
+### 提交前建议
+
+1. Fork 并创建分支：`feature/<name>` 或 `fix/<name>`
+2. 保持单一变更主题，避免一个 PR 混入多类改动
+3. 对关键变更附带说明：
+   - 背景问题
+   - 方案与影响范围
+   - 验证方式
+
+### 本地检查建议
 
 ```bash
-git clone https://github.com/mingrenya/AI-Waf.git
-cd MRYa
+# 后端（示例）
+cd server
+go test ./...
+go vet ./...
+
+# 前端（示例）
+cd web
+pnpm install
+pnpm lint
+pnpm build
 ```
 
-2. Build the Docker image:
+### PR 模板建议内容
 
-```bash
-docker build -t mrya-waf:latest .
-```
+- 变更摘要
+- 兼容性影响
+- 测试结果
+- 截图（若涉及前端）
 
-3. Run as a standalone container:
+## 版本路线图
 
-```bash
-docker run -p 2333:2333 -p 8080:8080 -p 443:443 -p 80:80 -p 9443:9443 -p 8404:8404 mrya-waf:latest
-```
+### v1.1（短期）
+- [ ] 完善安全指标看板
+- [ ] 告警通道增强（Webhook/IM）
+- [ ] 更多规则模板（OWASP Top 10）
 
-4. Alternatively, use Docker Compose for a complete deployment with MongoDB:
+### v1.2（中期）
+- [ ] AI 规则建议自动评分
+- [ ] 自适应限流策略优化
+- [ ] MCP 工具集扩展（更细粒度运维能力）
 
-```bash
-# Edit docker-compose.yaml to configure environment variables if needed
-docker-compose up -d
-```
+### v2.0（长期）
+- [ ] 多节点高可用部署方案
+- [ ] 更完整的策略编排与回滚机制
+- [ ] 更丰富的生态集成（SIEM/SOAR）
 
-This will start both MongoDB and Simple WAF services with all required configurations.
+## 许可证
 
-## Roadmap
+本项目采用 MIT 许可证，详见 `LICENSE`。
 
-Our project features and development progress:
-
-1. **Monitoring Dashboard**
-
-   - [x] Real-time attack visualization map
-   - [x] Geographic attack origin analytics
-   - [ ] Comprehensive security metrics dashboard
-
-2. **Advanced Traffic Control**
-
-   - [x] Fine-grained rate limiting
-   - [x] Request frequency analysis
-   - [ ] Adaptive throttling based on traffic patterns
-
-3. **Alert Integration**
-
-   - [ ] Webhook alert system
-   - [ ] Integration with popular messaging platforms
-   - [ ] Customizable alert templates
-
-4. **AI Security Analysis**
-
-   - [ ] ML-based attack pattern detection
-   - [ ] AI-assisted rule generation
-   - [ ] Automated ModSecurity directive creation
-   - [ ] MCP (Model Control Plane) integration
-
-5. **Enhanced Rule Management**
-   - [ ] OWASP Top 10 specific rule templates
-   - [ ] Rule effectiveness scoring
-   - [ ] One-click protection profiles
-
-For detailed technical documentation on engine architecture and implementation, see the proposals in the `/doc/proposal` directory.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
-
-## Acknowledgements
+## 致谢
 
 - [OWASP Coraza WAF](https://github.com/corazawaf/coraza)
 - [Coraza SPOA](https://github.com/corazawaf/coraza-spoa)
 - [HAProxy](https://www.haproxy.org/)
-- [Go Gin Framework](https://github.com/gin-gonic/gin)
+- [Gin](https://github.com/gin-gonic/gin)

@@ -60,7 +60,7 @@ func (c *AuthControllerImpl) Login(ctx *gin.Context) {
 	token, user, err := c.authService.Login(ctx, req)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) || errors.Is(err, service.ErrInvalidPassword) {
-			response.Error(ctx, model.NewAPIError(http.StatusBadRequest, "用户名或密码错误", err), false)
+			response.Error(ctx, model.NewAPIError(http.StatusUnauthorized, "用户名或密码错误", err), false)
 			return
 		}
 		response.InternalServerError(ctx, err, false)
@@ -98,7 +98,7 @@ func (c *AuthControllerImpl) LoginServiceAccount(ctx *gin.Context) {
 	token, user, err := c.authService.LoginWithCustomExpiration(ctx, req, 90*24*time.Hour)
 	if err != nil {
 		if errors.Is(err, service.ErrUserNotFound) || errors.Is(err, service.ErrInvalidPassword) {
-			response.Error(ctx, model.NewAPIError(http.StatusBadRequest, "用户名或密码错误", err), false)
+			response.Error(ctx, model.NewAPIError(http.StatusUnauthorized, "用户名或密码错误", err), false)
 			return
 		}
 		response.InternalServerError(ctx, err, false)

@@ -23,6 +23,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	route.Use(middleware.RequestID())
 	route.Use(middleware.Logger())
 	route.Use(middleware.Cors())
+	route.Use(middleware.SecurityHeaders())
 	route.Use(gin.CustomRecovery(middleware.CustomErrorHandler))
 
 	// 创建仓库

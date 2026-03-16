@@ -38,13 +38,13 @@ func NewRedisRateLimiter(addr, password string, db int) RateLimiter {
 	}
 }
 
-// Allow 使用 Redis INCR + EXPIRE 实现固定窗口计数限流。
-// 首次写入时设置过期时间，保证窗口自动滑动。
+// Allow 使用 Redis INCR + EXPIRENV 实现固定窗口计数限流。
+// 仅在 key 首次创建时设置过期时间，避免窗口被重复请求无限延伸。
 func (r *redisRateLimiter) Allow(ctx context.Context, key string, limit int, window time.Duration) bool {
 	redisKey := fmt.Sprintf("ratelimit:%s", key)
 	pipe := r.client.TxPipeline()
 	incr := pipe.Incr(ctx, redisKey)
-	pipe.Expire(ctx, redisKey, window)
+	pipe.ExpireNX(ctx, redisKey, window)
 	if _, err := pipe.Exec(ctx); err != nil {
 		// Redis 不可用时放行，降级由调用层处理
 		return true

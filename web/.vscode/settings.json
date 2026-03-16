@@ -5,7 +5,7 @@
     "i18n-ally.sourceLanguage": "zh",
     "i18n-ally.displayLanguage": "zh,en",
     "i18n-ally.keystyle": "nested",
-    "typescript.tsdk": "node_modules/typescript/lib",
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
     "cSpell.words": [
         "coraza",
         "partialize",
