@@ -1,6 +1,9 @@
 import type { Config } from "tailwindcss"
 import tailwindcssAnimate from "tailwindcss-animate"
 
+type UtilityRule = Record<string, string>
+type UtilityMap = Record<string, UtilityRule>
+
 const config = {
     darkMode: ["class"],
     content: [
@@ -202,7 +205,7 @@ const config = {
     },
     plugins: [
         tailwindcssAnimate,
-        function ({ addUtilities }) {
+        function ({ addUtilities }: { addUtilities: (utilities: UtilityMap) => void }) {
             const newUtilities = {
                 // 霓虹灯文本
                 '.text-shadow-glow-purple': {

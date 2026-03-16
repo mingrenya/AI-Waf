@@ -33,8 +33,10 @@
 ## 环境变量说明
 
 ### 必填配置
-- `JWT_SECRET`: JWT密钥（建议修改为随机字符串）
-- `MCP_API_TOKEN`: MCP服务token（按提示步骤获取）
+- `JWT_SECRET`: JWT密钥（至少32字符，建议64字符以上随机串）
+- `MONGO_ROOT_PASSWORD`: MongoDB root 密码
+- `WAF_USERNAME`: MCP 服务账号（建议最小权限）
+- `WAF_PASSWORD`: MCP 服务账号密码
 
 ### AI助手配置（可选）
 - `DEEPSEEK_API_KEY`: DeepSeek API密钥（留空则AI助手不可用）
@@ -46,8 +48,23 @@
 - `MONGO_INITDB_DATABASE`: 数据库名称
 
 ### 其他配置
-- `IS_PRODUCTION`: 生产模式（默认：false）
-- `VITE_API_BASE_URL`: API地址（默认：http://localhost:2333/api/v1）
+- `IS_PRODUCTION`: 生产模式（生产环境必须为 `true`）
+- `JWT_EXPIRATION_HRS`: JWT有效期（生产建议：12）
+- `CORS_ALLOWED_ORIGINS`: 允许跨域源（多个域名用`,`分隔）
+- `VITE_API_BASE_URL`: 前端 API 地址（生产建议 HTTPS 域名）
+- `LOG_LEVEL`: 日志级别（生产建议：warn）
+- `LOG_FORMAT`: 日志格式（生产建议：json）
+
+## 生产环境建议配置
+
+```env
+IS_PRODUCTION=true
+JWT_EXPIRATION_HRS=12
+LOG_LEVEL=warn
+LOG_FORMAT=json
+CORS_ALLOWED_ORIGINS=https://waf.example.com,https://admin.waf.example.com
+VITE_API_BASE_URL=https://waf.example.com/api/v1
+```
 
 ## 注意事项
 
@@ -75,6 +92,9 @@ docker compose up -d
 
 # 确认.env文件格式正确（无多余空格）
 cat .env | grep DEEPSEEK
+
+# 检查生产关键配置
+cat .env | grep -E "IS_PRODUCTION|JWT_EXPIRATION_HRS|CORS_ALLOWED_ORIGINS|LOG_LEVEL|LOG_FORMAT"
 ```
 
 ## 参考文档
