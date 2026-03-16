@@ -3,6 +3,9 @@ package internal
 import (
 	"context"
 	"net"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/mingrenya/AI-Waf/pkg/model"
@@ -35,6 +38,46 @@ type GeoIP2Options struct {
 	ASNDBPath  string // ASN数据库路径
 }
 
+var defaultGeoIPBases = []string{
+	"/home/mrya/mrya-waf/geo-ip",
+	"/geo-ip",
+	"geo-ip",
+}
+
+func resolveGeoDBPath(path string) string {
+	if path == "" {
+		return ""
+	}
+
+	if _, err := os.Stat(path); err == nil {
+		return path
+	}
+
+	fileName := filepath.Base(path)
+	if fileName == "." || fileName == string(filepath.Separator) {
+		return path
+	}
+
+	trimmed := filepath.ToSlash(filepath.Clean(path))
+	if strings.HasPrefix(trimmed, "/geo-ip/") || strings.HasPrefix(trimmed, "geo-ip/") {
+		for _, base := range defaultGeoIPBases {
+			candidate := filepath.Join(base, fileName)
+			if _, err := os.Stat(candidate); err == nil {
+				return candidate
+			}
+		}
+	}
+
+	for _, base := range defaultGeoIPBases {
+		candidate := filepath.Join(base, fileName)
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
+		}
+	}
+
+	return path
+}
+
 // NewGeoIP2Processor 创建一个新的GeoIP2处理器实例
 func NewGeoIP2Processor(ctx context.Context, options GeoIP2Options, logger zerolog.Logger) (IPProcessor, error) {
 	processor := &GeoIP2Processor{
@@ -44,10 +87,17 @@ func NewGeoIP2Processor(ctx context.Context, options GeoIP2Options, logger zerol
 
 	// 尝试打开City数据库
 	if options.CityDBPath != "" {
-		cityDB, err := geoip2.Open(options.CityDBPath)
+		resolvedCityPath := resolveGeoDBPath(options.CityDBPath)
+		cityDB, err := geoip2.Open(resolvedCityPath)
 		if err != nil {
-			logger.Error().Err(err).Str("path", options.CityDBPath).Msg("打开城市数据库失败")
+			logger.Error().Err(err).
+				Str("path", options.CityDBPath).
+				Str("resolvedPath", resolvedCityPath).
+				Msg("打开城市数据库失败")
 		} else {
+			if resolvedCityPath != options.CityDBPath {
+				logger.Info().Str("path", options.CityDBPath).Str("resolvedPath", resolvedCityPath).Msg("城市数据库路径已自动修正")
+			}
 			processor.cityDB = cityDB
 		}
 	} else {
@@ -56,10 +106,17 @@ func NewGeoIP2Processor(ctx context.Context, options GeoIP2Options, logger zerol
 
 	// 尝试打开ASN数据库
 	if options.ASNDBPath != "" {
-		asnDB, err := geoip2.Open(options.ASNDBPath)
+		resolvedASNPath := resolveGeoDBPath(options.ASNDBPath)
+		asnDB, err := geoip2.Open(resolvedASNPath)
 		if err != nil {
-			logger.Warn().Err(err).Str("path", options.ASNDBPath).Msg("打开ASN数据库失败，ASN信息将不可用")
+			logger.Warn().Err(err).
+				Str("path", options.ASNDBPath).
+				Str("resolvedPath", resolvedASNPath).
+				Msg("打开ASN数据库失败，ASN信息将不可用")
 		} else {
+			if resolvedASNPath != options.ASNDBPath {
+				logger.Info().Str("path", options.ASNDBPath).Str("resolvedPath", resolvedASNPath).Msg("ASN数据库路径已自动修正")
+			}
 			processor.asnDB = asnDB
 		}
 	} else {

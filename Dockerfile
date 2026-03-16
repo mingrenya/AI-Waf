@@ -1,7 +1,8 @@
 # 多阶段构建
 # 阶段1: 构建Node.js前端
 # 生产环境使用固定版本
-FROM node:23.10.0-alpine AS frontend-builder
+ARG DOCKER_REGISTRY=docker.io
+FROM ${DOCKER_REGISTRY}/library/node:23.10.0-alpine AS frontend-builder
 # 安装pnpm（使用最新稳定版本）
 RUN npm install -g pnpm@10.28.0
 # 设置环境变量禁用更新检查
@@ -15,7 +16,7 @@ RUN pnpm install
 RUN pnpm build
 
 # 阶段2: 构建Go后端
-FROM golang:1.24.1-alpine AS backend-builder
+FROM ${DOCKER_REGISTRY}/library/golang:1.24.1-alpine AS backend-builder
 # 设置Go环境变量
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
@@ -37,7 +38,7 @@ RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server
 RUN cd server && go build -o ../mrya-waf main.go
 
 # 阶段3: 最终镜像 - 使用官方 HAProxy 3.0.10 镜像
-FROM haproxy:3.0.10
+FROM ${DOCKER_REGISTRY}/library/haproxy:3.0.10
 
 # 确保以root用户进行初始化设置
 USER root

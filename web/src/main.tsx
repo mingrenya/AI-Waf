@@ -40,11 +40,29 @@ createRoot(document.getElementById('root')!).render(
     </StrictMode>,
 )
 
-// React 挂载后移除加载动画
-setTimeout(() => {
+// React 挂载后采用更平滑的加载策略：最短展示时长 + 超时兜底
+const APP_LOADING_MIN_VISIBLE_MS = 700
+const APP_LOADING_FADE_OUT_MS = 500
+const APP_LOADING_MAX_LIFETIME_MS = 5000
+
+const safelyRemoveAppLoading = () => {
     const loadingElement = document.querySelector('.app-loading')
-    if (loadingElement) {
-        loadingElement.classList.add('app-loading-fade-out')
-        setTimeout(() => loadingElement.remove(), 500)
-    }
-}, 100)
+    if (!loadingElement) return
+
+    loadingElement.classList.add('app-loading-fade-out')
+    setTimeout(() => loadingElement.remove(), APP_LOADING_FADE_OUT_MS)
+}
+
+const appLoadingStart = Number((window as Window & { __APP_LOADING_START__?: number }).__APP_LOADING_START__ || Date.now())
+const elapsed = Date.now() - appLoadingStart
+const remainingVisibleTime = Math.max(0, APP_LOADING_MIN_VISIBLE_MS - elapsed)
+
+setTimeout(() => {
+    requestAnimationFrame(() => {
+        safelyRemoveAppLoading()
+    })
+}, remainingVisibleTime)
+
+setTimeout(() => {
+    safelyRemoveAppLoading()
+}, APP_LOADING_MAX_LIFETIME_MS)

@@ -1,6 +1,7 @@
 # AI-Waf MCP Server Dockerfile
 # 使用官方go-sdk实现标准MCP协议
-FROM golang:1.24.1-alpine AS builder
+ARG DOCKER_REGISTRY=docker.io
+FROM ${DOCKER_REGISTRY}/library/golang:1.24.1-alpine AS builder
 
 RUN apk add --no-cache git ca-certificates
 
@@ -20,7 +21,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o server-http ./cmd/server-http
 
 # 运行阶段
-FROM alpine:latest
+FROM ${DOCKER_REGISTRY}/library/alpine:latest
 
 RUN apk --no-cache add ca-certificates
 

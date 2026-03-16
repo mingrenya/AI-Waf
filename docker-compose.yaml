@@ -29,6 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        DOCKER_REGISTRY: ${DOCKER_REGISTRY:-docker.io}
     container_name: mrya-waf
     restart: always
     depends_on:
@@ -70,6 +72,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.mcp
+      args:
+        DOCKER_REGISTRY: ${DOCKER_REGISTRY:-docker.io}
     container_name: ai-waf-mcp-server
     restart: always
     depends_on:

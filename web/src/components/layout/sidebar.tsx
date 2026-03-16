@@ -2,7 +2,7 @@
 
 import { Link, useLocation, useNavigate } from "react-router"
 import { cn } from "@/lib/utils"
-import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, BookOpen, Github, Bell, Brain } from "lucide-react"
+import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, Github, Bell, Brain } from "lucide-react"
 import { ROUTES } from "@/routes/constants"
 import { useTranslation } from "react-i18next"
 import type { TFunction } from "i18next"
@@ -184,15 +184,6 @@ export function Sidebar({ displayConfig = {} }: SidebarProps) {
                         title="官网"
                     >
                         <Globe className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
-                    </a>
-                    <a
-                        href="https://deepwiki.com/HUAHUAI23/MRYa"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                        title="文档"
-                    >
-                        <BookOpen className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
                     </a>
                     <a
                         href="https://github.com/mingrenya/AI-Waf"

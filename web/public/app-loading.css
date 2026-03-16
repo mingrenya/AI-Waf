@@ -1,0 +1,184 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.app-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.app-loading-background {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(147, 112, 219, 0.95) 0%,
+        rgba(138, 100, 208, 0.9) 50%,
+        rgba(123, 79, 214, 0.95) 100%
+    );
+    background-size: 200% 200%;
+}
+
+.app-loading-blur-elements {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.app-loading-blur-1 {
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    top: 10%;
+    left: 10%;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    filter: blur(24px);
+    animation: preload-float 8s ease-in-out infinite;
+}
+
+.app-loading-blur-2 {
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    top: 5%;
+    right: 15%;
+    background-color: rgba(233, 213, 255, 0.2);
+    border-radius: 9999px;
+    filter: blur(24px);
+    animation: preload-float-reverse 9s ease-in-out infinite;
+}
+
+.app-loading-blur-3 {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    bottom: 5%;
+    left: 15%;
+    background-color: rgba(243, 232, 255, 0.2);
+    border-radius: 9999px;
+    filter: blur(24px);
+    animation: preload-pulse-glow 4s ease-in-out infinite;
+}
+
+.app-loading-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+}
+
+.app-loading-text {
+    color: white;
+    font-size: 24px;
+    font-weight: 500;
+    animation: preload-fade-in 0.5s ease-out;
+}
+
+.app-loading-progress-container {
+    width: 256px;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.app-loading-progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #e0c3fc 0%, #8ec5fc 100%);
+    box-shadow: 0 0 10px rgba(224, 195, 252, 0.7);
+    transition: width 0.3s ease;
+}
+
+.app-loading-percentage {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    animation: preload-pulse 2s infinite;
+}
+
+@keyframes preload-float {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-20px) scale(1.05);
+    }
+}
+
+@keyframes preload-float-reverse {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(20px) scale(1.05);
+    }
+}
+
+@keyframes preload-pulse-glow {
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+@keyframes preload-pulse {
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes preload-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.app-loading-fade-out {
+    animation: loading-fade-out 0.5s ease-out forwards;
+}
+
+@keyframes loading-fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
