@@ -150,50 +150,52 @@ export function useRoutes(): RouteObject[] {
     // 应用路由
     const appRoutes: RouteObject = {
         element: <ProtectedRoute />,
-        children: [{
-            element: <RootLayout />,
-            children: [
-                {
-                    path: "/",
-                    element: <Navigate to={`${ROUTES.MONITOR}/overview`} replace />
-                },
-                {
-                    path: ROUTES.LOGS,
-                    element: <LogsLayout />,
-                    children: createChildRoutes(breadcrumbMap[ROUTES.LOGS])
-                },
-                {
-                    path: ROUTES.MONITOR,
-                    element: <MonitorLayOut />,
-                    children: createChildRoutes(breadcrumbMap[ROUTES.MONITOR])
-                },
-                {
-                    path: ROUTES.RULES,
-                    element: <RulesLayOut />,
-                    children: createChildRoutes(breadcrumbMap[ROUTES.RULES])
-                },
-                {
-                    path: ROUTES.SETTINGS,
-                    element: <SettingLayOut />,
-                    children: createChildRoutes(breadcrumbMap[ROUTES.SETTINGS])
-                },
-                {
-                    path: ROUTES.ALERTS,
-                    element: <AlertLayOut />,
-                    children: createChildRoutes(breadcrumbMap[ROUTES.ALERTS])
-                },
-                {
-                    path: ROUTES.AI_ANALYZER,
-                    element: <AIAnalyzerLayOut />,
-                    children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER])
-                },
-                // security-dashboard 应该在 ProtectedRoute 内
-                {
-                    path: "/security-dashboard",
-                    element: <ViewerPage />
-                }
-            ]
-        }]
+        children: [
+            {
+                // security-dashboard 在鉴权内，但不使用后台侧边栏布局
+                path: "/security-dashboard",
+                element: <ViewerPage />
+            },
+            {
+                element: <RootLayout />,
+                children: [
+                    {
+                        path: "/",
+                        element: <Navigate to={`${ROUTES.MONITOR}/overview`} replace />
+                    },
+                    {
+                        path: ROUTES.LOGS,
+                        element: <LogsLayout />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.LOGS])
+                    },
+                    {
+                        path: ROUTES.MONITOR,
+                        element: <MonitorLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.MONITOR])
+                    },
+                    {
+                        path: ROUTES.RULES,
+                        element: <RulesLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.RULES])
+                    },
+                    {
+                        path: ROUTES.SETTINGS,
+                        element: <SettingLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.SETTINGS])
+                    },
+                    {
+                        path: ROUTES.ALERTS,
+                        element: <AlertLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.ALERTS])
+                    },
+                    {
+                        path: ROUTES.AI_ANALYZER,
+                        element: <AIAnalyzerLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER])
+                    }
+                ]
+            }
+        ]
     }
 
     return [...authRoutes, appRoutes]

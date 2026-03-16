@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"sort"
 	"time"
 
 	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
@@ -12,6 +13,7 @@ import (
 	"github.com/mingrenya/AI-Waf/server/dto"
 	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/repository"
+	"github.com/mingrenya/AI-Waf/server/service/daemon"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -955,14 +957,86 @@ func (s *StatsServiceImpl) getRuleEngineStats(ctx context.Context) (*dto.RuleEng
 		return nil, err
 	}
 
+	avgMatchTime := 0.0
+	ruleEfficiency := 0.0
+
+	wafLogCollection := db.Collection((&pkgModel.WAFLog{}).GetCollectionName())
+
+	// 优先从 waf_log.match_time 计算平均匹配耗时（毫秒）
+	matchTimePipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "match_time", Value: bson.D{{Key: "$exists", Value: true}, {Key: "$ne", Value: nil}}}}}},
+		{{Key: "$group", Value: bson.D{{Key: "_id", Value: nil}, {Key: "avgMatchTime", Value: bson.D{{Key: "$avg", Value: "$match_time"}}}}}},
+	}
+	if cursor, aggErr := wafLogCollection.Aggregate(ctx, matchTimePipeline); aggErr == nil {
+		defer cursor.Close(ctx)
+		var result []struct {
+			AvgMatchTime *float64 `bson:"avgMatchTime"`
+		}
+		if decodeErr := cursor.All(ctx, &result); decodeErr == nil && len(result) > 0 && result[0].AvgMatchTime != nil {
+			avgMatchTime = *result[0].AvgMatchTime
+		}
+	}
+
+	// 若日志中没有 match_time，则降级使用 HAProxy frontend 的 Ttime 平均值
+	if avgMatchTime <= 0 {
+		runner, runnerErr := daemon.GetRunnerService()
+		if runnerErr == nil {
+			nativeStats, statsErr := runner.GetStats()
+			if statsErr == nil {
+				totalTtime := 0.0
+				sampleCount := 0
+				for _, stat := range nativeStats.Stats {
+					if stat.Type != "frontend" || stat.Stats == nil || stat.Stats.Ttime == nil {
+						continue
+					}
+					totalTtime += float64(*stat.Stats.Ttime)
+					sampleCount++
+				}
+				if sampleCount > 0 {
+					avgMatchTime = totalTtime / float64(sampleCount)
+				}
+			}
+		}
+	}
+
+	// 规则效率使用日志 accuracy(0-10) 的平均值映射为百分比
+	accuracyPipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "accuracy", Value: bson.D{{Key: "$exists", Value: true}, {Key: "$gte", Value: 0}}}}}},
+		{{Key: "$group", Value: bson.D{{Key: "_id", Value: nil}, {Key: "avgAccuracy", Value: bson.D{{Key: "$avg", Value: "$accuracy"}}}}}},
+	}
+	if cursor, aggErr := wafLogCollection.Aggregate(ctx, accuracyPipeline); aggErr == nil {
+		defer cursor.Close(ctx)
+		var result []struct {
+			AvgAccuracy *float64 `bson:"avgAccuracy"`
+		}
+		if decodeErr := cursor.All(ctx, &result); decodeErr == nil && len(result) > 0 && result[0].AvgAccuracy != nil {
+			ruleEfficiency = (*result[0].AvgAccuracy / 10.0) * 100.0
+		}
+	}
+
+	// 无 accuracy 数据时，降级为规则启用率
+	if ruleEfficiency <= 0 && totalRules > 0 {
+		ruleEfficiency = float64(enabledRules) / float64(totalRules) * 100.0
+	}
+
+	// 统一收敛到 0-100，并保留两位小数
+	if ruleEfficiency < 0 {
+		ruleEfficiency = 0
+	}
+	if ruleEfficiency > 100 {
+		ruleEfficiency = 100
+	}
+	avgMatchTime = math.Round(avgMatchTime*100) / 100
+	ruleEfficiency = math.Round(ruleEfficiency*100) / 100
+
 	return &dto.RuleEngineStats{
 		TotalRules:     totalRules,
 		EnabledRules:   enabledRules,
 		DisabledRules:  disabledRules,
 		WhitelistRules: whitelistRules,
 		BlacklistRules: blacklistRules,
-		AvgMatchTime:   0.5,  // 这个值可以从实际监控系统获取
-		RuleEfficiency: 95.5, // 这个值可以基于规则触发率和误报率计算
+		AvgMatchTime:   avgMatchTime,
+		RuleEfficiency: ruleEfficiency,
 	}, nil
 }
 
@@ -1321,14 +1395,73 @@ func (s *StatsServiceImpl) getThreatLevelDistribution(ctx context.Context, db *m
 
 // getResponseTimeStats 获取响应时间统计
 func (s *StatsServiceImpl) getResponseTimeStats(_ context.Context, _ *mongo.Database, _ time.Time) (*dto.ResponseTimeStats, error) {
-	// 从 HAProxy 统计数据中获取响应时间信息
-	// 这里使用模拟数据，实际应该从 HAProxy metrics 中获取
+	runner, err := daemon.GetRunnerService()
+	if err != nil {
+		return nil, fmt.Errorf("获取服务运行器失败: %w", err)
+	}
+
+	nativeStats, err := runner.GetStats()
+	if err != nil {
+		return nil, fmt.Errorf("获取HAProxy实时统计失败: %w", err)
+	}
+
+	// 使用 frontend 维度的 Ttime(总响应时间) 作为样本，避免静态占位数据。
+	responseSamples := make([]float64, 0, len(nativeStats.Stats))
+	for _, stat := range nativeStats.Stats {
+		if stat.Type != "frontend" || stat.Stats == nil || stat.Stats.Ttime == nil {
+			continue
+		}
+
+		t := float64(*stat.Stats.Ttime)
+		if t >= 0 {
+			responseSamples = append(responseSamples, t)
+		}
+	}
+
+	if len(responseSamples) == 0 {
+		return &dto.ResponseTimeStats{}, nil
+	}
+
+	sort.Float64s(responseSamples)
+
+	total := 0.0
+	for _, v := range responseSamples {
+		total += v
+	}
+
 	return &dto.ResponseTimeStats{
-		AvgResponseTime: 15.5,
-		MaxResponseTime: 250.0,
-		MinResponseTime: 5.0,
-		P50ResponseTime: 10.0,
-		P95ResponseTime: 50.0,
-		P99ResponseTime: 100.0,
+		AvgResponseTime: total / float64(len(responseSamples)),
+		MaxResponseTime: responseSamples[len(responseSamples)-1],
+		MinResponseTime: responseSamples[0],
+		P50ResponseTime: percentile(responseSamples, 50),
+		P95ResponseTime: percentile(responseSamples, 95),
+		P99ResponseTime: percentile(responseSamples, 99),
 	}, nil
+}
+
+func percentile(sorted []float64, p float64) float64 {
+	if len(sorted) == 0 {
+		return 0
+	}
+	if len(sorted) == 1 {
+		return sorted[0]
+	}
+
+	if p <= 0 {
+		return sorted[0]
+	}
+	if p >= 100 {
+		return sorted[len(sorted)-1]
+	}
+
+	position := (p / 100.0) * float64(len(sorted)-1)
+	lower := int(math.Floor(position))
+	upper := int(math.Ceil(position))
+
+	if lower == upper {
+		return sorted[lower]
+	}
+
+	weight := position - float64(lower)
+	return sorted[lower]*(1-weight) + sorted[upper]*weight
 }
