@@ -5,6 +5,8 @@ import { RoutePath, ROUTES } from "./constants"
 import { useTranslation } from 'react-i18next'
 import { TFunction } from 'i18next'
 import { ProtectedRoute } from "@/feature/auth/components/ProtectedRoute"
+import { useAuthStore } from '@/store/auth'
+import { hasPermission } from '@/lib/permissions'
 
 // 直接导入布局组件
 import { RootLayout } from "@/components/layout/root-layout"
@@ -21,6 +23,7 @@ import CertificatesPage from "@/pages/setting/pages/certificate/page"
 import EventsPage from "@/pages/logs/pages/event/page"
 import LogsPage from "@/pages/logs/pages/log/page"
 import SiteManagerPage from "@/pages/setting/pages/site/page"
+import UserManagementPage from "@/pages/setting/pages/user/page"
 import IPGroupPage from "@/pages/rule/pages/ip-group/page"
 import MicroRulePage from "@/pages/rule/pages/micro-rule/page"
 import StatsPage from "@/pages/monitor/pages/stats/page"
@@ -61,7 +64,17 @@ interface BreadcrumbConfig {
 }
 
 // 创建面包屑配置
-export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, BreadcrumbConfig> {
+export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Record<RoutePath, BreadcrumbConfig> {
+    const settingsItems: BreadcrumbItem[] = [
+        { title: t('breadcrumb.settings.settings'), path: "global", component: <GlobalSettingPage /> },
+        { title: t('breadcrumb.settings.siteManager'), path: "site", component: <SiteManagerPage /> },
+        { title: t('breadcrumb.settings.certManager'), path: "cert", component: <CertificatesPage /> },
+    ]
+
+    if (canReadUsers) {
+        settingsItems.push({ title: t('breadcrumb.settings.userManager'), path: 'user', component: <UserManagementPage /> })
+    }
+
     return {
         [ROUTES.LOGS]: {
             defaultPath: "event",
@@ -90,11 +103,7 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
         },
         [ROUTES.SETTINGS]: {
             defaultPath: "global",
-            items: [
-                { title: t('breadcrumb.settings.settings'), path: "global", component: <GlobalSettingPage /> },
-                { title: t('breadcrumb.settings.siteManager'), path: "site", component: <SiteManagerPage /> },
-                { title: t('breadcrumb.settings.certManager'), path: "cert", component: <CertificatesPage /> }
-            ]
+            items: settingsItems
         },
         [ROUTES.ALERTS]: {
             defaultPath: "channel",
@@ -119,11 +128,13 @@ export function createBreadcrumbConfig(t: TFunction): Record<RoutePath, Breadcru
 // 获取当前语言的面包屑配置
 export function useBreadcrumbMap() {
     const { t } = useTranslation()
-    return createBreadcrumbConfig(t)
+    const user = useAuthStore((state) => state.user)
+    const canReadUsers = hasPermission(user, 'user:read')
+    return createBreadcrumbConfig(t, canReadUsers)
 }
 
 // 生成子路由配置
-function createChildRoutes(config: BreadcrumbConfig): RouteObject[] {
+function createChildRoutes(config: BreadcrumbConfig, parentPath: RoutePath): RouteObject[] {
     return [
         {
             path: "",
@@ -132,7 +143,7 @@ function createChildRoutes(config: BreadcrumbConfig): RouteObject[] {
         ...config.items.map(item => ({
             path: item.path,
             element: item.component,
-            id: item.path // 添加唯一标识
+            id: `${parentPath.replace('/', '')}-${item.path}` // 全局唯一标识
         }))
     ]
 }
@@ -166,32 +177,32 @@ export function useRoutes(): RouteObject[] {
                     {
                         path: ROUTES.LOGS,
                         element: <LogsLayout />,
-                        children: createChildRoutes(breadcrumbMap[ROUTES.LOGS])
+                        children: createChildRoutes(breadcrumbMap[ROUTES.LOGS], ROUTES.LOGS)
                     },
                     {
                         path: ROUTES.MONITOR,
                         element: <MonitorLayOut />,
-                        children: createChildRoutes(breadcrumbMap[ROUTES.MONITOR])
+                        children: createChildRoutes(breadcrumbMap[ROUTES.MONITOR], ROUTES.MONITOR)
                     },
                     {
                         path: ROUTES.RULES,
                         element: <RulesLayOut />,
-                        children: createChildRoutes(breadcrumbMap[ROUTES.RULES])
+                        children: createChildRoutes(breadcrumbMap[ROUTES.RULES], ROUTES.RULES)
                     },
                     {
                         path: ROUTES.SETTINGS,
                         element: <SettingLayOut />,
-                        children: createChildRoutes(breadcrumbMap[ROUTES.SETTINGS])
+                        children: createChildRoutes(breadcrumbMap[ROUTES.SETTINGS], ROUTES.SETTINGS)
                     },
                     {
                         path: ROUTES.ALERTS,
                         element: <AlertLayOut />,
-                        children: createChildRoutes(breadcrumbMap[ROUTES.ALERTS])
+                        children: createChildRoutes(breadcrumbMap[ROUTES.ALERTS], ROUTES.ALERTS)
                     },
                     {
                         path: ROUTES.AI_ANALYZER,
                         element: <AIAnalyzerLayOut />,
-                        children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER])
+                        children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER], ROUTES.AI_ANALYZER)
                     }
                 ]
             }
@@ -202,4 +213,4 @@ export function useRoutes(): RouteObject[] {
 }
 
 // 默认面包屑配置，用于类型推断
-export const breadcrumbMap = createBreadcrumbConfig(((key: string) => key) as unknown as TFunction) as ReturnType<typeof createBreadcrumbConfig>
+export const breadcrumbMap = createBreadcrumbConfig(((key: string) => key) as unknown as TFunction, true) as ReturnType<typeof createBreadcrumbConfig>

@@ -29,7 +29,8 @@
         "settings": {
             "settings": "设置",
             "siteManager": "站点管理",
-            "certManager": "证书管理"
+            "certManager": "证书管理",
+            "userManager": "用户管理"
         },
         "alerts": {
             "channel": "通道",

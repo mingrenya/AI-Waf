@@ -29,7 +29,8 @@
         "settings": {
             "settings": "Settings",
             "siteManager": "Site Management",
-            "certManager": "Certificate Management"
+            "certManager": "Certificate Management",
+            "userManager": "User Management"
         },
         "alerts": {
             "channel": "Channels",
