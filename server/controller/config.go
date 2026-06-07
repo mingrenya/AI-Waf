@@ -2,7 +2,9 @@
 package controller
 
 import (
+	"context"
 	"errors"
+	"time"
 
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/mingrenya/AI-Waf/server/config"
@@ -22,16 +24,33 @@ type ConfigController interface {
 // ConfigControllerImpl 配置控制器实现
 type ConfigControllerImpl struct {
 	configService service.ConfigService
+	runnerService service.RunnerService
 	logger        zerolog.Logger
 }
 
 // NewConfigController 创建配置控制器
 func NewConfigController(configService service.ConfigService) ConfigController {
 	logger := config.GetControllerLogger("config")
+	runnerService, _ := service.NewRunnerService()
 	return &ConfigControllerImpl{
 		configService: configService,
+		runnerService: runnerService,
 		logger:        logger,
 	}
+}
+
+// triggerEngineReload 配置变更后异步触发引擎重载
+func (c *ConfigControllerImpl) triggerEngineReload() {
+	if c.runnerService == nil {
+		return
+	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := c.runnerService.Reload(ctx); err != nil {
+			c.logger.Warn().Err(err).Msg("配置变更后引擎重载失败，请手动执行 reload")
+		}
+	}()
 }
 
 // GetConfig 获取配置
@@ -103,6 +122,7 @@ func (c *ConfigControllerImpl) PatchConfig(ctx *gin.Context) {
 	// 转换为DTO响应
 	configResponse := mapConfigToDTO(cfg)
 
+	c.triggerEngineReload()
 	response.Success(ctx, "配置更新成功", configResponse)
 }
 

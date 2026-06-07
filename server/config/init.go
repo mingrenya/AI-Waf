@@ -58,7 +58,7 @@ func initConfig(db *mongo.Database) error {
 		// 更新第一个配置文档
 		_, err = configCollection.UpdateOne(
 			ctx,
-			bson.M{}, // 匹配第一个文档
+			bson.D{{Key: "name", Value: "AppConfig"}},
 			bson.M{"$set": bson.M{
 				"engine":          defaultConfig.Engine,
 				"haproxy":         defaultConfig.Haproxy,

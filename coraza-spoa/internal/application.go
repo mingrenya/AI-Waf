@@ -836,7 +836,11 @@ func (a AppConfig) NewApplicationWithContext(ctx context.Context, options Applic
 	if options.RuleEngineDbConfig != nil && options.RuleEngineDbConfig.MongoClient != nil {
 		ruleEngine := NewRuleEngine()
 		ruleEngine.InitMongoConfig(options.RuleEngineDbConfig)
-		ruleEngine.LoadAllFromMongoDB()
+		if err := ruleEngine.LoadAllFromMongoDB(); err != nil {
+			a.Logger.Error().Err(err).Msg("Failed to load rules from MongoDB, engine runs with empty ruleset")
+		} else {
+			a.Logger.Info().Int("rules", len(ruleEngine.GetRules())).Msg("Rules loaded from MongoDB")
+		}
 		app.ruleEngine = ruleEngine
 	}
 

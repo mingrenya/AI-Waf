@@ -41,20 +41,20 @@ func NewWAFLogRepository(db *mongo.Database) WAFLogRepository {
 	indexes := []mongo.IndexModel{
 		// 时间戳降序索引 — 支持按时间排序/范围查询
 		{
-			Keys: bson.D{{Key: "timestamp", Value: -1}},
+			Keys: bson.D{{Key: "createdAt", Value: -1}},
 		},
 		// 源 IP + 时间戳复合索引 — 支持按 IP 查询攻击历史
 		{
 			Keys: bson.D{
 				{Key: "srcIp", Value: 1},
-				{Key: "timestamp", Value: -1},
+				{Key: "createdAt", Value: -1},
 			},
 		},
 		// 域名 + 时间戳复合索引 — 支持按站点查询日志
 		{
 			Keys: bson.D{
 				{Key: "domain", Value: 1},
-				{Key: "timestamp", Value: -1},
+				{Key: "createdAt", Value: -1},
 			},
 		},
 	}

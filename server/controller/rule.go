@@ -2,9 +2,11 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	pkgmodel "github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/mingrenya/AI-Waf/server/config"
@@ -28,17 +30,34 @@ type MicroRuleController interface {
 
 // MicroRuleControllerImpl 微规则控制器实现
 type MicroRuleControllerImpl struct {
-	ruleService service.MicroRuleService
-	logger      zerolog.Logger
+	ruleService   service.MicroRuleService
+	runnerService service.RunnerService
+	logger        zerolog.Logger
 }
 
 // NewMicroRuleController 创建微规则控制器
 func NewMicroRuleController(ruleService service.MicroRuleService) MicroRuleController {
 	logger := config.GetControllerLogger("microrule")
+	runnerService, _ := service.NewRunnerService()
 	return &MicroRuleControllerImpl{
-		ruleService: ruleService,
-		logger:      logger,
+		ruleService:   ruleService,
+		runnerService: runnerService,
+		logger:        logger,
 	}
+}
+
+// triggerEngineReload 规则变更后异步触发引擎重载（失败不影响主流程）
+func (c *MicroRuleControllerImpl) triggerEngineReload() {
+	if c.runnerService == nil {
+		return
+	}
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		if err := c.runnerService.Reload(ctx); err != nil {
+			c.logger.Warn().Err(err).Msg("规则变更后引擎重载失败，请手动执行 reload")
+		}
+	}()
 }
 
 // BSONToJSON 将BSON数据转换为JSON
@@ -129,6 +148,7 @@ func (c *MicroRuleControllerImpl) CreateMicroRule(ctx *gin.Context) {
 	}
 
 	c.logger.Info().Str("id", rule.ID.Hex()).Str("name", rule.Name).Msg("微规则创建成功")
+	c.triggerEngineReload()
 	response.Success(ctx, "微规则创建成功", resp)
 }
 
@@ -284,6 +304,7 @@ func (c *MicroRuleControllerImpl) UpdateMicroRule(ctx *gin.Context) {
 	}
 
 	c.logger.Info().Str("id", id).Str("name", rule.Name).Msg("微规则更新成功")
+	c.triggerEngineReload()
 	response.Success(ctx, "微规则更新成功", resp)
 }
 
@@ -327,5 +348,6 @@ func (c *MicroRuleControllerImpl) DeleteMicroRule(ctx *gin.Context) {
 	}
 
 	c.logger.Info().Str("id", id).Msg("微规则删除成功")
+	c.triggerEngineReload()
 	response.Success(ctx, "微规则删除成功", nil)
 }

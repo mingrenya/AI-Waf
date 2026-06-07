@@ -119,6 +119,7 @@ type MongoLogStore struct {
 	logger      zerolog.Logger
 	state       atomic.Uint32 // 0: stopped, 1: running, 2: closing
 	wg          sync.WaitGroup
+	droppedCount atomic.Uint64 // 因缓冲区满而丢弃的日志计数
 
 	// 性能优化参数
 	writerCount    int           // 写入协程数
@@ -223,7 +224,8 @@ func (s *MongoLogStore) Store(log model.WAFLog) error {
 
 	// 尝试推送到环形缓冲区
 	if !buffer.Push(log) {
-		// 缓冲区满，直接丢弃（按要求可以接受日志丢失）
+		// 缓冲区满，直接丢弃
+		s.droppedCount.Add(1)
 		return nil
 	}
 
@@ -318,8 +320,11 @@ func (s *MongoLogStore) batchInsert(batch *LogBatch) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	// 批量插入，忽略错误（可接受丢失）
-	_, _ = s.collection.InsertMany(ctx, batch.logs[:batch.size])
+	// 批量插入
+	_, err := s.collection.InsertMany(ctx, batch.logs[:batch.size])
+	if err != nil {
+		s.logger.Warn().Err(err).Int("batch_size", batch.size).Msg("Failed to insert log batch to MongoDB")
+	}
 }
 
 // dynamicAdjuster 动态调整批大小
@@ -394,6 +399,11 @@ func (s *MongoLogStore) flushAll(startIdx, endIdx int) {
 	}
 }
 
+// DroppedCount 返回因缓冲区满而丢弃的日志数量
+func (s *MongoLogStore) DroppedCount() uint64 {
+	return s.droppedCount.Load()
+}
+
 // Close 关闭日志存储器
 func (s *MongoLogStore) Close() {
 	// 设置关闭状态
@@ -410,17 +420,5 @@ func (s *MongoLogStore) Close() {
 	s.state.Store(0)
 }
 
-// 辅助函数
-func min(a, b int32) int32 {
-	if a < b {
-		return a
-	}
-	return b
-}
+// 辅助函数：使用 Go 内置 min/max
 
-func max(a, b int32) int32 {
-	if a > b {
-		return a
-	}
-	return b
-}

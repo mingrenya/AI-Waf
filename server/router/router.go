@@ -154,6 +154,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	authenticated := api.Group("")
 	authenticated.Use(middleware.JWTAuth())
 	authenticated.Use(middleware.PasswordResetRequired())
+	authenticated.Use(middleware.SecurityAudit(db))
 
 	// 用户管理模块
 	userRoutes := authenticated.Group("/users")
@@ -392,22 +393,6 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 		mcpRoutes.GET("/tool-calls", middleware.HasPermission(model.PermWAFLogRead), mcpController.GetMCPToolCallHistory)
 		// 记录工具调用 - MCP Server调用，需要认证但不需要特殊权限
 		mcpRoutes.POST("/tool-calls/record", mcpController.RecordToolCall)
-	}
-
-	// 审计日志模块
-	auditRoutes := authenticated.Group("/audit")
-	{
-		// 获取审计日志 - 需要audit:read权限
-		auditRoutes.GET("", middleware.HasPermission(model.PermAuditRead), nil)
-	}
-
-	// 系统管理模块
-	systemRoutes := authenticated.Group("/system")
-	{
-		// 获取系统状态 - 需要system:status权限
-		systemRoutes.GET("/status", middleware.HasPermission(model.PermSystemStatus), nil)
-		// 重启系统 - 需要system:restart权限
-		systemRoutes.POST("/restart", middleware.HasPermission(model.PermSystemRestart), nil)
 	}
 
 	// ===== 前端静态资源托管 =====

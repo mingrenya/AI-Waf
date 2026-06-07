@@ -653,7 +653,8 @@ func (e *RuleEngine) MatchRequest(ip string, url string, path string) (shouldBlo
 	hasWhitelistRule := false
 
 	// 遍历所有规则（已按优先级和序列号排序）
-	for _, r := range e.Rules {
+	for i := range e.Rules {
+		r := &e.Rules[i]
 		// 检查是否存在启用的白名单规则
 		if r.Status == model.RuleEnabled && r.Type == model.WhitelistRule {
 			hasWhitelistRule = true
@@ -676,10 +677,10 @@ func (e *RuleEngine) MatchRequest(ip string, url string, path string) (shouldBlo
 			switch r.Type {
 			case model.BlacklistRule:
 				// 黑名单规则匹配成功 -> 返回true(拦截)
-				return true, r.Type, &r, nil
+				return true, r.Type, r, nil
 			case model.WhitelistRule:
 				// 白名单规则匹配成功 -> 返回false(放行)
-				return false, r.Type, &r, nil
+				return false, r.Type, r, nil
 			default:
 				return false, "", nil, fmt.Errorf("未知的规则类型: %s", r.Type)
 			}

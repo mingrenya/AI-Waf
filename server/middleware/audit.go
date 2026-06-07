@@ -10,6 +10,7 @@ import (
 	"github.com/mingrenya/AI-Waf/server/config"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // AuditLog 审计日志结构
@@ -41,12 +42,17 @@ func SecurityAudit(db *mongo.Database) gin.HandlerFunc {
 
 	// 需要审计的路径前缀
 	auditPaths := []string{
-		"/api/users",
-		"/api/roles",
-		"/api/sites",
-		"/api/rules",
-		"/api/config",
-		"/api/ai-analyzer",
+		"/api/v1/users",
+		"/api/v1/site",
+		"/api/v1/certificate",
+		"/api/v1/ip-groups",
+		"/api/v1/micro-rules",
+		"/api/v1/rules",
+		"/api/v1/config",
+		"/api/v1/blocked-ips",
+		"/api/v1/alerts",
+		"/api/v1/ai-analyzer",
+		"/api/v1/mcp",
 	}
 
 	// 需要审计的HTTP方法
@@ -203,8 +209,12 @@ func QueryAuditLogs(db *mongo.Database, filter bson.M, skip, limit int64) (*Audi
 		return nil, err
 	}
 
-	// 查询
-	cursor, err := collection.Find(ctx, filter)
+	// 查询（应用分页和排序）
+	findOpts := options.Find().
+		SetSkip(skip).
+		SetLimit(limit).
+		SetSort(bson.D{{Key: "timestamp", Value: -1}})
+	cursor, err := collection.Find(ctx, filter, findOpts)
 	if err != nil {
 		return nil, err
 	}
