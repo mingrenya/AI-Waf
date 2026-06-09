@@ -58,11 +58,12 @@ type FlowControlConfig struct {
 
 // FlowController 流控处理器
 type FlowController struct {
-	config      FlowControlConfig // 配置
-	logger      zerolog.Logger    // 日志
-	ipRecorder  BlockedIPRecorder // IP记录器
-	initialized bool              // 是否已初始化
-	mutex       sync.Mutex        // 互斥锁
+	config         FlowControlConfig // 配置
+	logger         zerolog.Logger    // 日志
+	ipRecorder     BlockedIPRecorder // IP记录器
+	initialized    bool              // 是否已初始化
+	sentinelFailed bool              // Sentinel 是否初始化失败（降级模式：放行所有请求）
+	mutex          sync.Mutex        // 互斥锁
 }
 
 // 资源名称常量
@@ -278,7 +279,10 @@ func (fc *FlowController) Initialize() error {
 	// 初始化 Sentinel
 	err := sentinel.InitWithConfig(conf)
 	if err != nil {
-		return fmt.Errorf("初始化Sentinel失败: %v", err)
+		fc.logger.Warn().Err(err).Msg("Sentinel初始化失败，进入降级模式：所有请求将被放行（fail-open）")
+		fc.sentinelFailed = true
+		fc.initialized = true
+		return nil
 	}
 
 	// 配置各类流控规则
@@ -371,6 +375,11 @@ func (fc *FlowController) CheckVisit(ip string, requestUri string) (bool, error)
 		return false, err
 	}
 
+	// 降级模式：Sentinel 不可用时放行所有请求（fail-open）
+	if fc.sentinelFailed {
+		return true, nil
+	}
+
 	// 使用热点参数限流，将IP作为第一个参数传入
 	entry, blockError := sentinel.Entry(ResourceVisit,
 		sentinel.WithArgs(ip),
@@ -404,6 +413,11 @@ func (fc *FlowController) RecordAttack(ip string, requestUri string) (bool, erro
 		return false, err
 	}
 
+	// 降级模式：Sentinel 不可用时放行所有请求（fail-open）
+	if fc.sentinelFailed {
+		return false, nil
+	}
+
 	// 使用热点参数限流，将IP作为第一个参数传入
 	entry, blockError := sentinel.Entry(ResourceAttack,
 		sentinel.WithArgs(ip),
@@ -435,6 +449,11 @@ func (fc *FlowController) RecordError(ip string, requestUri string) (bool, error
 	// Initialize 内部已做并发保护和幂等处理，这里直接调用避免 initialized 的并发读写。
 	if err := fc.Initialize(); err != nil {
 		return false, err
+	}
+
+	// 降级模式：Sentinel 不可用时放行所有请求（fail-open）
+	if fc.sentinelFailed {
+		return false, nil
 	}
 
 	// 使用热点参数限流，将IP作为第一个参数传入

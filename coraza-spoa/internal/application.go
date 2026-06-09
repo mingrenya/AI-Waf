@@ -3,8 +3,9 @@ package internal
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
-	"math/rand"
 	"net/netip"
 	"os"
 	"strings"
@@ -173,13 +174,14 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 	}
 
 	if len(req.ID) == 0 {
-		const idLength = 16
-		var sb strings.Builder
-		sb.Grow(idLength)
-		for i := 0; i < idLength; i++ {
-			sb.WriteRune(rune('A' + rand.Intn(26)))
+		// HAProxy 未透传 unique-id，使用密码学随机数生成 trace ID 作为后备
+		// 建议在 HAProxy 配置中添加: http-request set-var(txn.unique_id) unique-id
+		idBytes := make([]byte, 8)
+		if _, err := rand.Read(idBytes); err != nil {
+			a.Logger.Warn().Err(err).Msg("failed generate crypto random id, using hex fallback")
 		}
-		req.ID = sb.String()
+		req.ID = "eng-" + hex.EncodeToString(idBytes)
+		a.Logger.Warn().Str("generated_id", req.ID).Msg("HAProxy did not provide request unique-id, using engine-generated id")
 	}
 
 	realIP := getRealClientIP(&req)

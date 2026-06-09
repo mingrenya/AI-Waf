@@ -130,12 +130,6 @@ type MongoLogStore struct {
 	bufferSelector atomic.Uint64 // 用于选择buffer
 }
 
-// 单例实例
-var (
-	mongoLogStoreOnce     sync.Once
-	mongoLogStoreInstance *MongoLogStore
-)
-
 // StoreConfig 存储配置
 type StoreConfig struct {
 	BufferSize    int
@@ -167,48 +161,45 @@ func NewMongoLogStore(client *mongo.Client, database, collection string, logger 
 
 // NewMongoLogStoreWithConfig 使用配置创建存储器
 func NewMongoLogStoreWithConfig(client *mongo.Client, database, collection string, config StoreConfig, logger zerolog.Logger) *MongoLogStore {
-	mongoLogStoreOnce.Do(func() {
-		if config.NumBuffers <= 0 {
-			config.NumBuffers = runtime.NumCPU()
+	if config.NumBuffers <= 0 {
+		config.NumBuffers = runtime.NumCPU()
+	}
+	if config.WriterCount <= 0 {
+		config.WriterCount = config.NumBuffers / 2
+		if config.WriterCount == 0 {
+			config.WriterCount = 1
 		}
-		if config.WriterCount <= 0 {
-			config.WriterCount = config.NumBuffers / 2
-			if config.WriterCount == 0 {
-				config.WriterCount = 1
-			}
-		}
+	}
 
-		store := &MongoLogStore{
-			mongo:         client,
-			mongoDB:       database,
-			collection:    client.Database(database).Collection(collection),
-			ringBuffers:   make([]*RingBuffer, config.NumBuffers),
-			numBuffers:    config.NumBuffers,
-			logger:        logger,
-			writerCount:   config.WriterCount,
-			batchInterval: config.BatchInterval,
-			maxBatchSize:  config.MaxBatchSize,
-			minBatchSize:  config.MinBatchSize,
-		}
+	store := &MongoLogStore{
+		mongo:         client,
+		mongoDB:       database,
+		collection:    client.Database(database).Collection(collection),
+		ringBuffers:   make([]*RingBuffer, config.NumBuffers),
+		numBuffers:    config.NumBuffers,
+		logger:        logger,
+		writerCount:   config.WriterCount,
+		batchInterval: config.BatchInterval,
+		maxBatchSize:  config.MaxBatchSize,
+		minBatchSize:  config.MinBatchSize,
+	}
 
-		// 初始化环形缓冲区
-		bufferSizePerRing := config.BufferSize / config.NumBuffers
-		for i := 0; i < config.NumBuffers; i++ {
-			store.ringBuffers[i] = NewRingBuffer(bufferSizePerRing)
-		}
+	// 初始化环形缓冲区
+	bufferSizePerRing := config.BufferSize / config.NumBuffers
+	for i := 0; i < config.NumBuffers; i++ {
+		store.ringBuffers[i] = NewRingBuffer(bufferSizePerRing)
+	}
 
-		// 设置初始批大小
-		store.batchSize.Store(int32(config.MinBatchSize))
+	// 设置初始批大小
+	store.batchSize.Store(int32(config.MinBatchSize))
 
-		mongoLogStoreInstance = store
-		logger.Info().
-			Int("num_buffers", config.NumBuffers).
-			Int("writer_count", config.WriterCount).
-			Int("buffer_size", config.BufferSize).
-			Msg("创建新的高性能MongoLogStore实例")
-	})
+	logger.Info().
+		Int("num_buffers", config.NumBuffers).
+		Int("writer_count", config.WriterCount).
+		Int("buffer_size", config.BufferSize).
+		Msg("创建新的高性能MongoLogStore实例")
 
-	return mongoLogStoreInstance
+	return store
 }
 
 // Store 高性能非阻塞存储

@@ -328,8 +328,8 @@ type MongoDBConfig struct {
 
 // ipGroupCache IP组缓存结构,用于优化IP查找
 type ipGroupCache struct {
-	exactIPs map[string]bool // 精确IP映射
-	cidrNets []*net.IPNet    // CIDR网络列表
+	exactIPs map[string]bool // 精确IP映射 O(1)
+	radix    *ipRadixTree    // CIDR 前缀树 O(k)，k=32(IPv4) 或 128(IPv6)
 }
 
 // RuleEngine 规则引擎
@@ -824,16 +824,14 @@ func (e *RuleEngine) isIPInGroup(ip, groupName string) (bool, error) {
 		return true, nil
 	}
 
-	// 2. CIDR匹配 O(n) - n是CIDR数量，通常远小于IP数量
+	// 2. CIDR前缀树匹配 O(k)，k=32(IPv4) 或 128(IPv6)
 	ipAddr := net.ParseIP(ip)
 	if ipAddr == nil {
 		return false, fmt.Errorf("无效的IP地址: %s", ip)
 	}
 
-	for _, ipNet := range cache.cidrNets {
-		if ipNet.Contains(ipAddr) {
-			return true, nil
-		}
+	if cache.radix.Contains(ipAddr) {
+		return true, nil
 	}
 
 	return false, nil
@@ -860,7 +858,8 @@ func (e *RuleEngine) matchRegex(s, pattern string) (bool, error) {
 	}
 
 	// Go 的 regexp 包使用 RE2 语义（线性时间匹配），不会出现灾难性回溯。
-	// 此处额外使用 goroutine + channel 提供超时保护，防止极端构造下的意外阻塞。
+	// 此处额外使用带缓冲 channel 的 goroutine 提供超时保护，防止极端构造下的意外阻塞。
+	// channel 缓冲区大小为 1，确保超时后 goroutine 可以写入结果并正常退出，避免泄漏。
 	const matchTimeout = 100 * time.Millisecond
 	type matchResult struct {
 		matched bool
@@ -925,7 +924,7 @@ func (e *RuleEngine) buildIPGroupCache(groupName string) error {
 
 	cache := &ipGroupCache{
 		exactIPs: make(map[string]bool),
-		cidrNets: make([]*net.IPNet, 0),
+		radix:    newIPRadixTree(),
 	}
 
 	for _, item := range group.Items {
@@ -933,12 +932,12 @@ func (e *RuleEngine) buildIPGroupCache(groupName string) error {
 			// 精确IP，存入map
 			cache.exactIPs[item] = true
 		} else if isValidCIDR(item) {
-			// CIDR范围，解析并存入列表
+			// CIDR范围，插入前缀树
 			_, ipNet, err := net.ParseCIDR(item)
 			if err != nil {
 				return fmt.Errorf("解析CIDR失败: %s, 错误: %v", item, err)
 			}
-			cache.cidrNets = append(cache.cidrNets, ipNet)
+			cache.radix.Insert(ipNet)
 		} else {
 			return fmt.Errorf("IP组 %s 包含无效项: %s", groupName, item)
 		}
