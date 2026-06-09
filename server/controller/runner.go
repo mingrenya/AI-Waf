@@ -65,6 +65,8 @@ func getSuccessMessage(action string) string {
 		return "运行器已强制停止"
 	case "reload":
 		return "运行器配置已重新加载"
+	case "reload_rules":
+		return "WAF 规则已热加载"
 	default:
 		return "操作成功"
 	}
@@ -152,6 +154,8 @@ func (c *RunnerControllerImpl) Control(ctx *gin.Context) {
 		err = c.runnerService.ForceStop(ctx)
 	case "reload":
 		err = c.runnerService.Reload(ctx)
+	case "reload_rules":
+		err = c.runnerService.ReloadRules(ctx)
 	default:
 		c.logger.Warn().Str("action", req.Action).Msg("不支持的操作类型")
 		response.BadRequest(ctx, errors.New("不支持的操作类型"), true)

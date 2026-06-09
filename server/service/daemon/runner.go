@@ -31,6 +31,7 @@ type ServiceRunner interface {
 	ForceStop()
 	Restart() error
 	HotReload() error
+	ReloadEngineRules() error
 	GetState() ServiceState
 	GetStats() (models.NativeStats, error)
 }
@@ -437,6 +438,24 @@ func (r *ServiceRunnerImpl) HotReload() error {
 
 	r.logger.Info().Msg("热重载成功")
 
+	return nil
+}
+
+// ReloadEngineRules 轻量热加载引擎规则（仅重载 MicroEngine 规则和 IP 组，不重建整个引擎）。
+// 流量处理不中断，耗时约 50~200ms。
+func (r *ServiceRunnerImpl) ReloadEngineRules() error {
+	if r.state != ServiceRunning {
+		return fmt.Errorf("服务未在运行中，无法热加载规则")
+	}
+
+	r.logger.Info().Msg("开始热加载引擎规则...")
+
+	if err := r.engineService.ReloadRules(); err != nil {
+		r.logger.Error().Err(err).Msg("热加载引擎规则失败")
+		return err
+	}
+
+	r.logger.Info().Msg("引擎规则热加载完成")
 	return nil
 }
 

@@ -76,6 +76,32 @@ type Application struct {
 	AppConfig
 }
 
+// ReloadRules triggers a lightweight hot-reload of MicroEngine rules and IP groups
+// from MongoDB without recreating the Application or interrupting traffic processing.
+// Returns (ruleCount, ipGroupCount, error).
+func (a *Application) ReloadRules() (int, int, error) {
+	if a.ruleEngine == nil {
+		return 0, 0, fmt.Errorf("rule engine not initialized")
+	}
+
+	a.Logger.Info().Msg("starting MicroEngine hot-reload from MongoDB")
+	beforeRules, beforeIPs := a.ruleEngine.ReloadRuleCount()
+
+	if err := a.ruleEngine.ReloadFromMongoDB(); err != nil {
+		a.Logger.Error().Err(err).Msg("MicroEngine hot-reload failed")
+		return 0, 0, err
+	}
+
+	afterRules, afterIPs := a.ruleEngine.ReloadRuleCount()
+	a.Logger.Info().
+		Int("rules_before", beforeRules).
+		Int("rules_after", afterRules).
+		Int("ipgroups_before", beforeIPs).
+		Int("ipgroups_after", afterIPs).
+		Msg("MicroEngine hot-reload complete")
+	return afterRules, afterIPs, nil
+}
+
 // 扩展transaction结构体，添加请求信息
 type transaction struct {
 	tx        types.Transaction

@@ -334,6 +334,7 @@ type ipGroupCache struct {
 
 // RuleEngine 规则引擎
 type RuleEngine struct {
+	mu            sync.RWMutex
 	Rules         []Rule                    `json:"rules"`     // 所有规则列表
 	IPGroups      map[string]*model.IPGroup `json:"ip_groups"` // IP组映射表
 	ipGroupCaches map[string]*ipGroupCache  // IP组查找缓存
@@ -649,6 +650,10 @@ func (e *RuleEngine) MatchRequest(ip string, url string, path string) (shouldBlo
 		return false, "", nil, fmt.Errorf("无效的IP地址: %s", ip)
 	}
 
+	// 读锁保护，允许并发匹配，热更新时等待
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+
 	// 标记是否存在启用的白名单规则
 	hasWhitelistRule := false
 
@@ -697,9 +702,50 @@ func (e *RuleEngine) MatchRequest(ip string, url string, path string) (shouldBlo
 	return false, "", nil, nil
 }
 
-// GetRules 获取当前规则列表
+// GetRules 获取当前规则列表（安全只读）
 func (e *RuleEngine) GetRules() []Rule {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
 	return e.Rules
+}
+
+// ReloadFromMongoDB 从 MongoDB 重新加载规则和 IP 组（原子热更新）。
+// 请求匹配可在热更新期间继续执行，仅短暂写锁期间阻塞（ms 级）。
+func (e *RuleEngine) ReloadFromMongoDB() error {
+	if e.mongoConfig == nil || e.mongoConfig.MongoClient == nil {
+		return fmt.Errorf("MongoDB客户端未初始化, 无法热加载")
+	}
+
+	// 1. 在临时引擎上加载新数据（不加锁，不影响线上流量）
+	tmpEngine := NewRuleEngine()
+	tmpEngine.mongoConfig = e.mongoConfig
+
+	if err := tmpEngine.LoadIPGroupsFromMongoDB(); err != nil {
+		return fmt.Errorf("热加载: IP组加载失败: %w", err)
+	}
+
+	if err := tmpEngine.LoadRulesFromMongoDB(); err != nil {
+		return fmt.Errorf("热加载: 规则加载失败: %w", err)
+	}
+
+	// 2. 原子交换新数据（写锁，仅保护赋值操作）
+	e.mu.Lock()
+	e.Rules = tmpEngine.Rules
+	e.IPGroups = tmpEngine.IPGroups
+	e.ipGroupCaches = tmpEngine.ipGroupCaches
+	e.mu.Unlock()
+
+	// 3. 清理旧正则缓存（正则编译不变，保留缓存也无害，但为一致性清理）
+	// regexCache 由 LRU + TTL 自动管理，不强制清空
+
+	return nil
+}
+
+// ReloadRuleCount 返回热加载前后的规则/IP组计数（用于日志）
+func (e *RuleEngine) ReloadRuleCount() (rules int, ipGroups int) {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	return len(e.Rules), len(e.IPGroups)
 }
 
 // matchIP 匹配IP条件

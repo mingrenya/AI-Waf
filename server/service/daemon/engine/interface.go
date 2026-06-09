@@ -12,6 +12,7 @@ type EngineService interface {
 	Restart() error
 	Stop() error
 	Reload() error
+	ReloadRules() error
 }
 
 // NewEngineService 创建一个新的引擎服务实例
@@ -54,4 +55,8 @@ func (s *EngineServiceImpl) Stop() error {
 
 func (s *EngineServiceImpl) Reload() error {
 	return s.agent.UpdateApplications()
+}
+
+func (s *EngineServiceImpl) ReloadRules() error {
+	return s.agent.ReloadRules()
 }

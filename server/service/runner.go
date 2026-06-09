@@ -30,6 +30,7 @@ type RunnerService interface {
 	Restart(ctx context.Context) error
 	ForceStop(ctx context.Context) error
 	Reload(ctx context.Context) error
+	ReloadRules(ctx context.Context) error
 	// get haproxy stats
 	GetStats() (models.NativeStats, error)
 }
@@ -178,4 +179,20 @@ func (s *RunnerServiceImpl) Reload(ctx context.Context) error {
 
 func (s *RunnerServiceImpl) GetStats() (models.NativeStats, error) {
 	return s.runner.GetStats()
+}
+
+// ReloadRules 轻量热加载 WAF 规则（仅重载 MicroEngine 规则和 IP 组，不重建引擎）
+func (s *RunnerServiceImpl) ReloadRules(ctx context.Context) error {
+	if s.runner.GetState() != daemon.ServiceRunning {
+		return ErrRunnerNotRunning
+	}
+
+	s.logger.Info().Msg("热加载 WAF 规则...")
+	if err := s.runner.ReloadEngineRules(); err != nil {
+		s.logger.Error().Err(err).Msg("热加载 WAF 规则失败")
+		return fmt.Errorf("热加载 WAF 规则失败: %w", err)
+	}
+
+	s.logger.Info().Msg("WAF 规则热加载成功")
+	return nil
 }

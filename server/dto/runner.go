@@ -2,7 +2,7 @@ package dto
 
 // RunnerControlRequest 运行器控制请求
 type RunnerControlRequest struct {
-	Action string `json:"action" binding:"required,oneof=start stop restart force_stop reload"` // 控制动作
+	Action string `json:"action" binding:"required,oneof=start stop restart force_stop reload reload_rules"` // 控制动作
 }
 
 // RunnerControlResponse 运行器控制响应

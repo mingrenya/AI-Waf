@@ -17,6 +17,7 @@ import (
 
 	cfg "github.com/mingrenya/AI-Waf/coraza-spoa/config"
 	"github.com/mingrenya/AI-Waf/coraza-spoa/internal"
+	"github.com/mingrenya/AI-Waf/coraza-spoa/analyzer"
 	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	"github.com/mingrenya/AI-Waf/pkg/utils/network"
@@ -38,6 +39,7 @@ type AgentServer interface {
 	Stop() error
 	Restart() error
 	UpdateApplications() error
+	ReloadRules() error
 	UpdateNetworkAddress(network, address string)
 	UpdateLogger(logger zerolog.Logger)
 	GetState() ServerState
@@ -47,18 +49,19 @@ type AgentServer interface {
 
 // AgentServer 管理Agent服务的生命周期
 type AgentServerImpl struct {
-	mu           sync.Mutex
-	ctx          context.Context
-	cancelFunc   context.CancelFunc
-	agent        *internal.Agent
-	listener     net.Listener
-	network      string
-	address      string
-	applications map[string]*internal.Application
-	logger       zerolog.Logger
-	state        ServerState
-	lastError    error
-	mongoURI     string
+	mu            sync.Mutex
+	ctx           context.Context
+	cancelFunc    context.CancelFunc
+	agent         *internal.Agent
+	listener      net.Listener
+	network       string
+	address       string
+	applications  map[string]*internal.Application
+	logger        zerolog.Logger
+	state         ServerState
+	lastError     error
+	mongoURI      string
+	aiAnalyzer    *analyzer.AISecurityAnalyzer // 引擎层 AI 安全分析器
 }
 
 func NewAgentServer(logger zerolog.Logger, mongoURI string) (AgentServer, error) {
@@ -120,6 +123,12 @@ func (s *AgentServerImpl) Start() error {
 		Database: "waf",
 	}
 
+	// 流量分析器配置：启用自适应限流
+	trafficAnalyzerConfig := internal.TrafficAnalyzerConfig{
+		Client:   mongoClient,
+		Database: "waf",
+	}
+
 	geoIPConfig := internal.GeoIP2Options{
 		ASNDBPath:  globalConfig.Engine.ASNDBPath,
 		CityDBPath: globalConfig.Engine.CityDBPath,
@@ -154,10 +163,11 @@ func (s *AgentServerImpl) Start() error {
 
 		// 创建应用
 		application, err := internalAppConfig.NewApplicationWithContext(ctx, internal.ApplicationOptions{
-			MongoConfig:          mongoConfig,
-			GeoIPConfig:          &geoIPConfig,
-			RuleEngineDbConfig:   ruleEngineMongoConfig,
-			FlowControllerConfig: &flowControllerConfig,
+			MongoConfig:            mongoConfig,
+			GeoIPConfig:            &geoIPConfig,
+			RuleEngineDbConfig:     ruleEngineMongoConfig,
+			FlowControllerConfig:   &flowControllerConfig,
+			TrafficAnalyzerConfig:  &trafficAnalyzerConfig,
 		}, globalConfig.IsDebug)
 		if err != nil {
 			s.logger.Fatal().Err(err).Msg("Failed creating application: " + appConfig.Name)
@@ -291,6 +301,12 @@ func (s *AgentServerImpl) UpdateApplications() error {
 		Database: "waf",
 	}
 
+	// 流量分析器配置：启用自适应限流
+	trafficAnalyzerConfig := internal.TrafficAnalyzerConfig{
+		Client:   mongoClient,
+		Database: "waf",
+	}
+
 	geoIPConfig := internal.GeoIP2Options{
 		ASNDBPath:  globalConfig.Engine.ASNDBPath,
 		CityDBPath: globalConfig.Engine.CityDBPath,
@@ -326,10 +342,11 @@ func (s *AgentServerImpl) UpdateApplications() error {
 
 		// 创建应用
 		application, err := internalAppConfig.NewApplicationWithContext(s.ctx, internal.ApplicationOptions{
-			MongoConfig:          mongoConfig,
-			GeoIPConfig:          &geoIPConfig,
-			RuleEngineDbConfig:   ruleEngineMongoConfig,
-			FlowControllerConfig: &flowControllerConfig,
+			MongoConfig:            mongoConfig,
+			GeoIPConfig:            &geoIPConfig,
+			RuleEngineDbConfig:     ruleEngineMongoConfig,
+			FlowControllerConfig:   &flowControllerConfig,
+			TrafficAnalyzerConfig:  &trafficAnalyzerConfig,
 		}, globalConfig.IsDebug)
 
 		if err != nil {
@@ -348,6 +365,38 @@ func (s *AgentServerImpl) UpdateApplications() error {
 		s.logger.Info().Msg("应用配置已更新")
 	}
 
+	return nil
+}
+
+// ReloadRules 轻量热加载 MicroEngine 规则和 IP 组（无需重建 Application）。
+// 仅重新从 MongoDB 加载规则数据，流量处理不中断。
+func (s *AgentServerImpl) ReloadRules() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.state != ServerRunning {
+		return errors.New("服务未运行，无法热加载规则")
+	}
+	if s.applications == nil {
+		return errors.New("应用程序未初始化，无法热加载规则")
+	}
+
+	s.logger.Info().Msg("开始热加载 WAF 规则...")
+
+	for name, app := range s.applications {
+		ruleCount, ipGroupCount, err := app.ReloadRules()
+		if err != nil {
+			s.logger.Error().Err(err).Str("app", name).Msg("热加载规则失败")
+			return fmt.Errorf("应用 %s 热加载规则失败: %w", name, err)
+		}
+		s.logger.Info().
+			Str("app", name).
+			Int("rules", ruleCount).
+			Int("ip_groups", ipGroupCount).
+			Msg("应用规则热加载成功")
+	}
+
+	s.logger.Info().Msg("所有应用规则热加载完成")
 	return nil
 }
 
