@@ -1,0 +1,33 @@
+---
+meta:
+  author: AI-WAF
+  description: Remote Command Execution Tests
+  enabled: true
+  name: 03-rce.yaml
+tests:
+  - test_id: 3001
+    test_title: Command Injection - Semicolon with ls
+    desc: Command injection via semicolons should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/ping?host=127.0.0.1;ls -la"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403
+  - test_id: 3002
+    test_title: Command Injection - Pipe with cat
+    desc: Command injection via pipe should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/cat?file=/etc/passwd|cat /etc/shadow"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403

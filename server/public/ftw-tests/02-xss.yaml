@@ -1,0 +1,48 @@
+---
+meta:
+  author: AI-WAF
+  description: Cross-Site Scripting Tests
+  enabled: true
+  name: 02-xss.yaml
+tests:
+  - test_id: 2001
+    test_title: XSS - Script Tag Injection
+    desc: XSS via script tag should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/search?q=<script>alert(1)</script>"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403
+  - test_id: 2002
+    test_title: XSS - IMG onerror Handler
+    desc: XSS via img onerror handler should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/profile?avatar=<img src=x onerror=alert(1)>"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403
+  - test_id: 2003
+    test_title: XSS - JavaScript URI
+    desc: XSS via javascript URI should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: POST
+          uri: "/update"
+          version: HTTP/1.1
+          headers:
+            Content-Type: application/x-www-form-urlencoded
+            User-Agent: AI-WAF-FTW-Test
+          data: "url=javascript:alert(document.cookie)"
+        output:
+          expect_response_code: 403

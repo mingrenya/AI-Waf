@@ -33,6 +33,8 @@ COPY go.work ./
 COPY geo-ip/ ./geo-ip/
 # 复制前端构建产物到正确位置
 COPY --from=frontend-builder /app/dist ./server/public/dist
+# FTW 测试文件
+COPY server/public/ftw-tests/ ./server/public/ftw-tests/
 # 使用Go的工作区功能进行构建
 RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server
 RUN cd server && go build -o ../mrya-waf main.go
@@ -74,6 +76,9 @@ COPY --from=backend-builder /build/server/docs/ ./docs/
 RUN chown -R mrya:mrya /app && chmod +x /app/mrya-waf
 
 # 创建 mrya 用户家目录下的 mrya-waf 目录并复制 geo-ip 文件夹
+# 创建 FTW 测试文件目录
+COPY --from=backend-builder /build/server/public/ftw-tests/ /app/server/public/ftw-tests/
+
 RUN mkdir -p /home/mrya/mrya-waf/geo-ip && \
     mkdir -p /home/mrya/mrya-waf/haproxy/conf && \
     mkdir -p /home/mrya/mrya-waf/haproxy/cert && \

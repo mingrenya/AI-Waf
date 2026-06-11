@@ -63,6 +63,9 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	mcpService := service.NewMCPService(mcpRepo)
 	aiChatService := service.NewAIChatService()
 
+	// Loki 引擎日志查询服务
+	lokiLogService := service.NewLokiLogService()
+
 	// 增强规则管理服务
 	ruleTemplateService := service.NewRuleTemplateService(db)
 	ruleEffectivenessService := service.NewRuleEffectivenessService(db)
@@ -107,7 +110,12 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	aiAnalyzerController := controller.NewAIAnalyzerController(aiAnalyzerService)
 	mcpController := controller.NewMCPController(mcpService)
 	aiChatController := controller.NewAIChatController(aiChatService)
-	ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateService, ruleEffectivenessService, protectionProfileService)
+	lokiLogController := controller.NewLokiLogController(lokiLogService)
+ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateService, ruleEffectivenessService, protectionProfileService)
+
+	// FTW 回归测试服务
+	ftwService := service.NewFTWTestService(db)
+	ftwController := controller.NewFTWController(ftwService)
 
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
@@ -243,6 +251,10 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 		wafLogRoutes.GET("/event", middleware.HasPermission(model.PermWAFLogRead), wafLogController.GetAttackEvents)
 		// 获取攻击日志 - 需要logs:read权限
 		wafLogRoutes.GET("", middleware.HasPermission(model.PermWAFLogRead), wafLogController.GetAttackLogs)
+		// Loki 引擎日志查询 - 需要logs:read权限
+		wafLogRoutes.POST("/loki-query", middleware.HasPermission(model.PermWAFLogRead), lokiLogController.QueryLogs)
+		// Loki 引擎日志范围查询 - 需要logs:read权限
+		wafLogRoutes.POST("/loki-range", middleware.HasPermission(model.PermWAFLogRead), lokiLogController.QueryRange)
 	}
 
 	// 统计信息路由
@@ -333,6 +345,17 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 
 		// 告警统计
 		alertRoutes.GET("/statistics", middleware.HasPermission(model.PermAlertHistoryRead), alertController.GetStatistics)
+	}
+
+	// FTW WAF 回归测试模块
+	ftwRoutes := authenticated.Group("/ftw")
+	{
+		// 执行测试 - 需要config:update权限
+		ftwRoutes.POST("/run", middleware.HasPermission(model.PermConfigUpdate), ftwController.RunTests)
+		// 获取历史报告 - 需要config:read权限
+		ftwRoutes.GET("/reports", middleware.HasPermission(model.PermConfigRead), ftwController.GetReports)
+		// 获取测试文件列表 - 需要config:read权限
+		ftwRoutes.GET("/files", middleware.HasPermission(model.PermConfigRead), ftwController.GetTestFiles)
 	}
 
 	// AI分析器模块

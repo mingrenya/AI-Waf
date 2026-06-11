@@ -1,0 +1,48 @@
+---
+meta:
+  author: AI-WAF
+  description: SQL Injection Tests
+  enabled: true
+  name: 01-sqli.yaml
+tests:
+  - test_id: 1001
+    test_title: SQL Injection - Basic Union Select in Query String
+    desc: Basic SQL injection attempt should be blocked with 403
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/?id=1 UNION SELECT * FROM users"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403
+  - test_id: 1002
+    test_title: SQL Injection - SELECT in POST body
+    desc: SQL injection in POST body should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: POST
+          uri: "/login"
+          version: HTTP/1.1
+          headers:
+            Content-Type: application/x-www-form-urlencoded
+            User-Agent: AI-WAF-FTW-Test
+          data: "username=admin' OR '1'='1&password=test"
+        output:
+          expect_response_code: 403
+  - test_id: 1003
+    test_title: Normal Request - Clean Query String
+    desc: Clean request with no attack should pass through (200)
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/?page=1&sort=name"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 200

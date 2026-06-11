@@ -100,6 +100,79 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # ========================================
+  # 日志系统：Loki (日志聚合) + Grafana (可视化)
+  # ========================================
+
+  # Loki - 轻量级日志聚合系统，兼容 Prometheus 生态
+  loki:
+    image: grafana/loki:3.5.0
+    container_name: waf-loki
+    restart: always
+    user: "10001:10001"
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+      - loki_wal:/wal
+    configs:
+      - source: loki_config
+        target: /etc/loki/local-config.yaml
+    networks:
+      - waf-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+
+  # Promtail - 日志采集器，从 Docker 日志文件和 journald 采集日志发送到 Loki
+  promtail:
+    image: grafana/promtail:3.5.0
+    container_name: waf-promtail
+    restart: always
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - waf-network
+    depends_on:
+      loki:
+        condition: service_healthy
+
+
+  # Grafana - 可视化仪表盘
+  grafana:
+    image: grafana/grafana:11.6.0
+    container_name: waf-grafana
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: ""
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    networks:
+      - waf-network
+    depends_on:
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
 # 定义持久化卷
 volumes:
   mongodb_data:
@@ -108,6 +181,57 @@ volumes:
     driver: local
   mrya_data:
     driver: local
+  loki_data:
+    driver: local
+  loki_wal:
+    driver: local
+  grafana_data:
+    driver: local
+
+# 定义 Loki 配置文件
+configs:
+  loki_config:
+    content: |
+      auth_enabled: false
+
+      server:
+        http_listen_port: 3100
+        grpc_listen_port: 9096
+
+      common:
+        instance_addr: 127.0.0.1
+        path_prefix: /loki
+        storage:
+          filesystem:
+            chunks_directory: /loki/chunks
+            rules_directory: /loki/rules
+        replication_factor: 1
+        ring:
+          kvstore:
+            store: inmemory
+
+      schema_config:
+        configs:
+          - from: 2024-01-01
+            store: tsdb
+            object_store: filesystem
+            schema: v13
+            index:
+              prefix: index_
+              period: 24h
+
+      limits_config:
+        retention_period: 744h         # 保留 31 天
+        max_entries_limit_per_query: 5000
+        reject_old_samples: true
+        reject_old_samples_max_age: 168h
+
+      compactor:
+        working_directory: /loki/compactor
+        compaction_interval: 10m
+        retention_enabled: true
+        retention_delete_delay: 2h
+        delete_request_store: filesystem
 
 # 定义网络
 networks:

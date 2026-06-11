@@ -1,0 +1,33 @@
+---
+meta:
+  author: AI-WAF  
+  description: Path Traversal Tests
+  enabled: true
+  name: 04-path-traversal.yaml
+tests:
+  - test_id: 4001
+    test_title: Path Traversal - Double Dot Slash
+    desc: Path traversal with ../ should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/download?file=../../../etc/passwd"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403
+  - test_id: 4002
+    test_title: Path Traversal - URL Encoded
+    desc: Encoded path traversal should be blocked
+    stages:
+      - input:
+          dest_addr: "{{ .TargetURL }}"
+          method: GET
+          uri: "/view?path=%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+          version: HTTP/1.1
+          headers:
+            User-Agent: AI-WAF-FTW-Test
+        output:
+          expect_response_code: 403

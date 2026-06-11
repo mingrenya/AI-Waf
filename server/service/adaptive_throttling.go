@@ -319,11 +319,44 @@ func (s *AdaptiveThrottlingServiceImpl) GetStats(ctx context.Context) (*dto.Adap
 		}
 	}
 
-	// 计算学习进度（基于配置创建时间和学习周期）
-	learningProgress := 100.0
-	if cfg.LearningMode.Enabled && cfg.LearningMode.LearningDuration > 0 {
-		elapsed := time.Since(cfg.CreatedAt).Seconds()
-		learningProgress = math.Min(elapsed/float64(cfg.LearningMode.LearningDuration)*100, 100)
+	// 计算学习进度：基于真实样本采集进度，而非纯时间流逝
+	// 综合三项指标：1) traffic_patterns 集合数据量 vs minSamples
+	//              2) baseline_values 数量（3个类型都应计算出来）
+	//              3) 调整日志是否存在
+	//
+	// progress = (已收集样本比例 × 0.6) + (基线完成度 × 0.3) + (学习时长系数 × 0.1)
+	learningProgress := 0.0
+
+	if cfg.LearningMode.Enabled {
+		// 1. 样本收集进度（权重 0.6）：traffic_patterns 中 visit/attack/error 三类数据量 vs minSamples
+		sampleProgress := 0.0
+		for _, typ := range []string{"visit", "attack", "error"} {
+			typeFilter := bson.M{"type": typ}
+			if _, total, err := s.repo.GetTrafficPatterns(ctx, typeFilter, 0, 0); err == nil {
+				ms := float64(cfg.LearningMode.MinSamples)
+				if ms > 0 {
+					typeProgress := math.Min(float64(total)/ms*100, 100)
+					sampleProgress += typeProgress / 3.0 // 三类取平均
+				}
+			}
+		}
+
+		// 2. 基线完成度（权重 0.3）：三个类型的基线是否都已计算
+		baselineProgress := 0.0
+		for _, typ := range []string{"visit", "attack", "error"} {
+			if b, err := s.repo.GetBaselineByType(ctx, typ); err == nil && b != nil && b.Value > 0 {
+				baselineProgress += 100.0 / 3.0
+			}
+		}
+
+		// 3. 时间系数（权重 0.1）：短时间窗口内的自适应收敛程度
+		timeFactor := 0.0
+		if cfg.LearningMode.LearningDuration > 0 {
+			elapsed := time.Since(cfg.CreatedAt).Seconds()
+			timeFactor = math.Min(elapsed/float64(cfg.LearningMode.LearningDuration)*100, 100)
+		}
+
+		learningProgress = sampleProgress*0.6 + baselineProgress*0.3 + timeFactor*0.1
 	}
 
 	// 获取最近24小时调整次数

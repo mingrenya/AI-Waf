@@ -1,0 +1,115 @@
+# Promtail config for AI-WAF log collection
+# Scrapes Docker container logs and sends them to Loki
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 102400
+    timeout: 10s
+    backoff_config:
+      min_period: 500ms
+      max_period: 5m
+      max_retries: 10
+
+scrape_configs:
+  # Scrape WAF engine + management API logs (mrya-waf container)
+  - job_name: waf-engine
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+        filters:
+          - name: name
+            values:
+              - mrya-waf
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.+)'
+        replacement: '$1'
+        target_label: 'container_name'
+      - source_labels: ['__meta_docker_container_id']
+        target_label: 'container_id'
+      - source_labels: ['__meta_docker_container_image']
+        target_label: 'image'
+    pipeline_stages:
+      # Parse the HAProxy spoa log format (starts with timestamp)
+      - regex:
+          expression: '^(?P<time_raw>\S+\s+\S+)\s+(?P<level>\S+)\s+(?P<raw>.*)$'
+      - timestamp:
+          source: time_raw
+          format: 'RFC3339'
+      - labels:
+          level:
+      # Also handle JSON structured logs from the Go server
+      - json:
+          expressions:
+            level: level
+            message: message
+            component: component
+            time: time
+      - timestamp:
+          source: time
+          format: 'RFC3339'
+          fallback_formats: ['Unix']
+      - labels:
+          level:
+          component:
+
+  # Scrape MongoDB logs
+  - job_name: waf-mongodb
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+        filters:
+          - name: name
+            values:
+              - waf-mongodb
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.+)'
+        replacement: '$1'
+        target_label: 'container_name'
+
+  # Scrape MCP server logs
+  - job_name: waf-mcp
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+        filters:
+          - name: name
+            values:
+              - ai-waf-mcp-server
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.+)'
+        replacement: '$1'
+        target_label: 'container_name'
+
+  # Scrape HAProxy access logs (from Docker sock)
+  - job_name: waf-haproxy
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 15s
+        filters:
+          - name: name
+            values:
+              - mrya-waf
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.+)'
+        replacement: '$1'
+        target_label: 'container_name'
+    pipeline_stages:
+      # Filter for HAProxy log lines only
+      - match:
+          selector: '{container_name="mrya-waf"}'
+          stages:
+            - regex:
+                expression: '^(?P<haproxy_log>\d+/\d+/\d+.*)$'
+          action: keep
