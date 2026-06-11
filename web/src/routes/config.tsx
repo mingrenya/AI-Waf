@@ -38,6 +38,7 @@ import PatternsPage from "@/pages/ai-analyzer/pages/patterns/page"
 import RulesPage from "@/pages/ai-analyzer/pages/rules/page"
 import ConfigPage from "@/pages/ai-analyzer/pages/config/page"
 import AIAssistantPage from "@/pages/ai-analyzer/pages/assistant/page"
+import FTWPage from "@/pages/ftw/page"
 import EngineLogPage from "@/pages/logs/pages/engine/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
@@ -122,6 +123,12 @@ export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Rec
                 { title: t('breadcrumb.aiAnalyzer.rules'), path: "rules", component: <RulesPage /> },
                 { title: t('breadcrumb.aiAnalyzer.assistant'), path: "assistant", component: <AIAssistantPage /> },
                 { title: t('breadcrumb.aiAnalyzer.config'), path: "config", component: <ConfigPage /> }
+            ]
+        },
+        [ROUTES.FTW]: {
+            defaultPath: "test",
+            items: [
+                { title: 'FTW Test', path: "test", component: <FTWPage /> },
             ]
         }
     }

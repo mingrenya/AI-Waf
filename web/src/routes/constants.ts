@@ -7,6 +7,7 @@ export const ROUTES = {
     SETTINGS: "/settings",
     ALERTS: "/alerts",
     AI_ANALYZER: "/ai-analyzer",
+    FTW: "/ftw",
 } as const
 
 export type RouteKey = keyof typeof ROUTES

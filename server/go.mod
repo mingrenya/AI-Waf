@@ -37,7 +37,7 @@ require (
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/corazawaf/coraza-coreruleset v0.0.0-20240226094324-415b1017abdc // indirect
 	github.com/corazawaf/coraza/v3 v3.3.3 // indirect
-	github.com/corazawaf/libinjection-go v0.3.2 // indirect
+	github.com/corazawaf/libinjection-go v0.2.2 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dropmorepackets/haproxy-go v0.0.6 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect

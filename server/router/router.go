@@ -255,6 +255,8 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 		wafLogRoutes.POST("/loki-query", middleware.HasPermission(model.PermWAFLogRead), lokiLogController.QueryLogs)
 		// Loki 引擎日志范围查询 - 需要logs:read权限
 		wafLogRoutes.POST("/loki-range", middleware.HasPermission(model.PermWAFLogRead), lokiLogController.QueryRange)
+		// Loki 引擎日志统计 - 需要logs:read权限
+		wafLogRoutes.GET("/loki-stats", middleware.HasPermission(model.PermWAFLogRead), lokiLogController.GetStats)
 	}
 
 	// 统计信息路由

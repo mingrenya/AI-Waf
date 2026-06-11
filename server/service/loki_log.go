@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,6 +19,7 @@ import (
 type LokiLogService interface {
 	QueryLogs(ctx context.Context, req LokiQueryRequest) (*LokiQueryResponse, error)
 	QueryRange(ctx context.Context, req LokiRangeRequest) (*LokiQueryResponse, error)
+	GetLogStats(ctx context.Context, duration string) (*LokiStatsResult, error)
 }
 
 // LokiQueryRequest 即时查询请求
@@ -51,9 +53,12 @@ type LokiResponseData struct {
 }
 
 // LokiStream 日志流
+// 注意: Loki 在 matrix 模式返回的 values 是 [数字时间戳, 字符串值]
+// 而 streams 模式返回 [[纳秒字符串, 日志行], ...]
+// 所以使用 []interface{} 兼容两种格式
 type LokiStream struct {
 	Stream map[string]string `json:"stream"`
-	Values [][]string        `json:"values"` // [timestamp_ns, log_line]
+	Values [][]interface{}   `json:"values"`
 }
 
 // LokiLogEntry 格式化后的日志条目
@@ -122,8 +127,8 @@ func (s *lokiLogServiceImpl) QueryLogs(ctx context.Context, req LokiQueryRequest
 	} else {
 		end = resolveTime(end)
 	}
-	params.Set("start", start)
-	params.Set("end", end)
+	params.Set("start", resolveTime(start))
+	params.Set("end", resolveTime(end))
 
 	if req.Direction != "" {
 		params.Set("direction", req.Direction)
@@ -209,18 +214,15 @@ func ToLogEntries(resp *LokiQueryResponse) *LokiLogQueryResponse {
 				continue
 			}
 
-			// Loki 返回纳秒时间戳
-			ts := value[0]
-			logLine := value[1]
-
+			// Loki 返回纳秒时间戳（兼容数字和字符串格式）
 			entry := LokiLogEntry{
-				Timestamp: ts,
+				Timestamp: fmt.Sprintf("%v", value[0]),
 				Labels:    labels,
-				Message:   logLine,
+				Message:   fmt.Sprintf("%v", value[1]),
 			}
 
 			// 尝试提取结构化字段
-			entry.Level = extractField(logLine, "level")
+			entry.Level = extractField(fmt.Sprintf("%v", value[1]), "level")
 			if cn, ok := labels["container_name"]; ok {
 				entry.Component = cn
 			}
@@ -255,13 +257,23 @@ func extractField(jsonStr string, field string) string {
 }
 
 
-// resolveTime 将相对时间字符串转换为 RFC3339 格式
+// resolveTime 将相对/绝对时间字符串转换为 Unix 秒字符串（Loki query_range 要求）
 func resolveTime(t string) string {
 	switch t {
-	case "now":
-		return time.Now().UTC().Format(time.RFC3339)
+	case "now", "":
+		return fmt.Sprintf("%d", time.Now().Unix())
+	case "1h":
+		return fmt.Sprintf("%d", time.Now().Add(-1*time.Hour).Unix())
+	case "6h":
+		return fmt.Sprintf("%d", time.Now().Add(-6*time.Hour).Unix())
+	case "24h":
+		return fmt.Sprintf("%d", time.Now().Add(-24*time.Hour).Unix())
 	default:
-		// 已经是 RFC3339 格式或相对时间，直接传给 Loki
+		// Try to parse as duration string (e.g., "30m", "2h", "7d")
+		if d, err := time.ParseDuration(t); err == nil {
+			return fmt.Sprintf("%d", time.Now().Add(-d).Unix())
+		}
+		// Assume already a unix timestamp
 		return t
 	}
 }
@@ -269,7 +281,7 @@ func resolveTime(t string) string {
 // BuildWAFQuery 构建常见的 WAF 日志查询
 func BuildWAFQuery(params ...string) string {
 	// 默认查询 mrya-waf 容器的结构化 JSON 日志
-	baseSelector := `{container_name="/mrya-waf"}`
+	baseSelector := `{container_name="mrya-waf"}`
 
 	conditions := []string{}
 	for _, p := range params {
@@ -281,4 +293,102 @@ func BuildWAFQuery(params ...string) string {
 	}
 
 	return baseSelector + ` | json | ` + strings.Join(conditions, " | ")
+}
+
+// LokiStatsResult 统计聚合结果
+type LokiStatsResult struct {
+	LogVolume []TimeSeriesPoint `json:"logVolume"`
+	ByLevel   map[string]int    `json:"byLevel"`
+	ByComponent map[string]int  `json:"byComponent"`
+	TotalHits int               `json:"totalHits"`
+	RangeStart string           `json:"rangeStart"`
+	RangeEnd   string           `json:"rangeEnd"`
+}
+
+// TimeSeriesPoint 时间序列点
+type TimeSeriesPoint struct {
+	Timestamp int64   `json:"timestamp"`
+	Count     float64 `json:"count"`
+}
+
+// GetLogStats 获取日志统计数据
+func (s *lokiLogServiceImpl) GetLogStats(ctx context.Context, duration string) (*LokiStatsResult, error) {
+	start := resolveTime(duration)
+	end := resolveTime("now")
+	step := "60s" // 1分钟步长
+
+	stats := &LokiStatsResult{
+		ByLevel:     make(map[string]int),
+		ByComponent: make(map[string]int),
+		RangeStart:  start,
+		RangeEnd:    end,
+	}
+
+	// 1. 日志总量时序
+	query := `sum(count_over_time({container_name="mrya-waf"}[` + step + `]))`
+	resp, err := s.doQuery(ctx, "/loki/api/v1/query_range", url.Values{
+		"query": {query},
+		"start": {start},
+		"end":   {end},
+		"step":  {step},
+	})
+	if err != nil {
+		s.logger.Warn().Err(err).Msg("Log volume query failed")
+	} else {
+		for _, stream := range resp.Data.Result {
+			for _, v := range stream.Values {
+				if len(v) >= 2 {
+					ts := fmt.Sprintf("%v", v[0])
+					countStr := fmt.Sprintf("%v", v[1])
+					tsVal, errTs := strconv.ParseInt(ts, 10, 64)
+					countVal, errCount := strconv.ParseFloat(countStr, 64)
+					if errTs == nil && errCount == nil {
+						stats.LogVolume = append(stats.LogVolume, TimeSeriesPoint{Timestamp: tsVal, Count: countVal})
+					}
+				}
+			}
+		}
+	}
+
+	// 2. 按级别统计
+	for _, level := range []string{"error", "info", "warn", "debug"} {
+		q := `sum(count_over_time({container_name="mrya-waf"} |= "` + level + `" [` + duration + `]))`
+		resp, err := s.doQuery(ctx, "/loki/api/v1/query", url.Values{
+			"query": {q},
+			"start": {start},
+			"end":   {end},
+		})
+		if err == nil && len(resp.Data.Result) > 0 {
+			for _, stream := range resp.Data.Result {
+				if len(stream.Values) > 0 && len(stream.Values[0]) >= 2 {
+				countStr := fmt.Sprintf("%v", stream.Values[0][1])
+				count, _ := strconv.Atoi(countStr)
+					stats.ByLevel[level] += count
+					stats.TotalHits += count
+				}
+			}
+		}
+	}
+
+	// 3. 按组件统计
+	components := []string{"traffic-analyzer", "baseline", "flow-controller", "pattern-detector"}
+	for _, comp := range components {
+		q := `sum(count_over_time({container_name="mrya-waf"} |= "` + comp + `" [` + duration + `]))`
+		resp, err := s.doQuery(ctx, "/loki/api/v1/query", url.Values{
+			"query": {q},
+			"start": {start},
+			"end":   {end},
+		})
+		if err == nil && len(resp.Data.Result) > 0 {
+			for _, stream := range resp.Data.Result {
+				if len(stream.Values) > 0 && len(stream.Values[0]) >= 2 {
+					countStr := fmt.Sprintf("%v", stream.Values[0][1])
+					c, _ := strconv.Atoi(countStr)
+					stats.ByComponent[comp] += c
+				}
+			}
+		}
+	}
+
+	return stats, nil
 }

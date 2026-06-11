@@ -11,6 +11,7 @@ import (
 type LokiLogController interface {
 	QueryLogs(ctx *gin.Context)
 	QueryRange(ctx *gin.Context)
+	GetStats(ctx *gin.Context)
 }
 
 type lokiLogControllerImpl struct {
@@ -65,4 +66,16 @@ func (c *lokiLogControllerImpl) QueryRange(ctx *gin.Context) {
 	entries := service.ToLogEntries(result)
 	entries.Query = req.Query
 	response.Success(ctx, "查询成功", entries)
+}
+
+// GetStats 获取日志统计聚合数据
+func (c *lokiLogControllerImpl) GetStats(ctx *gin.Context) {
+	duration := ctx.DefaultQuery("duration", "1h")
+	stats, err := c.service.GetLogStats(ctx.Request.Context(), duration)
+	if err != nil {
+		c.logger.Error().Err(err).Msg("Loki 统计查询失败")
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+	response.Success(ctx, "查询成功", stats)
 }
