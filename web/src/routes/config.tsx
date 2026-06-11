@@ -38,6 +38,7 @@ import PatternsPage from "@/pages/ai-analyzer/pages/patterns/page"
 import RulesPage from "@/pages/ai-analyzer/pages/rules/page"
 import ConfigPage from "@/pages/ai-analyzer/pages/config/page"
 import AIAssistantPage from "@/pages/ai-analyzer/pages/assistant/page"
+import EngineLogPage from "@/pages/logs/pages/engine/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
 // 懒加载认证页面
@@ -81,6 +82,7 @@ export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Rec
             items: [
                 { title: t('breadcrumb.logs.attack'), path: "event", component: <EventsPage /> },
                 { title: t('breadcrumb.logs.protect'), path: "protect", component: <LogsPage /> },
+                { title: t('breadcrumb.logs.engine'), path: "engine", component: <EngineLogPage /> },
             ]
         },
         [ROUTES.MONITOR]: {

@@ -162,12 +162,9 @@ func (s *ftwTestServiceImpl) RunTests(ctx context.Context, targetURL string, tes
 			s.logger.Warn().Err(err).Str("file", f).Msg("解析 YAML 失败")
 			continue
 		}
-		target := targetURL
 		for i := range ft.Tests {
-			ft.Tests[i].TestID = ft.Tests[i].TestID
 			s.logger.Debug().Str("id", fmt.Sprintf("%d", ft.Tests[i].TestID)).Str("title", ft.Tests[i].TestTitle).Msg("Test case loaded")
 		}
-		_ = target
 		allCases = append(allCases, ft.Tests...)
 	}
 
@@ -362,7 +359,7 @@ func (s *ftwTestServiceImpl) GetTestFiles() []string {
 // saveReport writes report to MongoDB
 func (s *ftwTestServiceImpl) saveReport(ctx context.Context, report *FTWReport) {
 	if s.mongoDB == nil { return }
-	sctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	sctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	_, err := s.mongoDB.Collection("ftw_test_reports").InsertOne(sctx, report)
 	if err != nil {
