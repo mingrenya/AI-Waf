@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Copy, Check, AlertTriangle, Shield, Loader2 } from "lucide-react"
+import { Copy, Check, AlertTriangle, Shield } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { AttackDetailData } from "@/types/log"
 import { format } from "date-fns"
@@ -17,10 +17,11 @@ import {
 } from "@/components/ui/animation/dialog-animation"
 import { useTranslation } from "react-i18next"
 import { CopyableText } from "@/components/common/copyable-text"
-import { useBlockIP } from "@/feature/ip-group/hooks"
+import { useAttackerProfile } from "@/feature/situation/hooks/useSituationData"
+import { quickAction } from "@/api/situation"
+import { toast } from "@/store"
 
 import { TabsAnimationProvider } from "@/components/ui/animation/components/tab-animation"
-import { AnimatedButton } from "@/components/ui/animation/components/animated-button"
 
 interface AttackDetailDialogProps {
     open: boolean
@@ -33,18 +34,20 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
     const [encoding, setEncoding] = useState("UTF-8")
     const [activeTab, setActiveTab] = useState("request")
     const { t, i18n } = useTranslation()
-    const [isBlockingIP, setIsBlockingIP] = useState(false)
-    const { blockIP, clearError } = useBlockIP()
+    const sourceIP = data?.srcIp
+    const { data: profile } = useAttackerProfile(sourceIP || '')
+
+    const [quickActionLoading, setQuickActionLoading] = useState<string | null>(null)
 
     // Define the gradients for reuse
-    const purpleGradient = `linear-gradient(135deg, 
-    rgba(147, 112, 219, 0.95) 0%, 
-    rgba(138, 100, 208, 0.9) 50%, 
+    const purpleGradient = `linear-gradient(135deg,
+    rgba(147, 112, 219, 0.95) 0%,
+    rgba(138, 100, 208, 0.9) 50%,
     rgba(123, 79, 214, 0.95) 100%)`
 
-    const darkPurpleGradient = `linear-gradient(135deg, 
-    rgba(113, 70, 199, 0.8) 0%, 
-    rgba(91, 52, 171, 0.75) 50%, 
+    const darkPurpleGradient = `linear-gradient(135deg,
+    rgba(113, 70, 199, 0.8) 0%,
+    rgba(91, 52, 171, 0.75) 50%,
     rgba(72, 38, 153, 0.8) 100%)`
 
     const handleCopy = (text: string, key: string) => {
@@ -54,14 +57,23 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
         })
     }
 
-    const handleBlockIP = (ip: string) => {
-        setIsBlockingIP(true)
-        clearError()
-        blockIP(ip, {
-            onSettled: () => {
-                setIsBlockingIP(false)
-            }
-        })
+    const handleQuickBlock = async (action: 'block' | 'blacklist' | 'both', hours: number, label: string) => {
+        if (!sourceIP) return
+        setQuickActionLoading(label)
+        try {
+            const result = await quickAction({
+                source_ip: sourceIP,
+                action,
+                duration_hours: hours,
+                reason: `从攻击日志详情处置 - ${data?.message || '未知攻击'}`,
+                correlation_id: data?.requestId,
+            })
+            toast({ title: '处置成功', description: result.data.data.note, variant: 'success' })
+        } catch {
+            toast({ title: '处置失败', description: '请稍后重试', variant: 'destructive' })
+        } finally {
+            setQuickActionLoading(null)
+        }
     }
 
     if (!data) return null
@@ -196,6 +208,30 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
                                             </Card>
                                         </motion.div>
 
+                                        {/* 攻击者画像简要面板 */}
+                                        {profile && (
+                                            <motion.div {...dialogContentItemAnimation}>
+                                                <Card className="p-4 bg-card border rounded-lg bg-muted/30 dark:bg-accent/20 dark:card-neon">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <h4 className="font-semibold text-sm text-card-foreground dark:text-slate-200 dark:text-shadow-glow-white">攻击者画像</h4>
+                                                        <Badge variant={
+                                                            profile.risk_label === 'critical' ? 'destructive' :
+                                                                profile.risk_label === 'high' ? 'destructive' :
+                                                                    profile.risk_label === 'medium' ? 'secondary' : 'outline'
+                                                        }>
+                                                            风险: {profile.risk_label} ({profile.risk_score})
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-y-1 text-xs text-muted-foreground">
+                                                        <span>攻击阶段: {profile.attack_phase}</span>
+                                                        <span>24h攻击: {profile.total_attacks}次</span>
+                                                        <span>攻击类型: {profile.unique_attack_types}种</span>
+                                                        <span>疑似工具: {profile.tools_identified || '未识别'}</span>
+                                                    </div>
+                                                </Card>
+                                            </motion.div>
+                                        )}
+
                                         {/* 来源和目标信息 */}
                                         <motion.div {...dialogContentItemAnimation}>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -207,22 +243,8 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
                                                     <div className="space-y-4">
                                                         <div>
                                                             <span className="text-muted-foreground text-sm block mb-1 dark:text-shadow-glow-white">{t("srcIp")}</span>
-                                                            <div className="font-medium flex items-center justify-between text-card-foreground dark:text-slate-200 dark:text-shadow-glow-white">
+                                                            <div className="font-medium text-card-foreground dark:text-slate-200 dark:text-shadow-glow-white">
                                                                 <span className="break-all font-mono">{data.srcIp}</span>
-                                                                <AnimatedButton>
-                                                                    <Button
-                                                                        variant="destructive"
-                                                                        size="sm"
-                                                                        className="h-7 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-900/90 dark:hover:bg-red-800"
-                                                                        onClick={() => handleBlockIP(data.srcIp)}
-                                                                        disabled={isBlockingIP}
-                                                                    >
-                                                                        {isBlockingIP ? (
-                                                                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                                                                        ) : null}
-                                                                        {t("attackDetail.blockThisIp")}
-                                                                    </Button>
-                                                                </AnimatedButton>
                                                             </div>
                                                         </div>
                                                         <div>
@@ -431,6 +453,88 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
                                                 </Tabs>
                                             </Card>
                                         </motion.div>
+
+                                        {/* 快速处置按钮 */}
+                                        {sourceIP && (
+                                            <motion.div {...dialogContentItemAnimation}>
+                                                <div className="pt-3 border-t flex flex-wrap gap-2">
+                                                    <span className="text-xs text-muted-foreground flex items-center gap-1 w-full mb-1">
+                                                        <Shield className="h-3.5 w-3.5" />
+                                                        快速处置:
+                                                    </span>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="text-xs h-7"
+                                                        disabled={quickActionLoading !== null}
+                                                        onClick={() => handleQuickBlock('block', 1, 'Block 1h')}
+                                                    >
+                                                        {quickActionLoading === 'Block 1h' ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                                处理中...
+                                                            </span>
+                                                        ) : '封禁 1h'}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="text-xs h-7"
+                                                        disabled={quickActionLoading !== null}
+                                                        onClick={() => handleQuickBlock('block', 24, 'Block 24h')}
+                                                    >
+                                                        {quickActionLoading === 'Block 24h' ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                                处理中...
+                                                            </span>
+                                                        ) : '封禁 24h'}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="text-xs h-7"
+                                                        disabled={quickActionLoading !== null}
+                                                        onClick={() => handleQuickBlock('block', 168, 'Block 7d')}
+                                                    >
+                                                        {quickActionLoading === 'Block 7d' ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                                处理中...
+                                                            </span>
+                                                        ) : '封禁 7d'}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        className="text-xs h-7"
+                                                        disabled={quickActionLoading !== null}
+                                                        onClick={() => handleQuickBlock('block', 87600, 'Block Permanent')}
+                                                    >
+                                                        {quickActionLoading === 'Block Permanent' ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                                处理中...
+                                                            </span>
+                                                        ) : '永久封禁'}
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="text-xs h-7"
+                                                        disabled={quickActionLoading !== null}
+                                                        onClick={() => handleQuickBlock('blacklist', 0, 'Add Blacklist')}
+                                                    >
+                                                        {quickActionLoading === 'Add Blacklist' ? (
+                                                            <span className="flex items-center gap-1">
+                                                                <span className="animate-spin h-3 w-3 border-2 border-current border-t-transparent rounded-full" />
+                                                                处理中...
+                                                            </span>
+                                                        ) : '加入黑名单'}
+                                                    </Button>
+                                                </div>
+                                            </motion.div>
+                                        )}
                                     </div>
                                 </ScrollArea>
                             </motion.div>
