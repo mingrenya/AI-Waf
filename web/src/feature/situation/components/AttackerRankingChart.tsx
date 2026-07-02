@@ -29,10 +29,11 @@ function timeAgo(dateStr: string): string {
 }
 
 interface AttackerRankingChartProps {
-  onSelectAttacker?: (ip: string) => void;
+  // onSelectAttacker is reserved for future use (click-to-filter)
+  // onSelectAttacker?: (ip: string) => void;
 }
 
-export default function AttackerRankingChart({ onSelectAttacker }: AttackerRankingChartProps) {
+export default function AttackerRankingChart(_props: AttackerRankingChartProps) {
   const { data, isLoading } = useAttackers({ page_size: 50, sort_by: 'risk_score' });
 
   const columns: ColumnDef<AttackerSummary>[] = useMemo(

@@ -144,6 +144,10 @@ export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Rec
                 { title: 'Nuclei Scan', path: "scan", component: <ScanPage /> },
                 { title: 'Templates', path: "templates", component: <TemplatesPage /> },
             ]
+        },
+        [ROUTES.SITUATION]: {
+            defaultPath: "",
+            items: []
         }
     }
 }

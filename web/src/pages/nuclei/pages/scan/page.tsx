@@ -10,12 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
-interface SiteOption {
-  id: string;
-  name: string;
-  domain: string;
-}
-
 export default function ScanPage() {
   const [siteId, setSiteId] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
