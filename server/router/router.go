@@ -463,7 +463,7 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 		situationRoutes.POST("/quick-action", middleware.HasPermission(model.PermConfigUpdate), situationController.QuickAction)
 	}
 
-		// Nuclei 扫描
+		// Nuclei 扫描路由
 		nucleiRoutes := authenticated.Group("/nuclei")
 		{
 			nucleiRoutes.POST("/scan", middleware.HasPermission(model.PermConfigUpdate), nucleiController.StartScan)
