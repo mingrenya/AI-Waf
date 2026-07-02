@@ -38,21 +38,22 @@ scrape_configs:
       - source_labels: ['__meta_docker_container_image']
         target_label: 'image'
     pipeline_stages:
-      # Parse the HAProxy spoa log format (starts with timestamp)
-      - regex:
-          expression: '^(?P<time_raw>\S+\s+\S+)\s+(?P<level>\S+)\s+(?P<raw>.*)$'
-      - timestamp:
-          source: time_raw
-          format: 'RFC3339'
-      - labels:
-          level:
-      # Also handle JSON structured logs from the Go server
+      # 解析 JSON 结构化日志，提取 WAF 标签用于态势感知
       - json:
           expressions:
             level: level
             message: message
             component: component
             time: time
+            correlation_id: correlation_id
+            source_ip: source_ip
+            attack_type: attack_type
+            action: action
+            severity: severity
+            geo_country: geo_country
+            rule_id: rule_id
+            waf_phase: waf_phase
+            site_id: site_id
       - timestamp:
           source: time
           format: 'RFC3339'
@@ -60,6 +61,15 @@ scrape_configs:
       - labels:
           level:
           component:
+          correlation_id:
+          source_ip:
+          attack_type:
+          action:
+          severity:
+          geo_country:
+          rule_id:
+          waf_phase:
+          site_id:
 
   # Scrape MongoDB logs
   - job_name: waf-mongodb
