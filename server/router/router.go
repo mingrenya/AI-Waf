@@ -11,6 +11,7 @@ import (
 	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/mingrenya/AI-Waf/server/service"
 	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
+	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
 	ws "github.com/mingrenya/AI-Waf/server/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -46,6 +47,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	aiAnalyzerConfigRepo := repository.NewAIAnalyzerConfigRepository(db)
 	mcpConversationRepo := repository.NewMCPConversationRepository(db)
 	mcpRepo := repository.NewMCPRepository(db)
+	situationRepo := repository.NewSituationRepository(db)
 
 	// 创建服务
 	authService := service.NewAuthService(userRepo, roleRepo)
@@ -113,6 +115,11 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	aiChatController := controller.NewAIChatController(aiChatService)
 	lokiLogController := controller.NewLokiLogController(lokiLogService)
 ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateService, ruleEffectivenessService, protectionProfileService)
+
+	// 态势感知控制器 (depends on situationRepo + quickActionSvc)
+	situationPublisher := situationSvc.NewPublisher(nil)
+	quickActionSvc := situationSvc.NewQuickActionService(blockedIPRepo, ipGroupRepo, situationPublisher)
+	situationController := controller.NewSituationController(situationRepo, quickActionSvc)
 
 	// FTW 回归测试服务
 	ftwService := service.NewFTWTestService(db)
@@ -425,6 +432,22 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 		mcpRoutes.GET("/tool-calls", middleware.HasPermission(model.PermWAFLogRead), mcpController.GetMCPToolCallHistory)
 		// 记录工具调用 - MCP Server调用，需要认证但不需要特殊权限
 		mcpRoutes.POST("/tool-calls/record", mcpController.RecordToolCall)
+	}
+
+	// 态势感知
+	situationRoutes := authenticated.Group("/situation")
+	{
+		situationRoutes.GET("/overview", middleware.HasPermission(model.PermWAFLogRead), situationController.GetOverview)
+		situationRoutes.GET("/chains", middleware.HasPermission(model.PermWAFLogRead), situationController.ListChains)
+		situationRoutes.GET("/chains/:id", middleware.HasPermission(model.PermWAFLogRead), situationController.GetChainDetail)
+		situationRoutes.GET("/attackers", middleware.HasPermission(model.PermWAFLogRead), situationController.ListAttackers)
+		situationRoutes.GET("/attackers/:ip", middleware.HasPermission(model.PermWAFLogRead), situationController.GetAttackerProfile)
+		situationRoutes.GET("/trends", middleware.HasPermission(model.PermWAFLogRead), situationController.GetTrends)
+		situationRoutes.GET("/rules", middleware.HasPermission(model.PermConfigRead), situationController.ListRules)
+		situationRoutes.POST("/rules", middleware.HasPermission(model.PermConfigUpdate), situationController.CreateRule)
+		situationRoutes.PUT("/rules/:id", middleware.HasPermission(model.PermConfigUpdate), situationController.UpdateRule)
+		situationRoutes.DELETE("/rules/:id", middleware.HasPermission(model.PermConfigUpdate), situationController.DeleteRule)
+		situationRoutes.POST("/quick-action", middleware.HasPermission(model.PermConfigUpdate), situationController.QuickAction)
 	}
 
 	// ===== 前端静态资源托管 =====

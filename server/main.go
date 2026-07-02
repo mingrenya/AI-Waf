@@ -15,9 +15,13 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
+	redisPkg "github.com/mingrenya/AI-Waf/pkg/database/redis"
 	"github.com/mingrenya/AI-Waf/server/config"
 	_ "github.com/mingrenya/AI-Waf/server/docs" // 导入 swagger 文档
+	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/mingrenya/AI-Waf/server/router"
+	"github.com/mingrenya/AI-Waf/server/service"
+	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
 	aiAnalyzerTask "github.com/mingrenya/AI-Waf/server/service/cornjob/ai_analyzer"
 	haproxyStats "github.com/mingrenya/AI-Waf/server/service/cornjob/haproxy"
 	"github.com/mingrenya/AI-Waf/server/service/daemon"
@@ -98,6 +102,32 @@ func main() {
 	}
 	config.Logger.Info().Msg("AI Analyzer cron task started successfully")
 	defer aiTask.Stop()
+
+	// 创建一个后台 context，用于态势感知引擎等长时间运行的服务
+	bgCtx := context.Background()
+
+	// 启动态势感知引擎（检测间隔 30s）
+	go func() {
+		situationRepo := repository.NewSituationRepository(db)
+		lokiLogService := service.NewLokiLogService()
+		situationRuleEngine := situationSvc.NewRuleEngine(lokiLogService, situationRepo)
+		situationChainBuilder := situationSvc.NewAttackChainBuilder(lokiLogService, situationRepo)
+		situationProfiler := situationSvc.NewProfiler(lokiLogService, situationRepo)
+		redisClient, redisErr := redisPkg.GetClient(bgCtx)
+		situationPublisher := situationSvc.NewPublisher(redisClient)
+		situationEngine := situationSvc.NewEngine(situationRuleEngine, situationChainBuilder, situationProfiler, situationPublisher)
+
+		if err := situationRuleEngine.InitializeDefaults(bgCtx); err != nil {
+			config.Logger.Warn().Err(err).Msg("Failed to initialize situation rules")
+		}
+
+		if redisErr != nil {
+			config.Logger.Warn().Err(redisErr).Msg("Redis unavailable, situation engine running without real-time push")
+		}
+
+		config.Logger.Info().Msg("Situation awareness engine started (interval=30s)")
+		situationEngine.Start(bgCtx, 30*time.Second)
+	}()
 
 	// Set Gin mode based on configuration
 	if config.Global.IsProduction {
