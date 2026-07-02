@@ -12,6 +12,7 @@ import (
 	"github.com/mingrenya/AI-Waf/server/service"
 	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
 	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
+	nucleiSvc "github.com/mingrenya/AI-Waf/server/service/nuclei"
 	ws "github.com/mingrenya/AI-Waf/server/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	mcpConversationRepo := repository.NewMCPConversationRepository(db)
 	mcpRepo := repository.NewMCPRepository(db)
 	situationRepo := repository.NewSituationRepository(db)
+	nucleiRepo := repository.NewNucleiRepository(db)
 
 	// 创建服务
 	authService := service.NewAuthService(userRepo, roleRepo)
@@ -73,6 +75,14 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	ruleTemplateService := service.NewRuleTemplateService(db)
 	ruleEffectivenessService := service.NewRuleEffectivenessService(db)
 	protectionProfileService := service.NewProtectionProfileService(db, ruleTemplateService)
+
+	// Nuclei 扫描服务
+	nucleiScanner, err := nucleiSvc.NewScanner(context.Background(), "/home/mrya/mrya-waf/nuclei-templates")
+	if err != nil {
+		logger := config.GetServiceLogger("router")
+		logger.Warn().Err(err).Msg("Failed to create nuclei scanner, scanning will be unavailable")
+	}
+	nucleiTmplMgr := nucleiSvc.NewTemplateManager("/home/mrya/mrya-waf/nuclei-templates")
 
 	// 启动告警后台任务
 	logger := config.GetServiceLogger("router")
@@ -124,6 +134,9 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 	// FTW 回归测试服务
 	ftwService := service.NewFTWTestService(db)
 	ftwController := controller.NewFTWController(ftwService)
+
+	// Nuclei 扫描控制器
+	nucleiController := controller.NewNucleiController(nucleiScanner, nucleiRepo, nucleiTmplMgr)
 
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
@@ -449,6 +462,16 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 		situationRoutes.DELETE("/rules/:id", middleware.HasPermission(model.PermConfigUpdate), situationController.DeleteRule)
 		situationRoutes.POST("/quick-action", middleware.HasPermission(model.PermConfigUpdate), situationController.QuickAction)
 	}
+
+		// Nuclei 扫描
+		nucleiRoutes := authenticated.Group("/nuclei")
+		{
+			nucleiRoutes.POST("/scan", middleware.HasPermission(model.PermConfigUpdate), nucleiController.StartScan)
+			nucleiRoutes.GET("/scan/:id", middleware.HasPermission(model.PermConfigRead), nucleiController.GetTask)
+			nucleiRoutes.POST("/scan/:id/cancel", middleware.HasPermission(model.PermConfigUpdate), nucleiController.CancelTask)
+			nucleiRoutes.GET("/tasks", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTasks)
+			nucleiRoutes.GET("/templates", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTemplates)
+		}
 
 	// ===== 前端静态资源托管 =====
 	SetStaticFileRouter(route)
