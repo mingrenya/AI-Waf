@@ -46,6 +46,10 @@ import { LoadingFallback } from "@/components/common/loading-fallback"
 const LoginPage = lazy(() => import("@/pages/auth/login"))
 const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"))
 
+// 懒加载态势感知页面
+const SituationLayout = lazy(() => import("@/pages/situation/layout"))
+const SituationPage = lazy(() => import("@/pages/situation/page"))
+
 // 懒加载组件包装器
 const lazyLoad = (Component: React.ComponentType) => (
     <Suspense fallback={<LoadingFallback />}>
@@ -175,6 +179,17 @@ export function useRoutes(): RouteObject[] {
                 // security-dashboard 在鉴权内，但不使用后台侧边栏布局
                 path: "/security-dashboard",
                 element: <ViewerPage />
+            },
+            {
+                // situation 态势感知页面，不使用后台侧边栏布局
+                path: ROUTES.SITUATION,
+                element: lazyLoad(SituationLayout),
+                children: [
+                    {
+                        index: true,
+                        element: lazyLoad(SituationPage),
+                    },
+                ],
             },
             {
                 element: <RootLayout />,
