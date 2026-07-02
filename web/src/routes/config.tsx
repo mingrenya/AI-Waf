@@ -16,6 +16,7 @@ import { SettingLayOut } from "@/pages/setting/layout"
 import { LogsLayout } from "@/pages/logs/layout"
 import { AlertLayOut } from "@/pages/alert/layout"
 import { AIAnalyzerLayOut } from "@/pages/ai-analyzer/layout"
+import { NucleiLayOut } from "@/pages/nuclei/layout"
 
 // 直接导入子组件
 import GlobalSettingPage from "@/pages/setting/pages/global-setting/page"
@@ -40,6 +41,8 @@ import ConfigPage from "@/pages/ai-analyzer/pages/config/page"
 import AIAssistantPage from "@/pages/ai-analyzer/pages/assistant/page"
 import FTWPage from "@/pages/ftw/page"
 import EngineLogPage from "@/pages/logs/pages/engine/page"
+import ScanPage from "@/pages/nuclei/pages/scan/page"
+import TemplatesPage from "@/pages/nuclei/pages/templates/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
 // 懒加载认证页面
@@ -134,6 +137,13 @@ export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Rec
             items: [
                 { title: 'FTW Test', path: "test", component: <FTWPage /> },
             ]
+        },
+        [ROUTES.NUCLEI]: {
+            defaultPath: "scan",
+            items: [
+                { title: 'Nuclei Scan', path: "scan", component: <ScanPage /> },
+                { title: 'Templates', path: "templates", component: <TemplatesPage /> },
+            ]
         }
     }
 }
@@ -227,6 +237,11 @@ export function useRoutes(): RouteObject[] {
                         path: ROUTES.AI_ANALYZER,
                         element: <AIAnalyzerLayOut />,
                         children: createChildRoutes(breadcrumbMap[ROUTES.AI_ANALYZER], ROUTES.AI_ANALYZER)
+                    },
+                    {
+                        path: ROUTES.NUCLEI,
+                        element: <NucleiLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.NUCLEI], ROUTES.NUCLEI)
                     }
                 ]
             }

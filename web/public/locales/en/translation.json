@@ -6,6 +6,8 @@
     "rules": "Rules",
     "settings": "Settings",
     "alerts": "Alerts",
+    "situation": "Situation",
+    "nuclei": "Nuclei Scanner",
     "logout": "Logout",
     "aiAnalyzer": "AI Analyzer"
   },

@@ -7,6 +7,8 @@
     "settings": "设置",
     "logout": "登出",
     "alerts": "告警",
+    "situation": "态势感知",
+    "nuclei": "Nuclei扫描",
     "aiAnalyzer": "AI分析"
   },
   "breadcrumb": {
