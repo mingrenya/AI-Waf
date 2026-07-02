@@ -29,6 +29,7 @@ type Config struct {
 	Log          LogConfig
 	DBConfig     DBConfig
 	JWT          JWTConfig
+	RedisConfig  RedisConfig
 }
 
 // DBConfig 数据库配置
@@ -41,6 +42,13 @@ type DBConfig struct {
 type JWTConfig struct {
 	Secret        string
 	ExpirationHrs int
+}
+
+// RedisConfig Redis配置
+type RedisConfig struct {
+	Addr     string
+	Password string
+	Enabled  bool
 }
 
 // InitConfig 从环境变量初始化配置
@@ -72,6 +80,10 @@ func InitConfig() error {
 			Secret:        "default-jwt-secret-key",
 			ExpirationHrs: 24,
 		},
+		RedisConfig: RedisConfig{
+			Addr:    "",
+			Enabled: false,
+		},
 	}
 
 	// 从环境变量加载配置
@@ -85,6 +97,12 @@ func InitConfig() error {
 
 	if env := os.Getenv("IS_K8S"); env != "" {
 		Global.IsK8s = env == "true"
+	}
+
+	if redisAddr := os.Getenv("REDIS_ADDR"); redisAddr != "" {
+		Global.RedisConfig.Addr = redisAddr
+		Global.RedisConfig.Password = os.Getenv("REDIS_PASSWORD")
+		Global.RedisConfig.Enabled = true
 	}
 
 	// 日志配置
