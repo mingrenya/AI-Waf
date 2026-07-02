@@ -76,6 +76,7 @@ services:
       - "0.0.0.0:8404:8404"
     volumes:
       - mrya_data:/app/data
+      - captures_data:/app/data/captures
       - ./geo-ip:/home/mrya/mrya-waf/geo-ip:ro
     networks:
       - waf-network
@@ -207,6 +208,8 @@ volumes:
   grafana_data:
     driver: local
   redis_data:
+    driver: local
+  captures_data:
     driver: local
 
 # 定义 Loki 配置文件
