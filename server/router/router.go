@@ -13,6 +13,7 @@ import (
 	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
 	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
 	nucleiSvc "github.com/mingrenya/AI-Waf/server/service/nuclei"
+	captureSvc "github.com/mingrenya/AI-Waf/server/service/capture"
 	ws "github.com/mingrenya/AI-Waf/server/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -50,6 +51,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	mcpRepo := repository.NewMCPRepository(db)
 	situationRepo := repository.NewSituationRepository(db)
 	nucleiRepo := repository.NewNucleiRepository(db)
+	captureRepo := repository.NewCaptureRepository(db)
 
 	// 创建服务
 	authService := service.NewAuthService(userRepo, roleRepo)
@@ -137,6 +139,10 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 
 	// Nuclei 扫描控制器
 	nucleiController := controller.NewNucleiController(nucleiScanner, nucleiRepo, nucleiTmplMgr)
+
+	// 流量捕获服务
+	captureSvc := captureSvc.NewCaptureService(captureRepo, "/app/data/captures")
+	captureController := controller.NewCaptureController(captureSvc)
 
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
@@ -471,6 +477,16 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 			nucleiRoutes.POST("/scan/:id/cancel", middleware.HasPermission(model.PermConfigUpdate), nucleiController.CancelTask)
 			nucleiRoutes.GET("/tasks", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTasks)
 			nucleiRoutes.GET("/templates", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTemplates)
+		}
+
+		// 流量捕获路由
+		captureRoutes := authenticated.Group("/capture")
+		{
+			captureRoutes.POST("/start", middleware.HasPermission(model.PermConfigUpdate), captureController.StartCapture)
+			captureRoutes.POST("/:id/stop", middleware.HasPermission(model.PermConfigUpdate), captureController.StopCapture)
+			captureRoutes.GET("/sessions", middleware.HasPermission(model.PermConfigRead), captureController.ListSessions)
+			captureRoutes.GET("/:id", middleware.HasPermission(model.PermConfigRead), captureController.GetSession)
+			captureRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), captureController.DownloadPCAP)
 		}
 
 	// ===== 前端静态资源托管 =====
