@@ -11,6 +11,7 @@ import (
 	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/mingrenya/AI-Waf/server/service"
 	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
+	ws "github.com/mingrenya/AI-Waf/server/websocket"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -274,6 +275,12 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 		statsRoutes.GET("/traffic-time-series", middleware.HasPermission(model.PermWAFLogRead), statsController.GetTrafficTimeSeriesData)
 		// 获取综合安全指标 - 需要config:read权限
 		statsRoutes.GET("/security-metrics", middleware.HasPermission(model.PermWAFLogRead), statsController.GetSecurityMetrics)
+	}
+
+	// WebSocket 实时推送
+	wsRoutes := authenticated.Group("/ws")
+	{
+		wsRoutes.GET("", ws.WSHandler)
 	}
 
 	// 配置管理模块

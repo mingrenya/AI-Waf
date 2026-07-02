@@ -13,7 +13,7 @@ require (
 	github.com/mingrenya/AI-Waf/coraza-spoa v0.0.0-20250308163638-ae40316258d8
 	github.com/mingrenya/AI-Waf/pkg v0.0.0-20250308163638-ae40316258d8
 	github.com/mvrilo/go-redoc v0.1.5
-	github.com/redis/go-redis/v9 v9.18.0
+	github.com/redis/go-redis/v9 v9.21.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.35.0
 	github.com/swaggo/files v1.0.1
@@ -60,6 +60,7 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/jsonschema-go v0.3.0 // indirect
 	github.com/google/renameio v1.0.1 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/haproxytech/go-logger v1.1.0 // indirect
 	github.com/jcchavezs/mergefs v0.1.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
