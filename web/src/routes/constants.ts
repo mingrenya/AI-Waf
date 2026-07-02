@@ -10,6 +10,7 @@ export const ROUTES = {
     FTW: "/ftw",
     SITUATION: "/situation",
     NUCLEI: "/nuclei",
+    CAPTURE: "/capture",
 } as const
 
 export type RouteKey = keyof typeof ROUTES

@@ -17,6 +17,7 @@ import { LogsLayout } from "@/pages/logs/layout"
 import { AlertLayOut } from "@/pages/alert/layout"
 import { AIAnalyzerLayOut } from "@/pages/ai-analyzer/layout"
 import { NucleiLayOut } from "@/pages/nuclei/layout"
+import CaptureLayOut from "@/pages/capture/layout"
 
 // 直接导入子组件
 import GlobalSettingPage from "@/pages/setting/pages/global-setting/page"
@@ -43,6 +44,8 @@ import FTWPage from "@/pages/ftw/page"
 import EngineLogPage from "@/pages/logs/pages/engine/page"
 import ScanPage from "@/pages/nuclei/pages/scan/page"
 import TemplatesPage from "@/pages/nuclei/pages/templates/page"
+import CaptureControlPage from "@/pages/capture/pages/control/page"
+import CaptureSessionsPage from "@/pages/capture/pages/sessions/page"
 import { LoadingFallback } from "@/components/common/loading-fallback"
 
 // 懒加载认证页面
@@ -143,6 +146,13 @@ export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Rec
             items: [
                 { title: 'Nuclei Scan', path: "scan", component: <ScanPage /> },
                 { title: 'Templates', path: "templates", component: <TemplatesPage /> },
+            ]
+        },
+        [ROUTES.CAPTURE]: {
+            defaultPath: "control",
+            items: [
+                { title: 'Capture Control', path: "control", component: <CaptureControlPage /> },
+                { title: 'Sessions', path: "sessions", component: <CaptureSessionsPage /> },
             ]
         },
         [ROUTES.SITUATION]: {
@@ -246,6 +256,11 @@ export function useRoutes(): RouteObject[] {
                         path: ROUTES.NUCLEI,
                         element: <NucleiLayOut />,
                         children: createChildRoutes(breadcrumbMap[ROUTES.NUCLEI], ROUTES.NUCLEI)
+                    },
+                    {
+                        path: ROUTES.CAPTURE,
+                        element: <CaptureLayOut />,
+                        children: createChildRoutes(breadcrumbMap[ROUTES.CAPTURE], ROUTES.CAPTURE)
                     }
                 ]
             }
