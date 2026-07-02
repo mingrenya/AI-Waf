@@ -53,6 +53,7 @@ RUN apt-get update && apt-get install -y \
     iproute2 \
     net-tools \
     dnsutils \
+    libpcap-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 创建 mrya 用户和组
