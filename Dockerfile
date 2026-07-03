@@ -22,8 +22,6 @@ RUN apk add --no-cache gcc musl-dev libpcap-dev
 # 设置Go环境变量
 ENV GO111MODULE=on \
     CGO_ENABLED=1 \
-    CGO_CFLAGS="-I/usr/include" \
-    CGO_LDFLAGS="-L/usr/lib -lpcap" \
     GOOS=linux \
     GOARCH=amd64
 # 设置工作目录
