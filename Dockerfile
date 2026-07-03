@@ -79,6 +79,8 @@ RUN chown mrya:mrya /app
 
 # 从构建器复制Go二进制文件
 COPY --from=backend-builder /build/mrya-waf .
+# 从构建器复制 alpine libpcap.so（Go CGo 编译时链接的是 musl 版本的 libpcap.so.1）
+COPY --from=backend-builder /usr/lib/libpcap.so.1 /usr/lib/aarch64-linux-gnu/libpcap.so.1
 
 # 复制Swagger文档文件
 COPY --from=backend-builder /build/server/docs/ ./docs/
