@@ -3,6 +3,7 @@ import { useConfigQuery } from "@/feature/global-setting/hooks/useConfig"
 import { useRunnerStatusQuery, useRunnerControl } from "@/feature/global-setting/hooks/useRunner"
 import { EngineStatus } from "@/feature/global-setting/components/EngineStatus"
 import { ConfigForm } from "@/feature/global-setting/components/ConfigForm"
+import { GeoIPFilter } from "@/feature/global-setting/components/GeoIPFilter"
 import { Settings, Info } from "lucide-react"
 import { AdvancedErrorDisplay } from "@/components/common/error/errorDisplay"
 import { AnimatedContainer } from "@/components/ui/animation/components/animated-container"
@@ -102,6 +103,14 @@ export default function GlobalSettingPage() {
                             />
                         </div>
                     </div>
+                </div>
+
+                {/* GeoIP 国家过滤 */}
+                <div
+                    className="bg-background rounded-xl border-none mb-6 animate-fade-in-up"
+                    style={{ animationDelay: "0.15s" }}
+                >
+                    <GeoIPFilter />
                 </div>
 
                 {/* 配置表单 */}
