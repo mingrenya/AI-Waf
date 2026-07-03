@@ -1,257 +1,155 @@
-"use client"
+'use client'
 
-import { Link, useLocation, useNavigate } from "react-router"
-import { cn } from "@/lib/utils"
-import { Settings, Shield, BarChart2, FileText, LogOut, Heart, Globe, Github, Bell, Brain, ScanSearch, Crosshair } from "lucide-react"
-import { ROUTES } from "@/routes/constants"
-import { useTranslation } from "react-i18next"
-import type { TFunction } from "i18next"
-import { useAuthStore } from "@/store/auth"
-import { useState } from "react"
+import { Link, useLocation, useNavigate } from 'react-router'
+import { cn } from '@/lib/utils'
+import { Settings, Shield, BarChart2, FileText, LogOut, Bell, Brain, ScanSearch, Crosshair, Radio, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ROUTES } from '@/routes/constants'
+import { useTranslation } from 'react-i18next'
+import { useAuthStore } from '@/store/auth'
+import { useState } from 'react'
 
-// Create sidebar config with display options
-function createSidebarConfig(t: TFunction) {
-    return [
-        {
-            title: t("sidebar.monitor"),
-            icon: BarChart2,
-            href: ROUTES.MONITOR,
-            display: true,
-        },
-        {
-            title: t("sidebar.logs"),
-            icon: FileText,
-            href: ROUTES.LOGS,
-            display: true,
-        },
-        {
-            title: t("sidebar.rules"),
-            icon: Shield,
-            href: ROUTES.RULES,
-            display: true,
-        },
-        {
-            title: t("sidebar.alerts"),
-            icon: Bell,
-            href: ROUTES.ALERTS,
-            display: true,
-        },
-        {
-            title: t("sidebar.situation"),
-            icon: ScanSearch,
-            href: ROUTES.SITUATION,
-            display: true,
-        },
-        {
-            title: t("sidebar.nuclei"),
-            icon: Crosshair,
-            href: ROUTES.NUCLEI,
-            display: true,
-        },
-        {
-            title: t("sidebar.aiAnalyzer"),
-            icon: Brain,
-            href: ROUTES.AI_ANALYZER,
-            display: true,
-        },
-        {
-            title: t("sidebar.settings"),
-            icon: Settings,
-            href: ROUTES.SETTINGS,
-            display: true,
-        },
-    ] as const
+interface SidebarItem {
+  title: string
+  icon: React.ComponentType<{ className?: string }>
+  href: string
 }
 
-interface SidebarDisplayConfig {
-    monitor?: boolean
-    logs?: boolean
-    rules?: boolean
-    alerts?: boolean
-    situation?: boolean
-    nuclei?: boolean
-    aiAnalyzer?: boolean
-    settings?: boolean
+function createSidebarItems(t: (key: string) => string): SidebarItem[] {
+  return [
+    { title: t('sidebar.monitor'), icon: BarChart2, href: ROUTES.MONITOR },
+    { title: t('sidebar.logs'), icon: FileText, href: ROUTES.LOGS },
+    { title: t('sidebar.rules'), icon: Shield, href: ROUTES.RULES },
+    { title: t('sidebar.alerts'), icon: Bell, href: ROUTES.ALERTS },
+    { title: t('sidebar.situation'), icon: ScanSearch, href: ROUTES.SITUATION },
+    { title: t('sidebar.nuclei'), icon: Crosshair, href: ROUTES.NUCLEI },
+    { title: t('sidebar.capture'), icon: Radio, href: ROUTES.CAPTURE },
+    { title: t('sidebar.aiAnalyzer'), icon: Brain, href: ROUTES.AI_ANALYZER },
+    { title: t('sidebar.settings'), icon: Settings, href: ROUTES.SETTINGS },
+  ]
 }
 
 interface SidebarProps {
-    displayConfig?: SidebarDisplayConfig
+  allowedItems?: string[]
 }
 
-export function Sidebar({ displayConfig = {} }: SidebarProps) {
-    const location = useLocation()
-    const { t } = useTranslation()
-    const navigate = useNavigate()
-    const { logout } = useAuthStore()
-    const [isLogoutActive, setIsLogoutActive] = useState(false)
+export function Sidebar({ allowedItems }: SidebarProps) {
+  const location = useLocation()
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { logout, user } = useAuthStore()
+  const [collapsed, setCollapsed] = useState(false)
 
-    // Get current first level path
-    const currentFirstLevelPath = "/" + location.pathname.split("/")[1]
+  const currentFirstLevelPath = '/' + location.pathname.split('/')[1]
 
-    // Generate sidebar items with display config
-    const sidebarItems = createSidebarConfig(t).map((item) => {
-        // Determine which config property based on path
-        let configKey: keyof SidebarDisplayConfig = "monitor"
-        if (item.href === ROUTES.LOGS) configKey = "logs"
-        if (item.href === ROUTES.RULES) configKey = "rules"
-        if (item.href === ROUTES.ALERTS) configKey = "alerts"
-        if (item.href === ROUTES.SITUATION) configKey = "situation"
-        if (item.href === ROUTES.NUCLEI) configKey = "nuclei"
-        if (item.href === ROUTES.AI_ANALYZER) configKey = "aiAnalyzer"
-        if (item.href === ROUTES.SETTINGS) configKey = "settings"
+  const items = createSidebarItems(t).filter((item) => {
+    if (!allowedItems) return true
+    return allowedItems.includes(item.href)
+  })
 
-        // Use config value or default
-        const shouldDisplay = displayConfig[configKey] !== undefined ? displayConfig[configKey] : item.display
+  return (
+    <aside
+      className={cn(
+        'h-full text-white flex flex-col transition-all duration-300 relative',
+        collapsed ? 'w-16' : 'w-60',
+      )}
+      style={{
+        background: 'rgba(255, 255, 255, 0.06)',
+        backdropFilter: 'blur(30px)',
+        WebkitBackdropFilter: 'blur(30px)',
+        borderRight: '1px solid rgba(255, 255, 255, 0.1)',
+      }}
+    >
+      {/* Collapse toggle */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute -right-3 top-20 w-6 h-6 rounded-full flex items-center justify-center hover:scale-110 transition-transform z-10"
+        style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)' }}
+      >
+        {collapsed ? <ChevronRight className="w-3 h-3 text-white/70" /> : <ChevronLeft className="w-3 h-3 text-white/70" />}
+      </button>
 
-        return {
-            ...item,
-            display: shouldDisplay,
-        }
-    })
+      {/* Logo */}
+      <div className={cn('flex items-center gap-3 py-5 border-b border-white/10', collapsed ? 'px-3 justify-center' : 'px-5')}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+             style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+          <Shield className="w-5 h-5 text-white" />
+        </div>
+        {!collapsed && (
+          <div>
+            <p className="font-bold text-white text-sm tracking-tight">MRYa WAF</p>
+            <p className="text-xs text-white/40">Security Console</p>
+          </div>
+        )}
+      </div>
 
-    const handleLogout = () => {
-        setIsLogoutActive(true)
+      {/* User info */}
+      {!collapsed && user && (
+        <div className="px-5 py-3 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
+                 style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+              {user.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm text-white truncate">{user.username}</p>
+              <p className="text-xs text-white/50 truncate">{user.role}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
-        // Visual feedback before actual logout
-        setTimeout(() => {
-            logout()
-            navigate("/login")
-        }, 300)
-    }
+      {/* Navigation */}
+      <nav className="flex-1 py-3 space-y-0.5 overflow-y-auto scrollbar-glass">
+        {items.map((item) => {
+          const isActive = currentFirstLevelPath === item.href
+          return (
+            <Link
+              key={item.href}
+              to={item.href}
+              title={collapsed ? item.title : undefined}
+              className={cn(
+                'flex items-center gap-3 font-medium transition-all duration-200 mx-2 rounded-xl',
+                collapsed ? 'px-3 py-3 justify-center' : 'px-4 py-2.5',
+                isActive
+                  ? 'text-white'
+                  : 'text-white/60 hover:text-white/90',
+              )}
+              style={isActive ? {
+                background: 'rgba(102, 126, 234, 0.2)',
+                border: '1px solid rgba(102, 126, 234, 0.3)',
+              } : {}}
+            >
+              <item.icon className={cn('w-5 h-5 flex-shrink-0', isActive && 'text-indigo-300')} />
+              {!collapsed && <span className="text-sm">{item.title}</span>}
+              {isActive && !collapsed && (
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-300" />
+              )}
+            </Link>
+          )
+        })}
+      </nav>
 
-    return (
-        <div
-            className="w-64 h-full text-white flex flex-col border-r border-slate-200 dark:border-none relative overflow-hidden transition-all duration-300 bg-sidebar-gradient"
+      {/* Bottom: Logout */}
+      <div className={cn('border-t border-white/10 py-3', collapsed ? 'px-3' : 'px-4')}>
+        <button
+          onClick={() => { logout(); navigate('/login') }}
+          className={cn(
+            'flex items-center gap-3 text-white/50 hover:text-red-300 transition-colors duration-200 w-full rounded-xl',
+            'hover:bg-white/5',
+            collapsed ? 'px-3 py-3 justify-center' : 'px-4 py-2.5',
+          )}
+          title={collapsed ? t('sidebar.logout') : undefined}
         >
-            {/* 霓虹灯效果 暗色模式 */}
-            <div className="absolute inset-0 dark:animate-sidebar-neon-glow pointer-events-none"></div>
+          <LogOut className="w-5 h-5" />
+          {!collapsed && <span className="text-sm">{t('sidebar.logout')}</span>}
+        </button>
 
-            {/* Decorative background elements */}
-            <div className="absolute bottom-0 left-0 w-full h-48 overflow-hidden opacity-20 dark:opacity-15 pointer-events-none">
-                <div className="absolute bottom-[-10px] left-[-10px] w-20 h-20 bg-white/30 rotate-45 transform animate-float"></div>
-                <div className="absolute bottom-[-5px] left-[40px] w-12 h-12 bg-white/20 rotate-12 transform animate-float-reverse"></div>
-                <div className="absolute bottom-[30px] left-[80px] w-16 h-16 bg-white/25 rotate-30 transform animate-float"></div>
-                <div className="absolute bottom-[10px] left-[120px] w-24 h-24 bg-white/15 rotate-20 transform animate-float-reverse"></div>
-                <div className="absolute bottom-[40px] left-[180px] w-14 h-14 bg-white/20 rotate-45 transform animate-float"></div>
-                <div className="absolute bottom-[-20px] left-[220px] w-20 h-20 bg-white/10 rotate-30 transform animate-float-reverse"></div>
-            </div>
-
-            {/* Logo and title */}
-            {/* <div className="flex flex-col items-center gap-2 py-6 border-b border-white/10 dark:border-white/5"> */}
-            <div className="flex flex-col items-center gap-2 py-6 border-none">
-                {/* <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#A48BEA] to-[#8861DB] dark:from-[#9470DB] dark:to-[#7B4FD6] flex items-center justify-center shadow-lg animate-pulse-glow"> */}
-                <div className="w-16 h-16 rounded-full flex items-center justify-center animate-pulse-glow">
-                    {/* <Shield className="w-8 h-8 text-white" /> */}
-                    <img src="/logo.svg" alt="logo" />
-                </div>
-                <div className="font-bold text-xl mt-2">
-                    <span className="text-[#E8DFFF] dark:text-[#F0EBFF] text-shadow-glow-purple transition-all duration-300">MRYa</span>
-                    <span className="text-[#8ED4FF] dark:text-[#A5DEFF] text-shadow-glow-blue transition-all duration-300"> WAF</span>
-                </div>
-            </div>
-
-            {/* Navigation items */}
-            <div className="flex-1 py-4">
-                {sidebarItems
-                    .filter((item) => item.display)
-                    .map((item) => {
-                        const isActive = currentFirstLevelPath === item.href
-                        return (
-                            <Link
-                                key={item.href}
-                                to={item.href}
-                                className={cn(
-                                    "flex items-center gap-3 font-medium px-6 py-3 w-full group transition-all duration-300 relative overflow-hidden",
-                                    isActive
-                                        ? "bg-white/15 dark:bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.4)] dark:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-white translate-x-1"
-                                        : "text-white/90 hover:text-white hover:translate-x-1 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)] dark:hover:shadow-[0_0_12px_rgba(255,255,255,0.2)]",
-                                    "before:absolute before:content-[''] before:top-0 before:left-0 before:w-full before:h-full before:bg-gradient-to-r before:from-white/5 before:to-white/20 dark:before:from-white/5 dark:before:to-white/15 before:transition-opacity before:duration-300",
-                                    isActive
-                                        ? "before:opacity-100"
-                                        : "before:opacity-0 hover:before:opacity-100"
-                                )}
-                            >
-                                <span className="relative z-10 flex items-center gap-3">
-                                    <item.icon className={cn(
-                                        "w-5 h-5 transition-transform",
-                                        isActive ? "text-white" : "group-hover:animate-icon-shake"
-                                    )} />
-                                    <span className={cn(
-                                        "transition-all dark:text-shadow-glow-white",
-                                        isActive ? "font-semibold" : "group-hover:font-medium"
-                                    )}>{item.title}</span>
-                                </span>
-                                <div className={cn(
-                                    "absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent blur-sm transition-opacity duration-500",
-                                    isActive ? "opacity-70" : "opacity-0 group-hover:opacity-100"
-                                )}></div>
-                            </Link>
-                        )
-                    })}
-            </div>
-            {/* External Links */}
-            <div className="py-4 relative z-10">
-                <div className="flex items-center gap-4 px-6">
-                    <a
-                        href="https://github.com/mingrenya/AI-Waf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                        title="官网"
-                    >
-                        <Globe className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
-                    </a>
-                    <a
-                        href="https://github.com/mingrenya/AI-Waf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)]"
-                        title="GitHub"
-                    >
-                        <Github className="w-4 h-4 text-white/70 group-hover:text-white transition-colors" />
-                    </a>
-                </div>
-            </div>
-
-            {/* Logout button */}
-            {/* <div className="mt-auto py-4 border-t border-white/10 dark:border-white/5 relative z-10"> */}
-            <div className="mt-auto py-4 border-none">
-                <button
-                    onClick={handleLogout}
-                    className={cn(
-                        "flex items-center gap-3 font-medium px-6 py-3 w-full group transition-all duration-300 relative overflow-hidden",
-                        isLogoutActive
-                            ? "bg-white/15 dark:bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.4)] dark:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-white translate-x-1"
-                            : "text-white/90 hover:text-white hover:translate-x-1 hover:shadow-[0_0_10px_rgba(255,255,255,0.3)] dark:hover:shadow-[0_0_12px_rgba(255,255,255,0.2)]",
-                        "before:absolute before:content-[''] before:top-0 before:left-0 before:w-full before:h-full before:bg-gradient-to-r before:from-white/5 before:to-white/20 dark:before:from-white/5 dark:before:to-white/15 before:transition-opacity before:duration-300",
-                        isLogoutActive
-                            ? "before:opacity-100"
-                            : "before:opacity-0 hover:before:opacity-100"
-                    )}
-                >
-                    <span className="relative z-10 flex items-center gap-3">
-                        <LogOut className={cn(
-                            "w-5 h-5 transition-transform",
-                            isLogoutActive ? "text-white" : "group-hover:animate-icon-shake"
-                        )} />
-                        <span className={cn(
-                            "transition-all dark:text-shadow-glow-white",
-                            isLogoutActive ? "font-semibold" : "group-hover:font-medium"
-                        )}>{t("sidebar.logout")}</span>
-                    </span>
-                    <div className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent blur-sm transition-opacity duration-500",
-                        isLogoutActive ? "opacity-70" : "opacity-0 group-hover:opacity-100"
-                    )}></div>
-                </button>
-
-                <div className="text-center text-xs text-white/60 dark:text-white mt-4 px-4 flex items-center justify-center gap-1">
-                    <span>Made with</span>
-                    <Heart className="h-3 w-3 text-red-500 fill-red-500" />
-                    <span>by</span>
-                    <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" className="text-white/60 dark:text-white dark:text-shadow-glow-white">MRYa WAF team</a>
-                </div>
-            </div>
-        </div >
-    )
+        {!collapsed && (
+          <div className="text-center text-xs text-white/30 mt-4 px-4">
+            MRYa WAF v1.0
+          </div>
+        )}
+      </div>
+    </aside>
+  )
 }
