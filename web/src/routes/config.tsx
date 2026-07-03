@@ -77,13 +77,19 @@ interface BreadcrumbConfig {
 }
 
 // 创建面包屑配置
-export function createBreadcrumbConfig(t: TFunction, canReadUsers: boolean): Record<RoutePath, BreadcrumbConfig> {
+export function createBreadcrumbConfig(
+  t: TFunction,
+  canReadUsers: boolean,
+  canManageConfig: boolean,
+): Record<RoutePath, BreadcrumbConfig> {
     const settingsItems: BreadcrumbItem[] = [
         { title: t('breadcrumb.settings.settings'), path: "global", component: <GlobalSettingPage /> },
         { title: t('breadcrumb.settings.siteManager'), path: "site", component: <SiteManagerPage /> },
-        { title: t('breadcrumb.settings.certManager'), path: "cert", component: <CertificatesPage /> },
     ]
 
+    if (canManageConfig) {
+        settingsItems.push({ title: t('breadcrumb.settings.certManager'), path: "cert", component: <CertificatesPage /> })
+    }
     if (canReadUsers) {
         settingsItems.push({ title: t('breadcrumb.settings.userManager'), path: 'user', component: <UserManagementPage /> })
     }
@@ -168,7 +174,8 @@ export function useBreadcrumbMap() {
     const { t } = useTranslation()
     const user = useAuthStore((state) => state.user)
     const canReadUsers = hasPermission(user, 'user:read')
-    return createBreadcrumbConfig(t, canReadUsers)
+    const canManageConfig = hasPermission(user, 'config:update')
+    return createBreadcrumbConfig(t, canReadUsers, canManageConfig)
 }
 
 // 生成子路由配置
@@ -273,4 +280,4 @@ export function useRoutes(): RouteObject[] {
 }
 
 // 默认面包屑配置，用于类型推断
-export const breadcrumbMap = createBreadcrumbConfig(((key: string) => key) as unknown as TFunction, true) as ReturnType<typeof createBreadcrumbConfig>
+export const breadcrumbMap = createBreadcrumbConfig(((key: string) => key) as unknown as TFunction, true, true) as ReturnType<typeof createBreadcrumbConfig>
