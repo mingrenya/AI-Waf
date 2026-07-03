@@ -14,6 +14,7 @@ import (
 	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
 	nucleiSvc "github.com/mingrenya/AI-Waf/server/service/nuclei"
 	captureSvc "github.com/mingrenya/AI-Waf/server/service/capture"
+	backupSvc "github.com/mingrenya/AI-Waf/server/service/backup"
 	ws "github.com/mingrenya/AI-Waf/server/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -143,6 +144,11 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 	// 流量捕获服务
 	captureSvc := captureSvc.NewCaptureService(captureRepo, "/app/data/captures")
 	captureController := controller.NewCaptureController(captureSvc)
+
+	// 备份恢复服务
+	backupRepo := repository.NewBackupRepository(db)
+	backupSvc := backupSvc.NewService(db, backupRepo, "/app/data/backups")
+	backupController := controller.NewBackupController(backupSvc)
 
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
@@ -487,6 +493,16 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 			captureRoutes.GET("/sessions", middleware.HasPermission(model.PermConfigRead), captureController.ListSessions)
 			captureRoutes.GET("/:id", middleware.HasPermission(model.PermConfigRead), captureController.GetSession)
 			captureRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), captureController.DownloadPCAP)
+			}
+
+		// 备份恢复路由
+		backupRoutes := authenticated.Group("/backup")
+		{
+			backupRoutes.POST("/create", middleware.HasPermission(model.PermConfigUpdate), backupController.CreateBackup)
+			backupRoutes.GET("/list", middleware.HasPermission(model.PermConfigRead), backupController.ListBackups)
+			backupRoutes.POST("/:id/restore", middleware.HasPermission(model.PermConfigUpdate), backupController.RestoreBackup)
+			backupRoutes.DELETE("/:id", middleware.HasPermission(model.PermConfigUpdate), backupController.DeleteBackup)
+			backupRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), backupController.DownloadBackup)
 		}
 
 	// ===== 前端静态资源托管 =====
