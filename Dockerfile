@@ -16,7 +16,7 @@ RUN pnpm install
 RUN pnpm build
 
 # 阶段2: 构建Go后端
-FROM ${DOCKER_REGISTRY}/library/golang:1.24.1-alpine AS backend-builder
+FROM ${DOCKER_REGISTRY}/library/golang:1.24.2-alpine AS backend-builder
 # 设置Go环境变量
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
