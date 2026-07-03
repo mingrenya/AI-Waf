@@ -51,6 +51,7 @@ import { LoadingFallback } from "@/components/common/loading-fallback"
 // 懒加载认证页面
 const LoginPage = lazy(() => import("@/pages/auth/login"))
 const ResetPasswordPage = lazy(() => import("@/pages/auth/reset-password"))
+const ForbiddenPage = lazy(() => import('@/pages/forbidden/page'))
 
 // 懒加载态势感知页面
 const SituationLayout = lazy(() => import("@/pages/situation/layout"))
@@ -192,7 +193,8 @@ export function useRoutes(): RouteObject[] {
     // 认证路由
     const authRoutes: RouteObject[] = [
         { path: "/login", element: lazyLoad(LoginPage) },
-        { path: "/reset-password", element: lazyLoad(ResetPasswordPage) }
+        { path: "/reset-password", element: lazyLoad(ResetPasswordPage) },
+        { path: "/forbidden", element: lazyLoad(ForbiddenPage) },
     ]
 
     // 应用路由

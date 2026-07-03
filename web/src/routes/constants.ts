@@ -8,6 +8,7 @@ export const ROUTES = {
     ALERTS: "/alerts",
     AI_ANALYZER: "/ai-analyzer",
     FTW: "/ftw",
+    FORBIDDEN: '/forbidden',
     SITUATION: "/situation",
     NUCLEI: "/nuclei",
     CAPTURE: "/capture",
