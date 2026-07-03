@@ -21,9 +21,7 @@ FROM ${DOCKER_REGISTRY}/library/golang:1.24.2-alpine AS backend-builder
 RUN apk add --no-cache gcc musl-dev libpcap-dev
 # 设置Go环境变量
 ENV GO111MODULE=on \
-    CGO_ENABLED=1 \
-    GOOS=linux \
-    GOARCH=amd64
+    CGO_ENABLED=1
 # 设置工作目录
 WORKDIR /build
 # 先复制 go.mod/go.sum 下载依赖（利用 Docker 层缓存）
