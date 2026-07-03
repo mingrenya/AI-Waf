@@ -7,8 +7,8 @@ import { RequestsBlocksChart } from "@/feature/stats/components/charts/RequestsB
 import { useTimeRangeSelector, useOverviewStats } from "@/feature/stats/hooks/useStats"
 import { useTranslation } from "react-i18next"
 import { Separator } from "@/components/ui/separator"
-import { Card } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { PageTransition } from "@/components/ui/animation/page-transition"
+import { StatusBar } from "@/feature/monitor/components/StatusBar"
 
 export default function StatsPage() {
     const { t } = useTranslation()
@@ -16,22 +16,24 @@ export default function StatsPage() {
     const { data: statsData, isLoading } = useOverviewStats(timeRange)
 
     return (
-        <ScrollArea scrollbarVariant="none" className="h-full mx-auto p-4 space-y-6">
-            {/* 时间范围选择器 */}
+        <PageTransition className="p-4 space-y-6">
+            <StatusBar lastSync="60s ago" />
+
+            {/* 标题 + 时间范围选择器 */}
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-primary dark:text-white">
+                <h1 className="text-2xl font-bold text-white">
                     {t('stats.title')}
                 </h1>
                 <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
             </div>
 
-            <Separator className="my-4" />
+            <Separator className="my-4 bg-white/10" />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* 左侧指标区域 */}
                 <div className="lg:col-span-7">
-                    <Card className="border-none shadow-none p-4">
-                        <h2 className="text-lg font-medium mb-4 dark:text-white">{t('stats.overview')}</h2>
+                    <div className="glass-card p-4">
+                        <h2 className="text-lg font-medium mb-4 text-white">{t('stats.overview')}</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <StatsCard
                                 title={t('stats.totalRequests')}
@@ -63,14 +65,14 @@ export default function StatsPage() {
                                 title={t('stats.4xxErrors')}
                                 value={statsData?.error4xx || 0}
                                 icon={<AlertCircle size={16} />}
-                                change={`${statsData?.error4xxRate.toFixed(2)}%`}
+                                change={`${statsData?.error4xxRate?.toFixed(2)}%`}
                                 loading={isLoading}
                             />
                             <StatsCard
                                 title={t('stats.5xxErrors')}
                                 value={statsData?.error5xx || 0}
                                 icon={<Server size={16} />}
-                                change={`${statsData?.error5xxRate.toFixed(2)}%`}
+                                change={`${statsData?.error5xxRate?.toFixed(2)}%`}
                                 loading={isLoading}
                             />
                             <StatsCard
@@ -88,7 +90,7 @@ export default function StatsPage() {
                                 link={'/logs/attack'}
                             />
                         </div>
-                    </Card>
+                    </div>
                 </div>
 
                 {/* 右侧实时QPS区域 */}
@@ -102,6 +104,6 @@ export default function StatsPage() {
 
             {/* 底部区域 - 请求与拦截折线图 */}
             <RequestsBlocksChart timeRange={timeRange} />
-        </ScrollArea>
+        </PageTransition>
     )
 }

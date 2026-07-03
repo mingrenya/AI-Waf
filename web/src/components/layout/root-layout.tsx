@@ -1,13 +1,15 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { Sidebar } from './sidebar'
 import { Breadcrumb } from './breadcrumb'
 import { useAuthStore } from '@/store/auth'
 import { hasAnyPermission } from '@/lib/permissions'
 import { ROUTES } from '@/routes/constants'
 import { useMemo } from 'react'
+import { AnimatePresence } from 'motion/react'
 
 export function RootLayout() {
   const user = useAuthStore((state) => state.user)
+  const location = useLocation()
 
   const allowedSidebarItems = useMemo(() => {
     if (!user) return []
@@ -38,7 +40,9 @@ export function RootLayout() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Breadcrumb />
         <main className="flex-1 overflow-auto p-6" style={{ background: 'rgba(255,255,255,0.03)' }}>
-          <Outlet />
+          <AnimatePresence mode="wait">
+            <Outlet key={location.pathname} />
+          </AnimatePresence>
         </main>
       </div>
     </div>

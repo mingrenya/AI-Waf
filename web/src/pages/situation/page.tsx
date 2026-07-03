@@ -4,7 +4,7 @@ import AttackChainTimeline from '@/feature/situation/components/AttackChainTimel
 import AttackerRankingChart from '@/feature/situation/components/AttackerRankingChart';
 import AttackerDrawer from '@/feature/situation/components/AttackerDrawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageTransition } from '@/components/ui/animation/page-transition';
 
 export default function SituationPage() {
   const [selectedIp, setSelectedIp] = useState<string | null>(null);
@@ -16,11 +16,11 @@ export default function SituationPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+    <PageTransition className="flex flex-col gap-6 p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Situation Awareness</h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Situation Awareness</h1>
+        <p className="text-sm text-white/50 mt-1">
           Real-time attack surface monitoring and threat intelligence
         </p>
       </div>
@@ -38,14 +38,10 @@ export default function SituationPage() {
           <AttackChainTimeline onSelectAttacker={handleSelectAttacker} />
         </TabsContent>
         <TabsContent value="ranking" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Attacker Ranking</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AttackerRankingChart />
-            </CardContent>
-          </Card>
+          <div className="glass-card p-6">
+            <h2 className="text-lg font-semibold text-white mb-4">Attacker Ranking</h2>
+            <AttackerRankingChart />
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -55,6 +51,6 @@ export default function SituationPage() {
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
       />
-    </div>
+    </PageTransition>
   );
 }
