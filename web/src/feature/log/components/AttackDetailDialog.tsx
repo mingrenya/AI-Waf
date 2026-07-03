@@ -20,6 +20,8 @@ import { CopyableText } from "@/components/common/copyable-text"
 import { useAttackerProfile } from "@/feature/situation/hooks/useSituationData"
 import { quickAction } from "@/api/situation"
 import { toast } from "@/store"
+import { useAuthStore } from '@/store/auth'
+import { hasPermission } from '@/lib/permissions'
 
 import { TabsAnimationProvider } from "@/components/ui/animation/components/tab-animation"
 
@@ -36,6 +38,7 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
     const { t, i18n } = useTranslation()
     const sourceIP = data?.srcIp
     const { data: profile } = useAttackerProfile(sourceIP || '')
+    const currentUser = useAuthStore((state) => state.user)
 
     const [quickActionLoading, setQuickActionLoading] = useState<string | null>(null)
 
@@ -455,7 +458,7 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
                                         </motion.div>
 
                                         {/* 快速处置按钮 */}
-                                        {sourceIP && (
+                                        {sourceIP && hasPermission(currentUser, 'config:update') && (
                                             <motion.div {...dialogContentItemAnimation}>
                                                 <div className="pt-3 border-t flex flex-wrap gap-2">
                                                     <span className="text-xs text-muted-foreground flex items-center gap-1 w-full mb-1">

@@ -60,8 +60,8 @@ export default function AlertChannelPage() {
     }
 
     return (
-        <Card className="p-6 w-full min-h-full border-none shadow-none rounded-none">
-            <div className="flex justify-between items-center mb-6 bg-zinc-50 dark:bg-muted/30 rounded-md p-4 transition-colors duration-200">
+        <Card className="glass-card-light p-6 w-full min-h-full m-4">
+            <div className="flex justify-between items-center mb-6 bg-white/5 rounded-md p-4 transition-colors duration-200">
                 <h2 className="text-xl font-semibold text-primary dark:text-white">{t('alert.channelManagement')}</h2>
                 <div className="flex gap-2">
                     <AnimatedButton>

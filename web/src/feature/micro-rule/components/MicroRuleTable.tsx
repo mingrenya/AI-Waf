@@ -229,7 +229,7 @@ export function MicroRuleTable() {
 
     return (
         <>
-            <Card className="border-none shadow-none p-6 flex flex-col h-full">
+            <Card className="glass-card-light p-6 flex flex-col h-full m-4">
                 {/* 标题和操作按钮 - 固定在顶部 */}
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-primary dark:text-white">{t("microRule.title")}</h2>

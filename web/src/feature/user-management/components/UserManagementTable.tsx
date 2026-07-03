@@ -44,13 +44,13 @@ function roleLabel(role: ManagedUser['role']) {
 function roleBadgeClass(role: ManagedUser['role']) {
     switch (role) {
         case 'admin':
-            return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300'
+            return 'bg-red-500/10 text-red-400 border-red-500/20 dark:bg-red-500/10 dark:text-red-400'
         case 'auditor':
-            return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300'
+            return 'bg-blue-500/10 text-blue-400 border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400'
         case 'configurator':
-            return 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300'
+            return 'bg-purple-500/10 text-purple-400 border-purple-500/20 dark:bg-purple-500/10 dark:text-purple-400'
         default:
-            return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900/30 dark:text-slate-300'
+            return 'bg-slate-500/10 text-slate-400 border-slate-500/20 dark:bg-slate-500/10 dark:text-slate-400'
     }
 }
 
@@ -169,10 +169,10 @@ export function UserManagementTable() {
 
     if (!canRead) {
         return (
-            <Card className="p-6 border-none shadow-none rounded-none">
-                <div className="rounded-lg border border-dashed p-8 text-center">
-                    <UserCog className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">当前账号没有用户管理查看权限（需要 user:read）。</p>
+            <Card className="glass-card p-6 m-4">
+                <div className="rounded-lg border border-dashed border-white/20 p-8 text-center">
+                    <UserCog className="mx-auto mb-3 h-8 w-8 text-white/50" />
+                    <p className="text-sm text-white/60">当前账号没有用户管理查看权限（需要 user:read）。</p>
                 </div>
             </Card>
         )
@@ -180,7 +180,7 @@ export function UserManagementTable() {
 
     return (
         <>
-            <Card className="p-6 border-none shadow-none rounded-none flex flex-col h-full">
+            <Card className="glass-card p-6 flex flex-col h-full m-4">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-primary dark:text-white">用户管理</h2>
                     <div className="flex gap-2">
@@ -220,7 +220,7 @@ export function UserManagementTable() {
                                 </TableRow>
                             ) : (
                                 sortedUsers.map((user) => (
-                                    <TableRow key={user.id}>
+                                    <TableRow key={user.id} className="hover:bg-white/5 transition-colors">
                                         <TableCell className="font-medium">{user.username}</TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={roleBadgeClass(user.role)}>

@@ -7,6 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import type { CreateUserRequest, ManagedUser, UpdateUserRequest } from '@/types/user-management'
 
+const roleDescriptions: Record<string, string> = {
+    admin: '超级管理员 — 拥有所有权限，可管理用户、站点、配置、告警等全部功能',
+    configurator: '配置管理员 — 可管理站点、证书、规则、告警配置，但不能管理用户',
+    auditor: '审计员 — 只读访问所有日志、配置、用户信息，不能进行任何修改',
+    user: '普通用户 — 仅可查看 WAF 日志和系统状态，权限最小',
+}
+
 interface UserDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -75,7 +82,7 @@ export function UserDialog({ open, onOpenChange, mode, user, submitting = false,
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
@@ -104,6 +111,9 @@ export function UserDialog({ open, onOpenChange, mode, user, submitting = false,
                                 <SelectItem value="user">普通用户</SelectItem>
                             </SelectContent>
                         </Select>
+                        {role && (
+                            <p className="text-xs text-white/50 mt-1 italic">{roleDescriptions[role]}</p>
+                        )}
                     </div>
 
                     <div className="space-y-2">

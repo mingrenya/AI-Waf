@@ -22,6 +22,7 @@ import { format } from "date-fns"
 import { ExternalLink, AlertTriangle, History } from "lucide-react"
 import { AdvancedErrorDisplay } from "@/components/common/error/errorDisplay"
 import { produce } from "immer"
+import { PageTransition } from '@/components/ui/animation/page-transition'
 
 export default function EventsPage() {
     const { t } = useTranslation()
@@ -217,40 +218,42 @@ export default function EventsPage() {
     })
 
     return (
-        <Card className="flex flex-col h-full p-0 border-none shadow-none">
-            {/* 头部区域 - 固定高度 */}
-            <div className="p-6 flex-shrink-0">
-                <AttackEventFilter
-                    onFilter={handleFilter}
-                    onRefresh={refetch}
-                    defaultValues={queryParams}
-                    enablePolling={enablePolling}
-                    pollingInterval={pollingInterval}
-                    onPollingChange={handlePollingChange}
-                />
-            </div>
-
-            {/* 表格区域 - 弹性高度，可滚动 */}
-            <div className="px-6 flex-1 overflow-auto">
-                {isError ? (
-                    <AdvancedErrorDisplay error={error} onRetry={refetch} />
-                ) : (
-                    <DataTable
-                        loadingStyle="skeleton"
-                        table={table}
-                        columns={columns}
-                        isLoading={isPending}
-                        fixedHeader={true}
-                        animatedRows={true}
-                        showScrollShadows={true}
+        <PageTransition className="h-full flex flex-col">
+            <Card className="glass-card flex flex-col flex-1 m-4 overflow-hidden">
+                {/* 头部区域 - 固定高度 */}
+                <div className="p-6 flex-shrink-0">
+                    <AttackEventFilter
+                        onFilter={handleFilter}
+                        onRefresh={refetch}
+                        defaultValues={queryParams}
+                        enablePolling={enablePolling}
+                        pollingInterval={pollingInterval}
+                        onPollingChange={handlePollingChange}
                     />
-                )}
-            </div>
+                </div>
 
-            {/* 底部分页 - 固定高度 */}
-            {!isError && <div className="py-6 px-4 flex-shrink-0">
-                <DataTablePagination table={table} />
-            </div>}
-        </Card>
+                {/* 表格区域 - 弹性高度，可滚动 */}
+                <div className="px-6 flex-1 overflow-auto">
+                    {isError ? (
+                        <AdvancedErrorDisplay error={error} onRetry={refetch} />
+                    ) : (
+                        <DataTable
+                            loadingStyle="skeleton"
+                            table={table}
+                            columns={columns}
+                            isLoading={isPending}
+                            fixedHeader={true}
+                            animatedRows={true}
+                            showScrollShadows={true}
+                        />
+                    )}
+                </div>
+
+                {/* 底部分页 - 固定高度 */}
+                {!isError && <div className="py-6 px-4 flex-shrink-0">
+                    <DataTablePagination table={table} />
+                </div>}
+            </Card>
+        </PageTransition>
     )
 } 

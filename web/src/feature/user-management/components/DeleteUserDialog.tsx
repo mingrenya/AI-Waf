@@ -20,7 +20,7 @@ interface DeleteUserDialogProps {
 export function DeleteUserDialog({ open, onOpenChange, username, submitting = false, onConfirm }: DeleteUserDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent>
+            <AlertDialogContent className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl">
                 <AlertDialogHeader>
                     <AlertDialogTitle>确认删除用户</AlertDialogTitle>
                     <AlertDialogDescription>
