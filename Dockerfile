@@ -17,11 +17,13 @@ RUN pnpm build
 
 # 阶段2: 构建Go后端
 FROM ${DOCKER_REGISTRY}/library/golang:1.24.2-alpine AS backend-builder
-# 安装 gopacket 所需的 libpcap 开发头文件（CGo 编译需要）
-RUN apk add --no-cache libpcap-dev
+# 安装 gopacket 所需的 libpcap 开发库（CGo 编译需要）
+RUN apk add --no-cache gcc musl-dev libpcap-dev
 # 设置Go环境变量
 ENV GO111MODULE=on \
     CGO_ENABLED=1 \
+    CGO_CFLAGS="-I/usr/include" \
+    CGO_LDFLAGS="-L/usr/lib -lpcap" \
     GOOS=linux \
     GOARCH=amd64
 # 设置工作目录
