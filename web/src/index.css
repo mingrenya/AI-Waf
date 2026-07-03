@@ -8,114 +8,52 @@
 
 @layer base {
     :root {
-        --background: 0 0% 100%;
-        --foreground: 222.2 84% 4.9%;
-
-        --card: 0 0% 100%;
-        --card-foreground: 222.2 84% 4.9%;
-
-        --popover: 0 0% 100%;
-        --popover-foreground: 222.2 84% 4.9%;
-
-        /* 保持紫色主题 */
-        --primary: 267 59% 62%;
-        --primary-rgb: 157, 118, 219;
-        /* RGB equivalent for text-shadow */
-        --primary-foreground: 210 40% 98%;
-
-        --secondary: 210 40% 96.1%;
-        --secondary-foreground: 222.2 47.4% 11.2%;
-
-        --muted: 210 40% 96.1%;
-        --muted-foreground: 215.4 16.3% 46.9%;
-
-        --accent: 267 59% 97%;
-        --accent-foreground: 222.2 47.4% 11.2%;
-
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 210 40% 98%;
-
-        --border: 214.3 31.8% 91.4%;
-        --input: 214.3 31.8% 91.4%;
-        --ring: 267 59% 62%;
-
-        /* 图表颜色 */
-        --chart-1: 267 59% 62%;
+        /* Glassmorphism color system — all values in HSL for shadcn/ui compatibility */
+        --background: 240 10% 3.9%;
+        --foreground: 0 0% 98%;
+        --card: 0 0% 100% / 0.1;
+        --card-foreground: 0 0% 100%;
+        --popover: 240 10% 3.9%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 217 91% 60%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 240 4% 16%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 4% 16%;
+        --muted-foreground: 240 5% 65%;
+        --accent: 262 83% 58%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 63% 31%;
+        --destructive-foreground: 0 0% 100%;
+        --success: 142 71% 45%;
+        --success-foreground: 0 0% 100%;
+        --warning: 38 92% 50%;
+        --warning-foreground: 0 0% 100%;
+        --border: 0 0% 100% / 0.1;
+        --input: 0 0% 100% / 0.05;
+        --ring: 217 91% 60%;
+        --radius: 0.75rem;
+        --chart-1: 217 91% 60%;
         --chart-2: 262 83% 58%;
-        --chart-3: 231 48% 48%;
-        --chart-4: 199 89% 48%;
-        --chart-5: 168 83% 41%;
-
-        /* 滚动条颜色 */
-        --scrollbar-track: 210 40% 96.1%;
-        --scrollbar-thumb: 215 20% 75%;
-        --scrollbar-thumb-hover: 215 20% 65%;
-
-        /* 侧边栏渐变颜色 */
-        --sidebar-gradient-start: 267 59% 65% / 0.95;
-        --sidebar-gradient-middle: 267 53% 60% / 0.9;
-        --sidebar-gradient-end: 267 46% 57% / 0.95;
-
-        --radius: 0.5rem;
-    }
-
-    .dark {
-        /* --background: 222.2 84% 4.9%; */
-        --background: 242 53% 10%;
-        --foreground: 210 40% 98%;
-
-        /* --card: 222.2 84% 4.9%; */
-        --card: 242 53% 10%;
-        --card-foreground: 210 40% 98%;
-
-        /* --popover: 222.2 84% 4.9%; */
-        --popover: 242 53% 10%;
-        --popover-foreground: 210 40% 98%;
-
-        /* 优化紫色主题 */
-        --primary: 267 59% 62%;
-        --primary-rgb: 157, 118, 219;
-        /* RGB equivalent for text-shadow */
-        --primary-foreground: 210 40% 98%;
-        /* 改为浅色以提高对比度 */
-
-        --secondary: 217.2 32.6% 17.5%;
-        --secondary-foreground: 210 40% 98%;
-
-        --muted: 217.2 32.6% 17.5%;
-        --muted-foreground: 215 20.2% 65.1%;
-
-        /* 优化暗色模式下的强调色 */
-        --accent: 267 59% 25%;
-        /* 更深的紫色作为背景 */
-        --accent-foreground: 267 59% 85%;
-        /* 更亮的紫色作为前景 */
-
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 85.7% 97.3%;
-        /* 提高对比度 */
-
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
-        --ring: 267 59% 70%;
-        /* 更亮的紫色环 */
-
-        /* 优化深色模式图表颜色 */
-        --chart-1: 267 70% 70%;
-        --chart-2: 262 83% 65%;
-        --chart-3: 231 60% 60%;
-        --chart-4: 199 89% 65%;
-        --chart-5: 168 83% 60%;
-
-        /* 优化深色模式滚动条颜色 */
-        --scrollbar-track: 222.2 36% 10%;
-        --scrollbar-thumb: 267 30% 40%;
-        --scrollbar-thumb-hover: 267 40% 50%;
-
-        /* 优化深色模式侧边栏渐变颜色 */
-        --sidebar-gradient-start: 267 52% 50% / 0.95;
-        --sidebar-gradient-middle: 267 46% 45% / 0.9;
-        --sidebar-gradient-end: 267 40% 40% / 0.95;
+        --chart-3: 330 81% 60%;
+        --chart-4: 142 71% 45%;
+        --chart-5: 38 92% 50%;
+        /* Glass-specific */
+        --glass-bg: rgba(255, 255, 255, 0.1);
+        --glass-bg-hover: rgba(255, 255, 255, 0.15);
+        --glass-bg-light: rgba(255, 255, 255, 0.05);
+        --glass-bg-nav: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.18);
+        --glass-border-light: rgba(255, 255, 255, 0.1);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        --glass-shadow-hover: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
+        --glass-shadow-light: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+        --glass-blur: blur(20px);
+        --glass-blur-light: blur(10px);
+        --glass-blur-strong: blur(40px);
+        /* Fonts */
+        --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
     }
 }
 
@@ -127,6 +65,9 @@
     html,
     body {
         @apply bg-background text-foreground;
+        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
         height: 100%;
         overflow: hidden;
     }
@@ -134,6 +75,12 @@
     #root {
         height: 100%;
         overflow: hidden;
+    }
+
+    /* JetBrains Mono for data/metrics */
+    .font-mono, [data-mono] {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-feature-settings: 'tnum' 1, 'cv01' 1;
     }
 }
 
@@ -179,236 +126,144 @@
     background: hsl(var(--scrollbar-thumb-hover));
 }
 
-/* 霓虹灯滚动条 - 亮色模式 */
-.scrollbar-neon {
-    scrollbar-width: thin;
-    /* Firefox */
-    scrollbar-color: hsl(var(--primary)) hsl(var(--scrollbar-track));
-    /* Firefox */
-}
+/* ============================================
+   Glassmorphism Utility Classes
+   ============================================ */
 
-.scrollbar-neon::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+/* --- Glass Card --- */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
 }
-
-.scrollbar-neon::-webkit-scrollbar-track {
-    background: hsl(var(--scrollbar-track));
-    border-radius: 4px;
-}
-
-.scrollbar-neon::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
-    border-radius: 4px;
-    animation: scrollbar-neon 2s ease-in-out infinite;
-    box-shadow: 0 0 8px rgba(var(--primary-rgb), 60%),
-        0 0 16px rgba(var(--primary-rgb), 30%);
-}
-
-.scrollbar-neon::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 90%);
-    box-shadow: 0 0 12px rgba(var(--primary-rgb), 80%),
-        0 0 24px rgba(var(--primary-rgb), 50%);
-}
-
-/* 霓虹灯滚动条 - 暗色模式 */
-.dark .scrollbar-neon::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary) / 80%);
-    box-shadow: 0 0 10px rgba(var(--primary-rgb), 70%),
-        0 0 20px rgba(var(--primary-rgb), 40%),
-        0 0 30px rgba(var(--primary-rgb), 20%);
-}
-
-.dark .scrollbar-neon::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 90%);
-    box-shadow: 0 0 15px rgba(var(--primary-rgb), 80%),
-        0 0 30px rgba(var(--primary-rgb), 50%),
-        0 0 45px rgba(var(--primary-rgb), 30%);
-}
-
-/* 侧边栏渐变背景 */
-.bg-sidebar-gradient {
-    background: linear-gradient(
-        135deg,
-        hsl(var(--sidebar-gradient-start)) 0%,
-        hsl(var(--sidebar-gradient-middle)) 50%,
-        hsl(var(--sidebar-gradient-end)) 100%
-    );
-}
-
-/* 侧边栏霓虹灯效果 sidebar 边缘 - 暗色模式 */
-.dark .sidebar-neon-edge {
-    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3),
-        0 0 40px rgba(var(--primary-rgb), 0.1);
-    position: relative;
-}
-
-.dark .sidebar-neon-edge::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 2px;
-    height: 100%;
-    background: linear-gradient(
-        to bottom,
-        rgba(var(--primary-rgb), 0.8),
-        rgba(var(--primary-rgb), 0.4),
-        rgba(var(--primary-rgb), 0.8)
-    );
-    animation: aurora 10s ease infinite;
-}
-
-/* 侧边栏霓虹灯渐变背景 - 暗色模式 */
-.dark .bg-sidebar-gradient {
-    background: linear-gradient(
-        135deg,
-        hsl(267 59% 40% / 0.9) 0%,
-        hsl(262 70% 35% / 0.85) 25%,
-        hsl(267 65% 45% / 0.9) 50%,
-        hsl(272 70% 40% / 0.85) 75%,
-        hsl(267 75% 35% / 0.9) 100%
-    );
-    background-size: 200% 200%;
-    animation: sidebar-neon-flow;
-    box-shadow: inset 0 0 30px rgba(var(--primary-rgb), 0.3);
-    border-right: 1px solid rgba(var(--primary-rgb), 0.4);
-}
-
-/* 添加光斑效果 */
-.dark .bg-sidebar-gradient::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-            circle at 20% 30%,
-            rgba(var(--primary-rgb), 0.4) 0%,
-            transparent 20%
-        ),
-        radial-gradient(
-            circle at 80% 70%,
-            rgba(var(--primary-rgb), 0.3) 0%,
-            transparent 25%
-        );
-    pointer-events: none;
-    opacity: 0;
-    animation: pulse-glow 8s ease-in-out infinite;
-}
-
-/* 添加微光点效果 */
-.dark .bg-sidebar-gradient::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: radial-gradient(
-            circle at 30% 20%,
-            rgba(255, 255, 255, 0.3) 0%,
-            transparent 1%
-        ),
-        radial-gradient(
-            circle at 70% 40%,
-            rgba(255, 255, 255, 0.2) 0%,
-            transparent 1%
-        ),
-        radial-gradient(
-            circle at 40% 60%,
-            rgba(255, 255, 255, 0.3) 0%,
-            transparent 1%
-        ),
-        radial-gradient(
-            circle at 80% 80%,
-            rgba(255, 255, 255, 0.2) 0%,
-            transparent 1%
-        );
-    background-size: 120% 120%;
-    pointer-events: none;
-    opacity: 0.5;
-    animation: gradient-shift 10s ease infinite;
-}
-
-/* 暗色模式下表格行悬停霓虹灯效果 */
-.dark .table-row-hover:hover {
-    background: rgba(var(--primary-rgb), 0.15);
-    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.2);
-}
-
-/* 暗色模式下徽章霓虹灯效果 */
-.dark .badge-neon {
-    border: 1px solid rgba(var(--primary-rgb), 0.5);
-    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.3);
-    text-shadow: 0 0 3px rgba(var(--primary-rgb), 0.5);
-}
-
-/* 暗色模式下开关霓虹灯效果 */
-.dark .switch-neon[data-state="checked"] {
-    background-color: hsl(var(--primary));
-    box-shadow: 0 0 8px rgba(var(--primary-rgb), 0.7),
-        0 0 15px rgba(var(--primary-rgb), 0.4);
-}
-
-/* 暗色模式下的输入框霓虹灯效果 */
-.dark .input-neon {
-    border-color: rgba(var(--primary-rgb), 0.3);
-    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.2);
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
     transition: all 0.3s ease;
 }
-
-.dark .input-neon:focus {
-    border-color: rgba(var(--primary-rgb), 0.8);
-    box-shadow: 0 0 5px rgba(var(--primary-rgb), 0.5),
-        0 0 10px rgba(var(--primary-rgb), 0.3),
-        0 0 15px rgba(var(--primary-rgb), 0.1);
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
+    transform: translateY(-2px);
 }
 
-/* 霓虹灯组件在深色模式中 */
-.dark {
-    /* 标题霓虹灯效果 */
-    h1,
-    h2,
-    h3,
-    h4,
-    p,
-    span {
-        @apply text-shadow-glow-white;
-    }
+/* Glass card variants */
+.glass-card-light {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+}
+.glass-card-emphasis {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
 
-    /* 卡片霓虹灯边框 */
-    .card-neon {
-        @apply border-neon-pulse;
-    }
+/* --- Glass Button --- */
+.glass-btn {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+}
+.glass-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 6px 24px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+.glass-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.2);
+}
 
-    /* 重要按钮霓虹灯效果 */
-    .button-neon {
-        @apply border-neon-strong;
-        transition: all 0.3s ease;
-    }
+/* --- Glass Input --- */
+.glass-input {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
 
-    .button-neon:hover {
-        @apply border-neon-pulse;
-        transform: translateY(-2px);
-    }
+/* --- Glass Navigation --- */
+.glass-nav {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+}
 
-    /* 图标霓虹灯效果 */
-    .icon-neon {
-        filter: drop-shadow(0 0 3px rgba(var(--primary-rgb), 0.5))
-            drop-shadow(0 0 5px rgba(var(--primary-rgb), 0.3));
-    }
+/* --- Glass Container Backgrounds --- */
+.glass-bg-purple {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+.glass-bg-rainbow {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+}
+.glass-bg-animated {
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+}
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
 
-    /* 强调文本霓虹灯效果 */
-    .text-emphasis {
-        @apply text-neon-flicker;
-    }
+/* --- Floating Particle Effects --- */
+.glass-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+    animation: float-particle 20s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes float-particle {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -40px) scale(1.1); }
+    50% { transform: translate(-20px, -80px) scale(0.9); }
+    75% { transform: translate(-40px, -40px) scale(1.05); }
+}
 
-    /* 面板霓虹灯边缘 */
-    .panel-neon {
-        @apply border-neon-flow;
-        box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.2),
-            0 0 30px rgba(var(--primary-rgb), 0.1);
-    }
+/* --- Scrollbar (glass-adapted) --- */
+.scrollbar-glass::-webkit-scrollbar { width: 6px; }
+.scrollbar-glass::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+.scrollbar-glass::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+.scrollbar-glass::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
