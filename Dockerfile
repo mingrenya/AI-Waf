@@ -28,19 +28,27 @@ ENV GO111MODULE=on \
     GOARCH=amd64
 # 设置工作目录
 WORKDIR /build
-# 复制整个项目结构
+# 先复制 go.mod/go.sum 下载依赖（利用 Docker 层缓存）
+COPY go.work ./
+COPY coraza-spoa/go.mod coraza-spoa/go.sum ./coraza-spoa/
+COPY pkg/go.mod pkg/go.sum ./pkg/
+COPY server/go.mod server/go.sum ./server/
+COPY mcp-server/go.mod mcp-server/go.sum ./mcp-server/
+RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server
+RUN go work sync
+# 预热：下载全部依赖（此层会被缓存，除非 go.mod/go.sum 变化）
+RUN cd server && go mod download && cd ../coraza-spoa && go mod download && cd ../mcp-server && go mod download && cd ../pkg && go mod download
+# 复制源码（此层以下在代码变更时失效）
 COPY coraza-spoa/ ./coraza-spoa/
 COPY pkg/ ./pkg/
 COPY server/ ./server/
 COPY mcp-server/ ./mcp-server/
-COPY go.work ./
 COPY geo-ip/ ./geo-ip/
 # 复制前端构建产物到正确位置
 COPY --from=frontend-builder /app/dist ./server/public/dist
 # FTW 测试文件
 COPY server/public/ftw-tests/ ./server/public/ftw-tests/
-# 使用Go的工作区功能进行构建
-RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server
+# 构建
 RUN cd server && go build -o ../mrya-waf main.go
 
 # 阶段3: 最终镜像 - 使用官方 HAProxy 3.0.10 镜像
