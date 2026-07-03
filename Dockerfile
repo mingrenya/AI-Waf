@@ -61,8 +61,10 @@ RUN apt-get update && apt-get install -y \
     iproute2 \
     net-tools \
     dnsutils \
-    libpcap-dev \
+    libpcap0.8 \
     && rm -rf /var/lib/apt/lists/*
+# 创建 libpcap.so.1 的符号链接（Go CGo 链接的 .so 是 musl 版本，需要 glibc 版本的 .so.1）
+RUN ln -s /usr/lib/aarch64-linux-gnu/libpcap.so.0.8 /usr/lib/aarch64-linux-gnu/libpcap.so.1
 
 # 创建 mrya 用户和组
 RUN groupadd --gid 1000 mrya && \
