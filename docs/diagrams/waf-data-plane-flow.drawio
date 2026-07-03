@@ -1,0 +1,73 @@
+<mxfile host="Electron" agent="Claude">
+  <diagram name="WAF数据面请求检测流程" id="waf-data-plane-flow">
+    <mxGraphModel dx="694" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000;fontColor=#000;fontSize=13;arcSize=30;" value="HTTP 请求到达" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="haproxy" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="HAProxy 流量接入" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="128" as="geometry" />
+        </mxCell>
+        <mxCell id="detect_engine" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="多层安全引擎检测" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="hit_check" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="命中规则" vertex="1">
+          <mxGeometry height="60" width="120" x="220" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="block" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="拦截并记录攻击日志" vertex="1">
+          <mxGeometry height="48" width="160" x="350" y="404" as="geometry" />
+        </mxCell>
+        <mxCell id="resp_check" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="响应体安全检测" vertex="1">
+          <mxGeometry height="48" width="160" x="50" y="404" as="geometry" />
+        </mxCell>
+        <mxCell id="pass" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000;fontColor=#000;fontSize=13;arcSize=30;" value="放行至后端服务" vertex="1">
+          <mxGeometry height="48" width="160" x="50" y="492" as="geometry" />
+        </mxCell>
+        <mxCell id="mongo_store" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#000;fontColor=#000;fontSize=13;" value="MongoDB 批量存储" vertex="1">
+          <mxGeometry height="48" width="160" x="350" y="492" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="haproxy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="haproxy" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="detect_engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="detect_engine" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="hit_check">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4a" edge="1" parent="1" source="hit_check" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="block" value="是">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4b" edge="1" parent="1" source="hit_check" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="resp_check" value="否">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="resp_check" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="pass">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="block" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="mongo_store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" value="&lt;b&gt;Web 请求数据&lt;/b&gt;&lt;br&gt;HTTP 请求头、方法、路径、&lt;br&gt;查询参数、请求体字段解析" vertex="1">
+          <mxGeometry height="56" width="160" x="390" y="124" as="geometry" />
+        </mxCell>
+        <mxCell id="note2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" value="IP 封禁检查 → 频率限制检查 →MicroEngine 业务规则匹配 →Coraza WAF OWASP CRS 规则匹配" vertex="1">
+          <mxGeometry height="64" width="160" x="390" y="208" as="geometry" />
+        </mxCell>
+        <mxCell id="note3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" value="&lt;b&gt;攻击日志持久化&lt;/b&gt;&lt;br&gt;WAFLog 结构体含请求原文、&lt;br&gt;触发规则信息、GeoIP 地理位置，&lt;br&gt;通过 LogStore 异步批量写入 MongoDB" vertex="1">
+          <mxGeometry height="64" width="210" x="540" y="396" as="geometry" />
+        </mxCell>
+        <mxCell id="ne1" edge="1" parent="1" source="haproxy" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" target="note1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ne2" edge="1" parent="1" source="detect_engine" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" target="note2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ne3" edge="1" parent="1" source="block" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" target="note3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

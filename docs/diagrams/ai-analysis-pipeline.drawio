@@ -1,0 +1,105 @@
+<mxfile host="app.diagrams.net" modified="2026-07-02T00:00:00.000Z" agent="Claude" version="24.0.0">
+  <diagram name="AI攻击模式分析管道" id="ai-analysis-pipeline">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- 主流程节点 -->
+        <mxCell id="start" value="定时任务 / 手动触发" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000;fontColor=#000;fontSize=13;arcSize=30;" parent="1" vertex="1">
+          <mxGeometry x="200" y="40" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fetch" value="拉取 24h 攻击日志" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="200" y="128" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="feature" value="特征工程与 GeoIP 富化" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="200" y="216" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="detect" value="模式检测与严重度分级" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="200" y="304" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rule_gen" value="规则生成与去重" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="200" y="392" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="review" value="人工审核" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="200" y="480" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="check" value="通过？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="220" y="568" width="120" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="deploy" value="部署至 MicroRules 引擎" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="500" y="574" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="reject" value="标记为 rejected" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="200" y="668" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cleanup" value="30 天自动清理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000;fontColor=#000;fontSize=13;arcSize=30;" parent="1" vertex="1">
+          <mxGeometry x="200" y="756" width="160" height="48" as="geometry" />
+        </mxCell>
+
+        <!-- 主流程连线 -->
+        <mxCell id="e1" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="start" target="fetch" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="fetch" target="feature" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="feature" target="detect" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="detect" target="rule_gen" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="rule_gen" target="review" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="review" target="check" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7a" value="是" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="check" target="deploy" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7b" value="否" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" parent="1" source="check" target="reject" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;dashed=1;" parent="1" source="reject" target="cleanup" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- 右侧补充说明框 -->
+        <mxCell id="note1" value="&lt;b&gt;数据采集与预处理&lt;/b&gt;&lt;br&gt;从 MongoDB waf_log 集合拉取近&lt;br&gt;24 小时攻击日志，过滤 ruleId &gt; 0&lt;br&gt;的已触发规则记录" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" parent="1" vertex="1">
+          <mxGeometry x="640" y="208" width="260" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note2" value="&lt;b&gt;AI 分析引擎&lt;/b&gt;&lt;br&gt;FeatureExtractor 特征提取 →&lt;br&gt;AggregateFeatures 聚合 → 聚类分析&lt;br&gt;（KMeans / DBSCAN）→ Z-Score 统计检测" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" parent="1" vertex="1">
+          <mxGeometry x="640" y="296" width="260" height="64" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note3" value="&lt;b&gt;规则生命周期管理&lt;/b&gt;&lt;br&gt;RuleGenerator 针对 High/Critical 模式&lt;br&gt;生成规则（置信度阈值 0.7），去重后&lt;br&gt;pending 入库，审核通过后热加载至引擎" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" parent="1" vertex="1">
+          <mxGeometry x="640" y="384" width="260" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- 补充说明连线 -->
+        <mxCell id="ne1" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" parent="1" source="feature" target="note1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ne2" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" parent="1" source="detect" target="note2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ne3" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" parent="1" source="rule_gen" target="note3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

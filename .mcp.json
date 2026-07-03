@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ai-waf": {
+      "type": "stdio",
+      "command": "/Users/duheling/Documents/AI-Waf/mcp-server/mcp-server",
+      "env": {
+        "WAF_BACKEND_URL": "http://localhost:2333",
+        "WAF_USERNAME": "admin",
+        "WAF_PASSWORD": "admin@123"
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+<mxfile host="Electron" agent="Claude">
+  <diagram name="攻击算法检测流程" id="attack-detection-flow">
+    <mxGraphModel dx="731" dy="632" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000;fontColor=#000;fontSize=13;arcSize=30;" value="算法启动" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="fetch" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="拉取 24h 攻击日志" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="128" as="geometry" />
+        </mxCell>
+        <mxCell id="feature" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="特征提取与向量化" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="216" as="geometry" />
+        </mxCell>
+        <mxCell id="detect" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="三维度异常检测" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="304" as="geometry" />
+        </mxCell>
+        <mxCell id="merge" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="合并候选攻击模式" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="392" as="geometry" />
+        </mxCell>
+        <mxCell id="persist" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000;fontColor=#000;fontSize=13;" value="MongoDB 去重与持久化" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#000;fontColor=#000;fontSize=13;arcSize=30;" value="输出攻击模式列表" vertex="1">
+          <mxGeometry height="48" width="160" x="200" y="568" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="fetch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="fetch" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="feature">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="feature" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="detect">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="detect" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="merge">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="merge" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="persist">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="persist" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#000;fontColor=#000;endArrow=block;endFill=1;curved=0;rounded=0;" target="end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=right;spacingLeft=8;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;b style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(0, 0, 0));&quot;&gt;数据预处理&lt;/b&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(0, 0, 0));&quot;&gt;对原始 WAF 日志进行清洗、&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(0, 0, 0));&quot;&gt;字段解析与特征提取（源IP、&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(0, 0, 0));&quot;&gt;URL、Payload 等维度）&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="64" width="190" x="400" y="208" as="geometry" />
+        </mxCell>
+        <mxCell id="note2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" value="&lt;b&gt;统计异常检测&lt;/b&gt;&lt;br&gt;维度一：频率异常分析 Z-Score &gt; 2.0&lt;br&gt;维度二：IP 段聚集分析 占比 &gt; 10%&lt;br&gt;维度三：URL 聚焦分析 占比 &gt; 5%" vertex="1">
+          <mxGeometry height="64" width="200" x="400" y="296" as="geometry" />
+        </mxCell>
+        <mxCell id="note3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fafafa;strokeColor=#555;fontColor=#333;fontSize=11;align=left;spacingLeft=8;" value="&lt;b&gt;模式持久化&lt;/b&gt;&lt;br&gt;按 PayloadType + PathPattern +&lt;br&gt;IP 段进行去重比对，不存在则&lt;br&gt;Insert 插入，存在则 Update 更新" vertex="1">
+          <mxGeometry height="64" width="180" x="400" y="472" as="geometry" />
+        </mxCell>
+        <mxCell id="ne1" edge="1" parent="1" source="feature" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" target="note1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ne2" edge="1" parent="1" source="detect" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" target="note2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ne3" edge="1" parent="1" source="persist" style="edgeStyle=none;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#555;fontColor=#555;endArrow=none;endFill=0;startArrow=none;startFill=0;curved=0;rounded=0;dashed=1;" target="note3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
