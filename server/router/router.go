@@ -145,6 +145,9 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 	captureSvc := captureSvc.NewCaptureService(captureRepo, "/app/data/captures")
 	captureController := controller.NewCaptureController(captureSvc)
 
+	// GeoIP 国家过滤控制器
+	geoipController := controller.NewGeoIPController()
+
 	// 备份恢复服务
 	backupRepo := repository.NewBackupRepository(db)
 	backupSvc := backupSvc.NewService(db, backupRepo, "/app/data/backups")
@@ -503,6 +506,13 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 			backupRoutes.POST("/:id/restore", middleware.HasPermission(model.PermConfigUpdate), backupController.RestoreBackup)
 			backupRoutes.DELETE("/:id", middleware.HasPermission(model.PermConfigUpdate), backupController.DeleteBackup)
 			backupRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), backupController.DownloadBackup)
+		}
+
+		// GeoIP 国家过滤路由
+		geoipRoutes := authenticated.Group("/geoip")
+		{
+			geoipRoutes.GET("/config", middleware.HasPermission(model.PermConfigRead), geoipController.GetConfig)
+			geoipRoutes.PUT("/config", middleware.HasPermission(model.PermConfigUpdate), geoipController.UpdateConfig)
 		}
 
 	// ===== 前端静态资源托管 =====
