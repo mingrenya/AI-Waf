@@ -80,6 +80,7 @@ type Application struct {
 	botDetector       *BotDetector           // Bot管理检测器
 	antiEvasion       *AntiEvasion           // 反逃逸编码处理器
 	ddosBlocklist     *DDoSSharedBlocklist   // DDoS协同黑名单
+	apiDiscovery      *APIDiscovery          // API资产自动发现
 
 	AppConfig
 }
@@ -468,6 +469,14 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 	// 设置 response id 为事务 id，为 response 检测提供支持
 	if err := writer.SetString(encoding.VarScopeTransaction, "id", tx.ID()); err != nil {
 		return err
+	}
+
+	// Record request to API discovery engine
+	if a.apiDiscovery != nil && a.apiDiscovery.IsEnabled() {
+		hasAuth := getHeaderValueStr(req.Headers, "authorization") != "" ||
+			getHeaderValueStr(req.Headers, "x-api-key") != "" ||
+			getHeaderValueStr(req.Headers, "cookie") != ""
+		a.apiDiscovery.RecordRequest(req.Method, string(req.Path), string(req.Query), hasAuth, 0, 0)
 	}
 
 	if tx.IsRuleEngineOff() {
