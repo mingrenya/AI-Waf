@@ -25,6 +25,7 @@ type Site struct {
 	Backend      Backend       `bson:"backend" json:"backend"`                             // 后端服务器配置
 	WAFEnabled   bool          `bson:"wafEnabled" json:"wafEnabled"`                       // 是否启用WAF
 	WAFMode      WAFMode       `bson:"wafMode" json:"wafMode"`                             // WAF防护模式
+	TLS          *TLSConfig    `bson:"tls,omitempty" json:"tls,omitempty"`                  // TLS 配置(仅 HTTPS 站点)
 	CreatedAt    time.Time     `bson:"createdAt" json:"createdAt"`
 	UpdatedAt    time.Time     `bson:"updatedAt" json:"updatedAt"`
 	ActiveStatus bool          `bson:"activeStatus" json:"activeStatus"` // 站点是否激活
@@ -43,6 +44,15 @@ type Certificate struct {
 // Backend 代表后端服务器配置
 type Backend struct {
 	Servers []Server `bson:"servers" json:"servers"` // 服务器列表
+}
+
+// TLSConfig 代表站点的 TLS 配置
+type TLSConfig struct {
+	SslMinVer   string `bson:"sslMinVer,omitempty" json:"sslMinVer,omitempty"`     // TLS 最低版本, 如 TLSv1.2
+	SslMaxVer   string `bson:"sslMaxVer,omitempty" json:"sslMaxVer,omitempty"`     // TLS 最高版本, 如 TLSv1.3
+	Ciphers     string `bson:"ciphers,omitempty" json:"ciphers,omitempty"`         // TLS 1.2 加密套件列表
+	Ciphersuites string `bson:"ciphersuites,omitempty" json:"ciphersuites,omitempty"` // TLS 1.3 加密套件列表
+	Alpn        string `bson:"alpn,omitempty" json:"alpn,omitempty"`               // ALPN 协议协商, 如 h2,http/1.1
 }
 
 // Server 代表单个后端服务器

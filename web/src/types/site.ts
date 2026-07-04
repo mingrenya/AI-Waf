@@ -10,6 +10,7 @@ export interface Site {
     wafMode: WAFMode
     backend: Backend
     certificate?: Certificate
+    tls?: TLSConfig
     createdAt: string
     updatedAt: string
 }
@@ -38,6 +39,15 @@ export interface Certificate {
     publicKey: string
 }
 
+// TLS 配置
+export interface TLSConfig {
+    sslMinVer?: string
+    sslMaxVer?: string
+    ciphers?: string
+    ciphersuites?: string
+    alpn?: string
+}
+
 // 请求和响应类型
 export interface SiteListResponse {
     items: Site[]
@@ -54,6 +64,7 @@ export interface CreateSiteRequest {
     wafMode: WAFMode
     backend: Backend
     certificate?: Certificate
+    tls?: TLSConfig
 }
 
 export interface UpdateSiteRequest {
@@ -66,4 +77,5 @@ export interface UpdateSiteRequest {
     wafMode?: WAFMode
     backend?: Backend
     certificate?: Certificate
+    tls?: TLSConfig
 } 

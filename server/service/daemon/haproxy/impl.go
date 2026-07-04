@@ -328,6 +328,25 @@ func (s *HAProxyServiceImpl) AddSiteConfig(site model.Site) error {
 		}
 		https_bind.Ssl = true
 
+		// 应用站点 TLS 配置(若已设置)
+		if site.TLS != nil {
+			if site.TLS.SslMinVer != "" {
+				https_bind.SslMinVer = site.TLS.SslMinVer
+			}
+			if site.TLS.SslMaxVer != "" {
+				https_bind.SslMaxVer = site.TLS.SslMaxVer
+			}
+			if site.TLS.Ciphers != "" {
+				https_bind.Ciphers = site.TLS.Ciphers
+			}
+			if site.TLS.Ciphersuites != "" {
+				https_bind.Ciphersuites = site.TLS.Ciphersuites
+			}
+			if site.TLS.Alpn != "" {
+				https_bind.Alpn = site.TLS.Alpn
+			}
+		}
+
 		err = s.confClient.EditBind("internal_https", "frontend", fmt.Sprintf("fe_%d_https", site.ListenPort), https_bind, transaction.ID, 0)
 		if err != nil {
 			return fmt.Errorf("修改绑定失败: %v", err)

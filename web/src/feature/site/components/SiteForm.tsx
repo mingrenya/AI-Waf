@@ -29,7 +29,9 @@ import {
     Upload,
     Info,
     AlertCircle,
-    RefreshCw
+    RefreshCw,
+    Lock,
+    ChevronDown
 } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { siteFormSchema } from '@/validation/site'
@@ -41,6 +43,8 @@ import { useCreateSite, useUpdateSite } from '../hooks/useSites'
 import { AnimatedContainer } from '@/components/ui/animation/components/animated-container'
 import { useTranslation } from 'react-i18next'
 import { AnimatedButton } from '@/components/ui/animation/components/animated-button'
+import type { UseFormReturn } from 'react-hook-form'
+import type { CreateSiteRequest } from '@/types/site'
 interface SiteFormProps {
     mode?: 'create' | 'update'
     siteId?: string
@@ -376,6 +380,10 @@ export function SiteForm({
                             )}
 
 
+                            {/* TLS 高级配置 (仅 HTTPS 可见) */}
+                            {form.watch('enableHTTPS') && (
+                                <TLSConfigSection form={form} />
+                            )}
 
                         </div>
 
@@ -581,5 +589,272 @@ export function SiteForm({
                 certificate={null}
             />
         </>
+    )
+}
+
+// TLS 协议版本选项
+const SSL_VERSIONS = [
+    { value: '', label: '默认' },
+    { value: 'TLSv1.0', label: 'TLS 1.0' },
+    { value: 'TLSv1.1', label: 'TLS 1.1' },
+    { value: 'TLSv1.2', label: 'TLS 1.2' },
+    { value: 'TLSv1.3', label: 'TLS 1.3' },
+]
+
+// TLS 1.2 常用加密套件
+const CIPHER_PRESETS: { value: string; label: string; desc: string }[] = [
+    { value: 'ECDHE+AESGCM', label: '现代安全 (推荐)', desc: '仅 ECDHE + AES-GCM，兼容性中等' },
+    { value: 'ECDHE+AESGCM:ECDHE+CHACHA20', label: '现代+CHACHA20', desc: '增加移动端兼容' },
+    { value: 'ECDHE+AESGCM:ECDHE+CHACHA20:EECDH+AESGCM', label: '现代+兼容', desc: '含部分非 ECDHE 加密套件' },
+    { value: 'ECDHE+AESGCM:ECDHE+CHACHA20:EECDH+AESGCM:AES256-GCM-SHA384:AES128-GCM-SHA256', label: '广泛兼容', desc: '兼容大多数客户端' },
+    { value: '', label: '默认 (HAProxy)' },
+    { value: 'custom', label: '自定义输入' },
+]
+
+// TLS 1.3 常用加密套件
+const CIPHERSUITE_PRESETS: { value: string; label: string; desc: string }[] = [
+    { value: 'TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256', label: 'AES-GCM 标准', desc: 'TLS 1.3 标准配置' },
+    { value: 'TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256', label: 'AES + CHACHA20', desc: '移动端与桌面端兼顾' },
+    { value: '', label: '默认 (HAProxy)' },
+    { value: 'custom', label: '自定义输入' },
+]
+
+interface TLSConfigSectionProps {
+    form: UseFormReturn<CreateSiteRequest>
+}
+
+function TLSConfigSection({ form }: TLSConfigSectionProps) {
+    const { t } = useTranslation()
+    const [showAdvanced, setShowAdvanced] = useState(false)
+    const [ciphersMode, setCiphersMode] = useState('preset')
+    const [ciphersuiteMode, setCiphersuiteMode] = useState('preset')
+
+    return (
+        <div className="space-y-4 p-4 border rounded-md">
+            <button
+                type="button"
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="flex items-center gap-2 text-sm font-medium w-full cursor-pointer"
+                style={{ color: 'var(--text-primary)' }}
+            >
+                <Lock className="h-4 w-4" />
+                {t('site.dialog.tlsConfigTitle', { defaultValue: 'TLS 高级配置' })}
+                <ChevronDown
+                    className="h-4 w-4 ml-auto transition-transform duration-200"
+                    style={{ transform: showAdvanced ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                />
+            </button>
+
+            {showAdvanced && (
+                <div className="space-y-4 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+                    {/* TLS 最低/最高版本 */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                                {t('site.dialog.tlsMinVersion', { defaultValue: 'TLS 最低版本' })}
+                            </label>
+                            <Select
+                                value={form.watch('tls.sslMinVer') ?? ''}
+                                onValueChange={(v) => form.setValue('tls.sslMinVer', v || undefined)}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="默认" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {SSL_VERSIONS.map((v) => (
+                                        <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                                {t('site.dialog.tlsMaxVersion', { defaultValue: 'TLS 最高版本' })}
+                            </label>
+                            <Select
+                                value={form.watch('tls.sslMaxVer') ?? ''}
+                                onValueChange={(v) => form.setValue('tls.sslMaxVer', v || undefined)}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="默认" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {SSL_VERSIONS.map((v) => (
+                                        <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
+                    {/* ALPN */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                            ALPN 协议协商
+                        </label>
+                        <div className="flex gap-2">
+                            {['h2,http/1.1', 'http/1.1', 'h2'].map((alpn) => (
+                                <label key={alpn} className="flex items-center gap-1.5 text-xs cursor-pointer"
+                                    style={{ color: 'var(--text-secondary)' }}>
+                                    <input
+                                        type="radio"
+                                        name="alpn"
+                                        value={alpn}
+                                        checked={form.watch('tls.alpn') === alpn}
+                                        onChange={() => form.setValue('tls.alpn', alpn)}
+                                        className="cursor-pointer"
+                                    />
+                                    {alpn}
+                                </label>
+                            ))}
+                            <label className="flex items-center gap-1.5 text-xs cursor-pointer"
+                                style={{ color: 'var(--text-secondary)' }}>
+                                <input
+                                    type="radio"
+                                    name="alpn"
+                                    value=""
+                                    checked={!form.watch('tls.alpn')}
+                                    onChange={() => form.setValue('tls.alpn', undefined)}
+                                    className="cursor-pointer"
+                                />
+                                默认
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* TLS 1.2 加密套件 */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                            TLS 1.2 加密套件
+                        </label>
+                        <div className="flex gap-2 mb-1">
+                            <label className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+                                <input
+                                    type="radio"
+                                    name="ciphersMode"
+                                    value="preset"
+                                    checked={ciphersMode === 'preset'}
+                                    onChange={() => setCiphersMode('preset')}
+                                    className="cursor-pointer"
+                                />
+                                预设
+                            </label>
+                            <label className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+                                <input
+                                    type="radio"
+                                    name="ciphersMode"
+                                    value="custom"
+                                    checked={ciphersMode === 'custom'}
+                                    onChange={() => setCiphersMode('custom')}
+                                    className="cursor-pointer"
+                                />
+                                自定义
+                            </label>
+                        </div>
+                        {ciphersMode === 'preset' ? (
+                            <Select
+                                value={form.watch('tls.ciphers') ?? ''}
+                                onValueChange={(v) => {
+                                    if (v === 'custom') {
+                                        setCiphersMode('custom')
+                                    } else {
+                                        form.setValue('tls.ciphers', v || undefined)
+                                    }
+                                }}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="默认 (HAProxy)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CIPHER_PRESETS.map((p) => (
+                                        <SelectItem key={p.value} value={p.value}>
+                                            <div className="flex flex-col">
+                                                <span>{p.label}</span>
+                                                <span className="text-xs text-muted-foreground">{p.desc}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        ) : (
+                            <Input
+                                placeholder="ECDHE+AESGCM:ECDHE+CHACHA20:EECDH+AESGCM"
+                                value={form.watch('tls.ciphers') ?? ''}
+                                onChange={(e) => form.setValue('tls.ciphers', e.target.value || undefined)}
+                                className="font-mono text-xs"
+                            />
+                        )}
+                    </div>
+
+                    {/* TLS 1.3 加密套件 */}
+                    <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                            TLS 1.3 加密套件
+                        </label>
+                        <div className="flex gap-2 mb-1">
+                            <label className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+                                <input
+                                    type="radio"
+                                    name="ciphersuiteMode"
+                                    value="preset"
+                                    checked={ciphersuiteMode === 'preset'}
+                                    onChange={() => setCiphersuiteMode('preset')}
+                                    className="cursor-pointer"
+                                />
+                                预设
+                            </label>
+                            <label className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: 'var(--text-secondary)' }}>
+                                <input
+                                    type="radio"
+                                    name="ciphersuiteMode"
+                                    value="custom"
+                                    checked={ciphersuiteMode === 'custom'}
+                                    onChange={() => setCiphersuiteMode('custom')}
+                                    className="cursor-pointer"
+                                />
+                                自定义
+                            </label>
+                        </div>
+                        {ciphersuiteMode === 'preset' ? (
+                            <Select
+                                value={form.watch('tls.ciphersuites') ?? ''}
+                                onValueChange={(v) => {
+                                    if (v === 'custom') {
+                                        setCiphersuiteMode('custom')
+                                    } else {
+                                        form.setValue('tls.ciphersuites', v || undefined)
+                                    }
+                                }}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="默认 (HAProxy)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CIPHERSUITE_PRESETS.map((p) => (
+                                        <SelectItem key={p.value} value={p.value}>
+                                            <div className="flex flex-col">
+                                                <span>{p.label}</span>
+                                                <span className="text-xs text-muted-foreground">{p.desc}</span>
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        ) : (
+                            <Input
+                                placeholder="TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
+                                value={form.watch('tls.ciphersuites') ?? ''}
+                                onChange={(e) => form.setValue('tls.ciphersuites', e.target.value || undefined)}
+                                className="font-mono text-xs"
+                            />
+                        )}
+                    </div>
+
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        💡 提示：TLS 配置仅对 HTTPS 站点生效，修改后需重启 HAProxy 使配置生效
+                    </p>
+                </div>
+            )}
+        </div>
     )
 }

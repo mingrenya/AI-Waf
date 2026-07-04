@@ -18,6 +18,7 @@ type CreateSiteRequest struct {
 	WAFEnabled   bool            `json:"wafEnabled" example:"false"`                                                     // 是否启用WAF
 	WAFMode      string          `json:"wafMode" binding:"omitempty,oneof=protection observation" example:"observation"` // WAF模式
 	ActiveStatus bool            `json:"activeStatus" example:"true"`                                                    // 站点状态
+	TLS          *TLSConfigDTO   `json:"tls,omitempty"`                                                                  // TLS 配置
 }
 
 // UpdateSiteRequest 更新站点请求
@@ -32,6 +33,7 @@ type UpdateSiteRequest struct {
 	WAFEnabled   bool            `json:"wafEnabled" example:"false"`                                                     // 是否启用WAF
 	WAFMode      string          `json:"wafMode" binding:"omitempty,oneof=protection observation" example:"observation"` // WAF模式
 	ActiveStatus bool            `json:"activeStatus" example:"true"`                                                    // 站点状态
+	TLS          *TLSConfigDTO   `json:"tls,omitempty"`                                                                  // TLS 配置
 }
 
 // CertificateDTO 证书DTO
@@ -54,6 +56,15 @@ type ServerDTO struct {
 	Host  string `json:"host" binding:"required" example:"backend.example.com"` // 主机地址
 	Port  int    `json:"port" binding:"required,min=1,max=65535" example:"80"`  // 端口
 	IsSSL bool   `json:"isSSL" example:"false"`                                 // 是否启用SSL
+}
+
+// TLSConfigDTO TLS 配置 DTO
+type TLSConfigDTO struct {
+	SslMinVer    string `json:"sslMinVer,omitempty" example:"TLSv1.2"`              // TLS 最低版本
+	SslMaxVer    string `json:"sslMaxVer,omitempty" example:"TLSv1.3"`              // TLS 最高版本
+	Ciphers      string `json:"ciphers,omitempty" example:"ECDHE+AESGCM"`           // TLS 1.2 加密套件
+	Ciphersuites string `json:"ciphersuites,omitempty" example:"TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"` // TLS 1.3 加密套件
+	Alpn         string `json:"alpn,omitempty" example:"h2,http/1.1"`               // ALPN 协议协商
 }
 
 // SiteResponse 站点响应
