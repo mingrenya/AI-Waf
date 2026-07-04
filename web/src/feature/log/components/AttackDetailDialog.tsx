@@ -92,7 +92,7 @@ export function AttackDetailDialog({ open, onOpenChange, data }: AttackDetailDia
             <AnimatePresence>
                 {open && (
                     <motion.div {...dialogEnterExitAnimation}>
-                        <DialogContent className="surface-modal sm:max-w-[90vw] lg:max-w-[75vw] xl:max-w-[65vw] max-h-[90vh] w-full p-0 gap-0 overflow-hidden dark:bg-accent/10 dark:border-slate-800 " style={{ color: 'var(--text-primary)' }}>
+                        <DialogContent className="surface-modal sm:max-w-[90vw] lg:max-w-[75vw] xl:max-w-[65vw] max-h-[90vh] w-full p-0 gap-0 overflow-hidden " style={{ color: 'var(--text-primary)' }}>
                             <motion.div {...dialogContentAnimation}>
                                 <DialogHeader
                                     className="px-6 py-4"

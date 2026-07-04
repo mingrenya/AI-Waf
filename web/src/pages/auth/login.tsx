@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next'
 import { Heart, Shield, Activity, Globe, Server } from 'lucide-react'
 
 const features = [
-  { icon: Shield, label: 'WAF Engine', value: 'Coraza 3.0', color: 'text-primary-400' },
-  { icon: Activity, label: 'Threats Blocked', value: '12.4K', color: 'text-primary-300' },
-  { icon: Globe, label: 'Protected Sites', value: '8', color: 'text-primary-300' },
-  { icon: Server, label: 'Uptime', value: '99.9%', color: 'text-primary-300' },
+  { icon: Shield, label: 'WAF Engine', value: 'Coraza 3.0', color: 'var(--color-primary-4)' },
+  { icon: Activity, label: 'Threats Blocked', value: '12.4K', color: 'var(--color-primary-3)' },
+  { icon: Globe, label: 'Protected Sites', value: '8', color: 'var(--color-primary-3)' },
+  { icon: Server, label: 'Uptime', value: '99.9%', color: 'var(--color-primary-3)' },
 ]
 
 export default function LoginPage() {
@@ -56,7 +56,7 @@ export default function LoginPage() {
                     <div className="hidden lg:flex flex-col justify-center animate-slide-up">
                         <div className="mb-10">
                             <h1 className="text-5xl font-bold mb-3 font-mono tracking-tight stagger-1" style={{ color: 'var(--text-primary)' }}>
-                                MRYa<span className="text-primary-300">WAF</span>
+                                MRYa<span style={{ color: 'var(--color-primary-3)' }}>WAF</span>
                             </h1>
                             <p className="text-lg stagger-2" style={{ color: 'var(--text-secondary)' }}>
                                 智能 Web 应用防火墙管理平台
@@ -65,9 +65,9 @@ export default function LoginPage() {
                         <div className="grid grid-cols-2 gap-4">
                             {features.map((f, i) => (
                                 <div key={f.label} className={`surface-card p-5 animate-scale-in stagger-${i + 3}`}>
-                                    <f.icon className={`w-5 h-5 ${f.color} mb-2`} />
+                                    <f.icon className="w-5 h-5 mb-2" style={{ color: f.color }} />
                                     <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>{f.label}</p>
-                                    <p className={`text-xl font-bold font-mono ${f.color}`}>{f.value}</p>
+                                    <p className="text-xl font-bold font-mono" style={{ color: f.color }}>{f.value}</p>
                                 </div>
                             ))}
                         </div>

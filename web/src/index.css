@@ -129,6 +129,18 @@
   --text-muted: rgba(255, 255, 255, 0.45);
   --text-dim: rgba(255, 255, 255, 0.25);
 
+  /* 品牌色板 (Primary — 暗色适配) */
+  --color-primary-1: rgba(102, 126, 234, 0.15);
+  --color-primary-2: rgba(102, 126, 234, 0.2);
+  --color-primary-3: rgba(102, 126, 234, 0.3);
+  --color-primary-4: rgba(102, 126, 234, 0.4);
+  --color-primary-5: #667eea;
+  --color-primary-6: #7b8ff0;
+  --color-primary-7: #8fa0f5;
+  --color-primary-8: #a3b0fa;
+  --color-primary-9: #b7c1ff;
+  --color-primary-10: #cbd2ff;
+
   /* Tailwind 兼容变量 */
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;

@@ -68,7 +68,7 @@ const config = {
                 },
 
                 iconStroke: {
-                    light: '##8861DB',      // 亮色背景上使用
+                    light: '#8861DB',      // 亮色背景上使用
                     DEFAULT: '#8861DB',    // 默认颜色
                     dark: '#8861DB',       // 暗色背景上使用
                     accent: '#8861DB',     // 强调色
@@ -112,6 +112,19 @@ const config = {
                     "50%": { backgroundPosition: "100% 50%" },
                     "100%": { backgroundPosition: "0% 50%" },
                 },
+                "float": {
+                    "0%, 100%": { transform: "translateY(0px)" },
+                    "50%": { transform: "translateY(-20px)" },
+                },
+                "float-reverse": {
+                    "0%, 100%": { transform: "translateY(0px)" },
+                    "50%": { transform: "translateY(20px)" },
+                },
+                "aurora": {
+                    "0%": { backgroundPosition: "0% 50%", opacity: "0.7" },
+                    "50%": { backgroundPosition: "100% 50%", opacity: "0.4" },
+                    "100%": { backgroundPosition: "0% 50%", opacity: "0.7" },
+                },
             },
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
@@ -123,6 +136,9 @@ const config = {
                 "slide-in-right": "slide-in-right 0.4s ease-out",
                 "scale-in": "scale-in 0.3s ease-out",
                 "gradient-shift": "gradient-shift 8s ease infinite",
+                "float": "float 6s ease-in-out infinite",
+                "float-reverse": "float-reverse 8s ease-in-out infinite",
+                "aurora": "aurora 12s ease infinite",
             },
             fontFamily: {
                 sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],

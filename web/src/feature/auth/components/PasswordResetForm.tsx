@@ -34,10 +34,10 @@ export function PasswordResetForm() {
     }
 
     return (
-        <Card className="w-full max-w-md mx-auto shadow-xl bg-white/90 backdrop-blur-md border-0 transition-all hover:shadow-2xl duration-300">
+        <Card className="w-full max-w-md mx-auto surface-card border-0 transition-all hover:shadow-2xl duration-300" style={{ backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)' }}>
             <CardHeader className="space-y-1 pb-2">
-                <CardTitle className="text-2xl font-bold text-center text-gray-800">{t('auth.resetPassword')}</CardTitle>
-                <CardDescription className="text-center text-gray-600">
+                <CardTitle className="text-2xl font-bold text-center" style={{ color: 'var(--text-primary)' }}>{t('auth.resetPassword')}</CardTitle>
+                <CardDescription className="text-center" style={{ color: 'var(--text-secondary)' }}>
                     {user?.needReset
                         ? t('auth.firstLoginReset')
                         : t('auth.enterOldAndNewPassword')}
@@ -45,8 +45,8 @@ export function PasswordResetForm() {
             </CardHeader>
             <CardContent className="space-y-4 pt-4">
                 {error && (
-                    <Alert variant="destructive" className="mb-4 bg-red-50 border-red-200 animate-fade-in-up">
-                        <AlertDescription className="text-red-700">{error}</AlertDescription>
+                    <Alert variant="destructive" className="mb-4 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/50 animate-fade-in-up">
+                        <AlertDescription className="text-red-700 dark:text-red-300">{error}</AlertDescription>
                     </Alert>
                 )}
 
@@ -57,14 +57,15 @@ export function PasswordResetForm() {
                             name="oldPassword"
                             render={({ field }) => (
                                 <FormItem className="transition-all duration-300 animate-fade-in-up">
-                                    <FormLabel className="text-gray-700">{t('auth.currentPassword')}</FormLabel>
+                                    <FormLabel style={{ color: 'var(--text-secondary)' }}>{t('auth.currentPassword')}</FormLabel>
                                     <FormControl>
                                         <div className="relative group">
-                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors duration-300" />
+                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground group-hover:text-purple-500 transition-colors duration-300" />
                                             <Input
                                                 type="password"
                                                 placeholder={t('auth.enterCurrentPassword')}
-                                                className="pl-10 py-6 text-gray-700 bg-gray-50 border-gray-200 focus:bg-white transition-all group-hover:border-purple-300"
+                                                className="pl-10 py-6 bg-black/5 dark:bg-white/5 border-transparent focus:bg-white/10 transition-all group-hover:border-purple-300/50"
+                                                style={{ color: 'var(--text-primary)' }}
                                                 {...field}
                                                 onChange={(e) => {
                                                     clearError()
@@ -83,14 +84,15 @@ export function PasswordResetForm() {
                             name="newPassword"
                             render={({ field }) => (
                                 <FormItem className="transition-all duration-300 animate-fade-in-up [animation-delay:150ms]">
-                                    <FormLabel className="text-gray-700">{t('auth.newPassword')}</FormLabel>
+                                    <FormLabel style={{ color: 'var(--text-secondary)' }}>{t('auth.newPassword')}</FormLabel>
                                     <FormControl>
                                         <div className="relative group">
-                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors duration-300" />
+                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground group-hover:text-purple-500 transition-colors duration-300" />
                                             <Input
                                                 type="password"
                                                 placeholder={t('auth.enterNewPassword')}
-                                                className="pl-10 py-6 text-gray-700 bg-gray-50 border-gray-200 focus:bg-white transition-all group-hover:border-purple-300"
+                                                className="pl-10 py-6 bg-black/5 dark:bg-white/5 border-transparent focus:bg-white/10 transition-all group-hover:border-purple-300/50"
+                                                style={{ color: 'var(--text-primary)' }}
                                                 {...field}
                                                 onChange={(e) => {
                                                     clearError()
@@ -109,14 +111,15 @@ export function PasswordResetForm() {
                             name="confirmPassword"
                             render={({ field }) => (
                                 <FormItem className="transition-all duration-300 animate-fade-in-up [animation-delay:300ms]">
-                                    <FormLabel className="text-gray-700">{t('auth.confirmNewPassword')}</FormLabel>
+                                    <FormLabel style={{ color: 'var(--text-secondary)' }}>{t('auth.confirmNewPassword')}</FormLabel>
                                     <FormControl>
                                         <div className="relative group">
-                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400 group-hover:text-purple-500 transition-colors duration-300" />
+                                            <Lock className="absolute left-3 top-3 h-5 w-5 text-muted-foreground group-hover:text-purple-500 transition-colors duration-300" />
                                             <Input
                                                 type="password"
                                                 placeholder={t('auth.enterNewPasswordAgain')}
-                                                className="pl-10 py-6 text-gray-700 bg-gray-50 border-gray-200 focus:bg-white transition-all group-hover:border-purple-300"
+                                                className="pl-10 py-6 bg-black/5 dark:bg-white/5 border-transparent focus:bg-white/10 transition-all group-hover:border-purple-300/50"
+                                                style={{ color: 'var(--text-primary)' }}
                                                 {...field}
                                                 onChange={(e) => {
                                                     clearError()
@@ -140,11 +143,11 @@ export function PasswordResetForm() {
                     </form>
                 </Form>
             </CardContent>
-            <CardFooter className="flex justify-center border-t border-gray-100 pt-4">
-                <p className="text-sm text-gray-500">
+            <CardFooter className="flex justify-center pt-4" style={{ borderTop: '1px solid var(--surface-card-border)' }}>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                     {t('auth.passwordRequirement')}
                 </p>
             </CardFooter>
         </Card>
     )
-} 
+}
