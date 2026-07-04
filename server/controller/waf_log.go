@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/mingrenya/AI-Waf/server/dto"
@@ -12,6 +13,7 @@ import (
 type WAFLogController interface {
 	GetAttackEvents(ctx *gin.Context)
 	GetAttackLogs(ctx *gin.Context)
+	MarkFalsePositive(ctx *gin.Context)
 }
 
 type WAFLogControllerImpl struct {
@@ -149,4 +151,18 @@ func (c *WAFLogControllerImpl) GetAttackLogs(ctx *gin.Context) {
 	}
 
 	response.Success(ctx, "获取攻击日志成功", result)
+}
+
+// MarkFalsePositive 将攻击日志标记为误报
+func (c *WAFLogControllerImpl) MarkFalsePositive(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if id == "" {
+		response.BadRequest(ctx, fmt.Errorf("缺少日志 ID"), true)
+		return
+	}
+	if err := c.wafLogService.MarkFalsePositive(ctx.Request.Context(), id); err != nil {
+		response.InternalServerError(ctx, err, false)
+		return
+	}
+	response.Success(ctx, "已标记为误报", nil)
 }

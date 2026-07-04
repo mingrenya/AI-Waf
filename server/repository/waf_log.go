@@ -21,6 +21,7 @@ type WAFLogRepository interface {
 	CountAggregateAttackEvents(ctx context.Context, pipeline mongo.Pipeline) (int64, error)
 	FindAttackLogs(ctx context.Context, filter bson.D, skip int64, limit int64) ([]model.WAFLog, error)
 	CountAttackLogs(ctx context.Context, filter bson.D) (int64, error)
+	MarkFalsePositive(ctx context.Context, logID string) error
 }
 
 type MongoWAFLogRepository struct {
@@ -206,6 +207,24 @@ func (r *MongoWAFLogRepository) CountAttackLogs(ctx context.Context, filter bson
 
 // calculateAttackDuration calculates the duration of a continuous attack
 // by finding the longest sequence of attacks with gaps no larger than 5 minutes
+// MarkFalsePositive 将指定攻击日志标记为误报
+func (r *MongoWAFLogRepository) MarkFalsePositive(ctx context.Context, logID string) error {
+	objID, err := bson.ObjectIDFromHex(logID)
+	if err != nil {
+		return fmt.Errorf("invalid log ID: %w", err)
+	}
+	filter := bson.D{{Key: "_id", Value: objID}}
+	update := bson.M{"$set": bson.M{"is_false_positive": true, "false_positive_at": time.Now()}}
+	result, err := r.collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("failed to mark false positive: %w", err)
+	}
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("log entry not found: %s", logID)
+	}
+	return nil
+}
+
 func (r *MongoWAFLogRepository) calculateAttackDuration(attackTimes []time.Time) float64 {
 	if len(attackTimes) == 0 {
 		return 1.0 // 即使没有攻击时间，也至少返回1分钟

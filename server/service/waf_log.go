@@ -15,6 +15,7 @@ import (
 type WAFLogService interface {
 	GetAttackEvents(ctx context.Context, req dto.AttackEventRequset, page, pageSize int) (*dto.AttackEventResponse, error)
 	GetAttackLogs(ctx context.Context, req dto.AttackLogRequest, page, pageSize int) (*dto.AttackLogResponse, error)
+	MarkFalsePositive(ctx context.Context, logID string) error
 }
 
 type WAFLogServiceImpl struct {
@@ -242,3 +243,8 @@ func (s *WAFLogServiceImpl) buildAttackLogFilter(req dto.AttackLogRequest) bson.
 
 	return filter
 }
+// MarkFalsePositive 将指定日志标记为误报
+func (s *WAFLogServiceImpl) MarkFalsePositive(ctx context.Context, logID string) error {
+	return s.wafLogRepository.MarkFalsePositive(ctx, logID)
+}
+
