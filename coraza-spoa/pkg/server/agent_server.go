@@ -179,6 +179,7 @@ func (s *AgentServerImpl) Start() error {
 			RuleEngineDbConfig:     ruleEngineMongoConfig,
 			FlowControllerConfig:   &flowControllerConfig,
 			TrafficAnalyzerConfig:  &trafficAnalyzerConfig,
+			OnAttack:               s.onAttack,
 		}, globalConfig.IsDebug)
 		if err != nil {
 			s.logger.Fatal().Err(err).Msg("Failed creating application: " + appConfig.Name)
@@ -358,6 +359,7 @@ func (s *AgentServerImpl) UpdateApplications() error {
 			RuleEngineDbConfig:     ruleEngineMongoConfig,
 			FlowControllerConfig:   &flowControllerConfig,
 			TrafficAnalyzerConfig:  &trafficAnalyzerConfig,
+			OnAttack:               s.onAttack,
 		}, globalConfig.IsDebug)
 
 		if err != nil {
