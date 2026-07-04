@@ -542,6 +542,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	{
 		nucleiRoutes.POST("/scan", middleware.HasPermission(model.PermConfigUpdate), nucleiController.StartScan)
 		nucleiRoutes.GET("/scan/:id", middleware.HasPermission(model.PermConfigRead), nucleiController.GetTask)
+			nucleiRoutes.GET("/scan/:id/detail", middleware.HasPermission(model.PermConfigRead), nucleiController.GetTaskDetail)
 		nucleiRoutes.POST("/scan/:id/cancel", middleware.HasPermission(model.PermConfigUpdate), nucleiController.CancelTask)
 		nucleiRoutes.GET("/tasks", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTasks)
 		nucleiRoutes.GET("/templates", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTemplates)

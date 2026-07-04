@@ -19,6 +19,29 @@ type ScanTaskResponse struct {
 	CreatedAt string `json:"created_at"`
 }
 
+// ScanTaskDetailResponse 扫描任务详情响应(含 Findings 列表)
+type ScanTaskDetailResponse struct {
+	ID          string        `json:"id"`
+	SiteID      string        `json:"site_id"`
+	TargetURL   string        `json:"target_url"`
+	Status      string        `json:"status"`
+	Total       int           `json:"total"`
+	Findings    []FindingItem `json:"findings"`
+	CreatedAt   string        `json:"created_at"`
+	StartedAt   string        `json:"started_at,omitempty"`
+	CompletedAt string        `json:"completed_at,omitempty"`
+}
+
+// FindingItem 扫描发现项
+type FindingItem struct {
+	TemplateID       string   `json:"template_id"`
+	Name             string   `json:"name"`
+	Severity         string   `json:"severity"`
+	MatchedAt        string   `json:"matched_at"`
+	CurlCommand      string   `json:"curl_command"`
+	ExtractedResults []string `json:"extracted_results"`
+}
+
 // ScanConfigRequest 扫描配置
 type ScanConfigRequest struct {
 	TemplatesPath string `json:"templates_path"`

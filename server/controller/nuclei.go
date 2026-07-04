@@ -23,6 +23,7 @@ import (
 type NucleiController interface {
 	StartScan(ctx *gin.Context)
 	GetTask(ctx *gin.Context)
+	GetTaskDetail(ctx *gin.Context)
 	CancelTask(ctx *gin.Context)
 	ListTasks(ctx *gin.Context)
 	ListTemplates(ctx *gin.Context)
@@ -262,4 +263,47 @@ func (c *NucleiControllerImpl) ListTemplates(ctx *gin.Context) {
 		return
 	}
 	response.Success(ctx, "获取模板列表成功", templates)
+}
+
+// GetTaskDetail 获取扫描任务详情(含 Findings)
+func (c *NucleiControllerImpl) GetTaskDetail(ctx *gin.Context) {
+	id := ctx.Param("id")
+	dbTask, err := c.repo.GetTask(context.Background(), id)
+	if err != nil {
+		response.NotFound(ctx, "任务不存在", err)
+		return
+	}
+	response.Success(ctx, "获取任务详情成功", dto.ScanTaskDetailResponse{
+		ID:          dbTask.ID,
+		SiteID:      dbTask.SiteID,
+		TargetURL:   dbTask.TargetURL,
+		Status:      dbTask.Status,
+		Total:       len(dbTask.Findings),
+		Findings:    convertFindings(dbTask.Findings),
+		CreatedAt:   dbTask.CreatedAt.Format(time.RFC3339),
+		StartedAt:   formatTimePtr(dbTask.StartedAt),
+		CompletedAt: formatTimePtr(dbTask.CompletedAt),
+	})
+}
+
+func convertFindings(src []repository.NucleiFinding) []dto.FindingItem {
+	result := make([]dto.FindingItem, 0, len(src))
+	for _, f := range src {
+		result = append(result, dto.FindingItem{
+			TemplateID:       f.TemplateID,
+			Name:             f.Name,
+			Severity:         f.Severity,
+			MatchedAt:        f.MatchedAt,
+			CurlCommand:      f.CurlCommand,
+			ExtractedResults: f.ExtractedResults,
+		})
+	}
+	return result
+}
+
+func formatTimePtr(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format(time.RFC3339)
 }
