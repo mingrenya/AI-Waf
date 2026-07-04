@@ -21,9 +21,9 @@ const config = {
                 },
             },
             borderRadius: {
-                lg: 'var(--radius)',
-                md: 'calc(var(--radius) - 2px)',
-                sm: 'calc(var(--radius) - 4px)'
+                lg: "var(--radius-lg)",
+                md: "var(--radius-base)",
+                sm: "var(--radius-sm)",
             },
             colors: {
                 background: 'hsl(var(--background))',
@@ -83,15 +83,6 @@ const config = {
                     from: { height: "var(--radix-accordion-content-height)" },
                     to: { height: "0" },
                 },
-                "icon-shake": {
-                    "0%": { transform: "rotate(0deg)" },
-                    "25%": { transform: "rotate(-12deg)" },
-                    "50%": { transform: "rotate(10deg)" },
-                    "75%": { transform: "rotate(-6deg)" },
-                    "85%": { transform: "rotate(3deg)" },
-                    "92%": { transform: "rotate(-2deg)" },
-                    "100%": { transform: "rotate(0deg)" },
-                },
                 "pulse-glow": {
                     "0%, 100%": { opacity: "0.6", transform: "scale(1)" },
                     "50%": { opacity: "0.8", transform: "scale(1.1)" },
@@ -99,10 +90,6 @@ const config = {
                 "fade-in-up": {
                     "0%": { opacity: "0", transform: "translateY(20px)" },
                     "100%": { opacity: "1", transform: "translateY(0)" },
-                },
-                "wiggle": {
-                    "0%, 100%": { transform: "rotate(-2deg)" },
-                    "50%": { transform: "rotate(2deg)" },
                 },
                 "fade-in": {
                     "0%": { opacity: "0" },
@@ -120,14 +107,6 @@ const config = {
                     "0%": { opacity: "0", transform: "scale(0.95)" },
                     "100%": { opacity: "1", transform: "scale(1)" },
                 },
-                "pulse-green": {
-                    "0%, 100%": { opacity: "1" },
-                    "50%": { opacity: "0.4" },
-                },
-                "ping-slow": {
-                    "0%": { transform: "scale(1)", opacity: "1" },
-                    "100%": { transform: "scale(1.5)", opacity: "0" },
-                },
                 "gradient-shift": {
                     "0%": { backgroundPosition: "0% 50%" },
                     "50%": { backgroundPosition: "100% 50%" },
@@ -137,16 +116,12 @@ const config = {
             animation: {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
-                "icon-shake": "icon-shake 0.7s ease-out",
                 "pulse-glow": "pulse-glow 4s ease-in-out infinite",
                 "fade-in-up": "fade-in-up 0.5s ease-out",
-                "wiggle": "wiggle 1s ease-in-out infinite",
                 "fade-in": "fade-in 0.4s ease-out",
                 "slide-up": "slide-up 0.5s ease-out",
                 "slide-in-right": "slide-in-right 0.4s ease-out",
                 "scale-in": "scale-in 0.3s ease-out",
-                "pulse-green": "pulse-green 2s ease-in-out infinite",
-                "ping-slow": "ping-slow 2s ease-out infinite",
                 "gradient-shift": "gradient-shift 8s ease infinite",
             },
             fontFamily: {
@@ -159,11 +134,6 @@ const config = {
                 md: "10px",
                 lg: "20px",
                 xl: "40px",
-            },
-            boxShadow: {
-                "glass": "0 8px 32px 0 rgba(31,38,135,0.37)",
-                "glass-hover": "0 12px 48px 0 rgba(31,38,135,0.45)",
-                "glass-light": "0 4px 16px 0 rgba(31,38,135,0.2)",
             },
         },
     },
