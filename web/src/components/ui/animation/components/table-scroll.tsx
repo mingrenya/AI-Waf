@@ -1,6 +1,4 @@
-import { ReactNode, useRef, useEffect, useState } from "react"
-import { motion, useScroll, useTransform } from "motion/react"
-import { containerAnimation } from "../container-animation"
+import { ReactNode, useRef, useEffect, useState, useCallback } from "react"
 
 interface TableScrollContainerProps {
     children: ReactNode
@@ -9,6 +7,10 @@ interface TableScrollContainerProps {
     shadowOpacity?: number
 }
 
+/**
+ * 轻量版滚动阴影容器 — 去除 motion/react 依赖
+ * 使用原生滚动事件替代 useScroll + useTransform motion hooks
+ */
 export function TableScrollContainer({
     children,
     className = "",
@@ -16,67 +18,78 @@ export function TableScrollContainer({
     shadowOpacity = 0.15
 }: TableScrollContainerProps) {
     const containerRef = useRef<HTMLDivElement>(null)
-    const { scrollYProgress } = useScroll({ container: containerRef })
     const [canScroll, setCanScroll] = useState(false)
+    const [topOpacity, setTopOpacity] = useState(0)
+    const [bottomOpacity, setBottomOpacity] = useState(0)
 
-    // 顶部和底部阴影透明度
-    const topShadowOpacity = useTransform(scrollYProgress, [0, 0.1], [0, shadowOpacity])
-    const bottomShadowOpacity = useTransform(scrollYProgress, [0.9, 1], [shadowOpacity, 0])
-
-    // 检查内容是否可滚动
-    useEffect(() => {
-        const checkScrollability = () => {
-            if (containerRef.current) {
-                const { scrollHeight, clientHeight } = containerRef.current
-                setCanScroll(scrollHeight > clientHeight)
-            }
+    const checkScrollability = useCallback(() => {
+        if (containerRef.current) {
+            const { scrollHeight, clientHeight } = containerRef.current
+            setCanScroll(scrollHeight > clientHeight)
         }
+    }, [])
 
+    const handleScroll = useCallback(() => {
+        if (!containerRef.current) return
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current
+        const maxScroll = scrollHeight - clientHeight
+        if (maxScroll <= 0) {
+            setTopOpacity(0)
+            setBottomOpacity(0)
+            return
+        }
+        const progress = scrollTop / maxScroll
+        setTopOpacity(progress < 0.1 ? shadowOpacity : 0)
+        setBottomOpacity(progress > 0.9 ? shadowOpacity : 0)
+    }, [shadowOpacity])
+
+    useEffect(() => {
         checkScrollability()
-
-        // 添加窗口大小变化的监听
         window.addEventListener('resize', checkScrollability)
         return () => window.removeEventListener('resize', checkScrollability)
-    }, [])
+    }, [checkScrollability])
+
+    useEffect(() => {
+        const el = containerRef.current
+        if (!el) return
+        el.addEventListener('scroll', handleScroll, { passive: true })
+        return () => el.removeEventListener('scroll', handleScroll)
+    }, [handleScroll])
 
     return (
         <div className={`relative w-full h-full ${className}`}>
             {/* 顶部滚动阴影 */}
             {showShadows && canScroll && (
-                <motion.div
-                    className="absolute top-0 left-0 right-0 h-4 pointer-events-none z-10"
+                <div
+                    className="absolute top-0 left-0 right-0 h-4 pointer-events-none z-10 transition-opacity duration-300"
                     style={{
-                        opacity: topShadowOpacity,
+                        opacity: topOpacity,
                         background: `linear-gradient(to bottom, rgba(0,0,0,${shadowOpacity}), transparent)`
                     }}
                 />
             )}
 
             {/* 滚动容器 */}
-            <motion.div
+            <div
                 ref={containerRef}
                 className="overflow-auto h-full w-full scroll-smooth"
                 style={{
-                    // 添加平滑滚动效果
-                    scrollBehavior: 'smooth',
-                    // 优化移动端滚动
                     WebkitOverflowScrolling: 'touch'
                 }}
-                {...containerAnimation}
             >
                 {children}
-            </motion.div>
+            </div>
 
             {/* 底部滚动阴影 */}
             {showShadows && canScroll && (
-                <motion.div
-                    className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10"
+                <div
+                    className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10 transition-opacity duration-300"
                     style={{
-                        opacity: bottomShadowOpacity,
+                        opacity: bottomOpacity,
                         background: `linear-gradient(to top, rgba(0,0,0,${shadowOpacity}), transparent)`
                     }}
                 />
             )}
         </div>
     )
-} 
+}
