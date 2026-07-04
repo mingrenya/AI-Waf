@@ -21,7 +21,7 @@ export default function StatsPage() {
 
             {/* 标题 + 时间范围选择器 */}
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
                     {t('stats.title')}
                 </h1>
                 <TimeRangeSelector value={timeRange} onChange={setTimeRange} />
@@ -32,8 +32,8 @@ export default function StatsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* 左侧指标区域 */}
                 <div className="lg:col-span-7">
-                    <div className="glass-card p-4">
-                        <h2 className="text-lg font-medium mb-4 text-white">{t('stats.overview')}</h2>
+                    <div className="surface-card p-4">
+                        <h2 className="text-lg font-medium mb-4" style={{ color: 'var(--text-primary)' }}>{t('stats.overview')}</h2>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <StatsCard
                                 title={t('stats.totalRequests')}

@@ -95,7 +95,7 @@ const CountdownDisplay = React.memo(({
     if (!isActive) return null
 
     return (
-        <div className="text-xs text-muted-foreground mt-1 dark:text-shadow-glow-white font-mono w-20 text-center">
+        <div className="text-xs text-muted-foreground mt-1  font-mono w-20 text-center">
             {formatRemainingTime(currentRemaining)}
         </div>
     )
@@ -252,27 +252,27 @@ export function BlockedIPTable() {
     const columns: ColumnDef<BlockedIPRecord>[] = useMemo(() => [
         {
             accessorKey: 'ip',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('flowControl.table.ip', 'IP地址')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('flowControl.table.ip', 'IP地址')}</div>,
             cell: ({ row }) => (
-                <div className="font-mono dark:text-shadow-glow-white">{row.original.ip}</div>
+                <div className="font-mono ">{row.original.ip}</div>
             ),
         },
         {
             accessorKey: 'reason',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('flowControl.table.reason', '封禁原因')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('flowControl.table.reason', '封禁原因')}</div>,
             cell: ({ row }) => (
-                <Badge variant="secondary" className="dark:text-shadow-glow-white">
+                <Badge variant="secondary" className="">
                     {getReasonDescription(row.original.reason)}
                 </Badge>
             ),
         },
         {
             accessorKey: 'requestUri',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('flowControl.table.requestUri', '请求路径')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('flowControl.table.requestUri', '请求路径')}</div>,
             cell: ({ row }) => (
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger className="font-mono text-sm dark:text-shadow-glow-white max-w-xs truncate cursor-pointer text-left block">
+                        <TooltipTrigger className="font-mono text-sm  max-w-xs truncate cursor-pointer text-left block">
                             {row.original.requestUri}
                         </TooltipTrigger>
                         <TooltipContent>
@@ -286,7 +286,7 @@ export function BlockedIPTable() {
             accessorKey: 'blockedAt',
             header: () => (
                 <div
-                    className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 px-2 -mx-2 rounded transition-colors flex items-center gap-1"
+                    className="font-medium py-3.5 whitespace-nowrap  dark:text-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700/50 px-2 -mx-2 rounded transition-colors flex items-center gap-1"
                     onClick={handleSortClick}
                     title="点击排序"
                 >
@@ -299,14 +299,14 @@ export function BlockedIPTable() {
                 </div>
             ),
             cell: ({ row }) => (
-                <div className="text-sm dark:text-shadow-glow-white">
+                <div className="text-sm ">
                     {formatTime(row.original.blockedAt)}
                 </div>
             ),
         },
         {
             accessorKey: 'status',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('flowControl.table.status', '状态')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('flowControl.table.status', '状态')}</div>,
             cell: ({ row }) => (
                 <StatusCell
                     remainingTTL={row.original.remainingTTL}
@@ -378,7 +378,7 @@ export function BlockedIPTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={handleRefresh}
-                                className="flex items-center gap-2 dark:text-shadow-glow-white"
+                                className="flex items-center gap-2 "
                             >
                                 <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
                                     <RefreshCcw className="h-4 w-4" />
@@ -392,7 +392,7 @@ export function BlockedIPTable() {
                                 size="sm"
                                 onClick={() => cleanupExpiredBlockedIPs()}
                                 disabled={isCleanupLoading}
-                                className="flex items-center gap-2 dark:text-shadow-glow-white"
+                                className="flex items-center gap-2 "
                             >
                                 <Trash2 className="h-4 w-4" />
                                 {isCleanupLoading
@@ -410,7 +410,7 @@ export function BlockedIPTable() {
                         <AnimatedIcon animationVariant="continuous-pulse" isAnimating={isFilterAnimating} className="h-4 w-4">
                             <Filter className="h-4 w-4 text-muted-foreground" />
                         </AnimatedIcon>
-                        <span className="text-sm font-medium dark:text-shadow-glow-white">
+                        <span className="text-sm font-medium ">
                             {t('flowControl.filters', '过滤条件')}
                         </span>
                     </div>
@@ -421,18 +421,18 @@ export function BlockedIPTable() {
                             value={ipInputValue}
                             onChange={(e) => setIpInputValue(e.target.value)}
                             onKeyDown={handleIpInputKeyDown}
-                            className="w-48 dark:text-shadow-glow-white"
+                            className="w-48 "
                         />
 
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap dark:text-shadow-glow-white">
+                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap ">
                                 {t('flowControl.table.reason', '封禁原因')}:
                             </span>
                             <Select
                                 value={filters.reason || 'all'}
                                 onValueChange={(value: string) => updateFilters({ reason: value === 'all' ? undefined : value })}
                             >
-                                <SelectTrigger className="w-auto max-w-[200px] dark:text-shadow-glow-white gap-2">
+                                <SelectTrigger className="w-auto max-w-[200px]  gap-2">
                                     <SelectValue placeholder={t('flowControl.filterByReason', 'Filter by Reason')} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -445,14 +445,14 @@ export function BlockedIPTable() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap dark:text-shadow-glow-white">
+                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap ">
                                 {t('flowControl.table.status', '状态')}:
                             </span>
                             <Select
                                 value={filters.status}
                                 onValueChange={(value: 'all' | 'active' | 'expired') => updateFilters({ status: value })}
                             >
-                                <SelectTrigger className="w-auto max-w-[200px] dark:text-shadow-glow-white gap-2">
+                                <SelectTrigger className="w-auto max-w-[200px]  gap-2">
                                     <SelectValue placeholder={t('flowControl.status.placeholder', 'Status')} />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -467,7 +467,7 @@ export function BlockedIPTable() {
                             variant="ghost"
                             size="sm"
                             onClick={clearFilters}
-                            className="flex items-center gap-2 dark:text-shadow-glow-white ml-2"
+                            className="flex items-center gap-2  ml-2"
                         >
                             <X className="h-4 w-4" />
                             {t('flowControl.clearFilters', '清除')}

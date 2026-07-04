@@ -57,12 +57,12 @@ export function SiteDialog({
             <AnimatePresence mode="wait">
                 {open && (
                     <motion.div {...dialogEnterExitAnimation}>
-                        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-neon p-0">
+                        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-custom p-0">
                             <motion.div {...dialogContentAnimation}>
                                 <motion.div {...dialogHeaderAnimation}>
                                     <DialogHeader className="p-6 pb-3">
                                         <DialogTitle className="text-xl">{title}</DialogTitle>
-                                        <DialogDescription className='dark:text-shadow-glow-white'>{description}</DialogDescription>
+                                        <DialogDescription className=''>{description}</DialogDescription>
                                     </DialogHeader>
                                 </motion.div>
 

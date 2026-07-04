@@ -27,7 +27,7 @@ export function LoginForm() {
     return (
         <div className="space-y-5">
             {error && (
-                <Alert variant="destructive" className="mb-4 bg-red-500/10 border-red-500/30 backdrop-blur-sm animate-fade-in text-white">
+                <Alert variant="destructive" className="mb-4 bg-red-500/10 border-red-500/30 backdrop-blur-sm animate-fade-in">
                     <AlertDescription className="text-red-300">{error}</AlertDescription>
                 </Alert>
             )}
@@ -41,11 +41,12 @@ export function LoginForm() {
                             <FormItem className="animate-fade-in">
                                 <FormControl>
                                     <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-dim)' }} />
                                         <input
                                             placeholder={t('auth.usernamePlaceholder')}
                                             autoComplete="username"
-                                            className="glass-input w-full pl-10 pr-4 py-3 text-sm outline-none text-white placeholder:text-white/30"
+                                            className="surface-floating w-full pl-10 pr-4 py-3 text-sm outline-none"
+                                            style={{ color: 'var(--text-primary)', borderRadius: 'var(--radius-base)' }}
                                             {...field}
                                             onChange={(e) => {
                                                 clearError()
@@ -66,12 +67,13 @@ export function LoginForm() {
                             <FormItem className="animate-fade-in [animation-delay:150ms]">
                                 <FormControl>
                                     <div className="relative">
-                                        <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                                        <LockKeyhole className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-dim)' }} />
                                         <input
                                             type="password"
                                             placeholder={t('auth.passwordPlaceholder')}
                                             autoComplete="current-password"
-                                            className="glass-input w-full pl-10 pr-4 py-3 text-sm outline-none text-white placeholder:text-white/30"
+                                            className="surface-floating w-full pl-10 pr-4 py-3 text-sm outline-none"
+                                            style={{ color: 'var(--text-primary)', borderRadius: 'var(--radius-base)' }}
                                             {...field}
                                             onChange={(e) => {
                                                 clearError()
@@ -88,7 +90,7 @@ export function LoginForm() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="glass-btn ripple-effect w-full py-3 flex items-center justify-center gap-2 text-sm animate-fade-in [animation-delay:300ms]"
+                        className="surface-card w-full py-3 flex items-center justify-center gap-2 text-sm animate-fade-in [animation-delay:300ms]" style={{ color: 'var(--text-primary)' }}
                     >
                         {isLoading ? (
                             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -100,7 +102,7 @@ export function LoginForm() {
                 </form>
             </Form>
 
-            <p className="text-center text-xs text-white/40 pt-2 border-t border-white/10">
+            <p className="text-center text-xs pt-2 border-t" style={{ color: 'var(--text-dim)', borderColor: 'rgba(255,255,255,0.1)' }}>
                 {t('auth.passwordRequirement')}
             </p>
         </div>

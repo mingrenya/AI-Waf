@@ -50,7 +50,8 @@ export const LoadingFallback = () => {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="text-white text-2xl font-medium"
+                    className="text-2xl font-medium"
+                    style={{ color: 'var(--text-primary)' }}
                 >
                     Loading...
                 </motion.div>
@@ -70,7 +71,7 @@ export const LoadingFallback = () => {
                 </div>
 
                 <motion.div
-                    className="text-white/80 text-sm"
+                    className="text-sm" style={{ color: 'var(--text-secondary)' }}
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                 >

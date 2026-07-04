@@ -169,10 +169,10 @@ export function UserManagementTable() {
 
     if (!canRead) {
         return (
-            <Card className="glass-card p-6 m-4">
-                <div className="rounded-lg border border-dashed border-white/20 p-8 text-center">
-                    <UserCog className="mx-auto mb-3 h-8 w-8 text-white/50" />
-                    <p className="text-sm text-white/60">当前账号没有用户管理查看权限（需要 user:read）。</p>
+            <Card className="surface-card p-6 m-4">
+                <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'rgba(255,255,255,0.2)' }}>
+                    <UserCog className="mx-auto mb-3 h-8 w-8" style={{ color: 'var(--text-muted)' }} />
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>当前账号没有用户管理查看权限（需要 user:read）。</p>
                 </div>
             </Card>
         )
@@ -180,7 +180,7 @@ export function UserManagementTable() {
 
     return (
         <>
-            <Card className="glass-card p-6 flex flex-col h-full m-4">
+            <Card className="surface-card p-6 flex flex-col h-full m-4">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-primary dark:text-white">用户管理</h2>
                     <div className="flex gap-2">

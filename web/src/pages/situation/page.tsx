@@ -19,8 +19,8 @@ export default function SituationPage() {
     <PageTransition className="flex flex-col gap-6 p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Situation Awareness</h1>
-        <p className="text-sm text-white/50 mt-1">
+        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>Situation Awareness</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
           Real-time attack surface monitoring and threat intelligence
         </p>
       </div>
@@ -38,8 +38,8 @@ export default function SituationPage() {
           <AttackChainTimeline onSelectAttacker={handleSelectAttacker} />
         </TabsContent>
         <TabsContent value="ranking" className="mt-4">
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">Attacker Ranking</h2>
+          <div className="surface-card p-6">
+            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Attacker Ranking</h2>
             <AttackerRankingChart />
           </div>
         </TabsContent>

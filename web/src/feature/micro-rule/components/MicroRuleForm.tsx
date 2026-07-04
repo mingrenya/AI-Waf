@@ -144,9 +144,9 @@ export function MicroRuleForm({
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="dark:text-shadow-glow-white">{t("microRule.form.name")}</FormLabel>
+                                    <FormLabel className="">{t("microRule.form.name")}</FormLabel>
                                     <FormControl>
-                                        <Input className="dark:text-shadow-glow-white" placeholder={t("microRule.form.namePlaceholder")} {...field} />
+                                        <Input className="" placeholder={t("microRule.form.namePlaceholder")} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -158,10 +158,10 @@ export function MicroRuleForm({
                             name="priority"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="dark:text-shadow-glow-white">{t("microRule.form.priority")}</FormLabel>
+                                    <FormLabel className="">{t("microRule.form.priority")}</FormLabel>
                                     <FormControl>
                                         <Input
-                                            className="dark:text-shadow-glow-white"
+                                            className=""
                                             placeholder={t("microRule.form.priorityPlaceholder")}
                                             {...field}
                                             onChange={(e) => field.onChange(Number(e.target.value))}
@@ -178,14 +178,14 @@ export function MicroRuleForm({
                             name="type"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="dark:text-shadow-glow-white">{t("microRule.form.type")}</FormLabel>
+                                    <FormLabel className="">{t("microRule.form.type")}</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                         value={field.value}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="dark:text-shadow-glow-white">
+                                            <SelectTrigger className="">
                                                 <SelectValue placeholder={t("microRule.form.selectType")} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -205,14 +205,14 @@ export function MicroRuleForm({
                             name="status"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="dark:text-shadow-glow-white">{t("microRule.form.status")}</FormLabel>
+                                    <FormLabel className="">{t("microRule.form.status")}</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         defaultValue={field.value}
                                         value={field.value}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="dark:text-shadow-glow-white">
+                                            <SelectTrigger className="">
                                                 <SelectValue placeholder={t("microRule.form.selectStatus")} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -230,7 +230,7 @@ export function MicroRuleForm({
                     {/* 条件构建器 */}
 
                     <div className="space-y-4 mt-6">
-                        <FormLabel className="dark:text-shadow-glow-white text-base">{t("microRule.form.condition")}</FormLabel>
+                        <FormLabel className=" text-base">{t("microRule.form.condition")}</FormLabel>
                         <div className="border p-6 rounded-md dark:border-gray-700">
                             <ConditionBuilder
                                 form={form}

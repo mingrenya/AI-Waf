@@ -24,7 +24,7 @@ export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
                     variant={value === range.value ? "default" : "outline"}
                     size="sm"
                     onClick={() => onChange(range.value)}
-                    className="dark:text-shadow-glow-white"
+                    className=""
                 >
                     {range.label}
                 </Button>

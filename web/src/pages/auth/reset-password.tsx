@@ -30,7 +30,7 @@ export default function ResetPasswordPage() {
 
 
             <div className="mb-8 z-10 animate-fade-in-up">
-                <h1 className="text-3xl font-bold text-center text-white drop-shadow-md hover:animate-wiggle text-shadow-glow-white">
+                <h1 className="text-3xl font-bold text-center drop-shadow-md hover:scale-105 transition-transform" style={{ color: 'var(--text-primary)' }}>
                     {t('sidebar.title')}
                 </h1>
             </div>
@@ -40,11 +40,11 @@ export default function ResetPasswordPage() {
             </div>
 
             {/* 底部说明文字 */}
-            <div className="text-center text-xs text-white/70 dark:text-white mt-8 z-10 flex items-center justify-center gap-1 animate-fade-in-up [animation-delay:400ms]">
+            <div className="text-center text-xs mt-8 z-10 flex items-center justify-center gap-1 animate-fade-in-up [animation-delay:400ms]" style={{ color: 'var(--text-secondary)' }}>
                 <span>Made with</span>
                 <Heart className="h-3 w-3 text-red-500 fill-red-500" />
                 <span>by</span>
-                <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" className="text-white/70 dark:text-white dark:text-shadow-glow-white">MRYa WAF team</a>
+                <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }}>MRYa WAF team</a>
             </div>
         </div>
     )

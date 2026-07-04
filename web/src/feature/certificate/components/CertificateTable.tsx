@@ -157,16 +157,16 @@ export function CertificateTable() {
     const columns: ColumnDef<Certificate>[] = [
         {
             accessorKey: 'name',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("certificate.name")}</div>,
-            cell: ({ row }) => <div className="font-medium dark:text-shadow-glow-white">{row.original.name}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("certificate.name")}</div>,
+            cell: ({ row }) => <div className="font-medium ">{row.original.name}</div>,
         },
         {
             accessorKey: 'domains',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("certificate.domains")}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("certificate.domains")}</div>,
             cell: ({ row }) => (
                 <div className="flex flex-wrap gap-1 max-w-xs">
                     {row.original.domains.map((domain, index) => (
-                        <span key={index} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs dark:text-shadow-glow-white">
+                        <span key={index} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs ">
                             {domain}
                         </span>
                     ))}
@@ -175,19 +175,19 @@ export function CertificateTable() {
         },
         {
             accessorKey: 'issuerAndExpiry',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("certificate.issuerAndExpiry")}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("certificate.issuerAndExpiry")}</div>,
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="text-sm dark:text-shadow-glow-white">{row.original.issuerName}</span>
-                    <span className="text-xs text-muted-foreground dark:text-shadow-glow-white">
+                    <span className="text-sm ">{row.original.issuerName}</span>
+                    <span className="text-xs text-muted-foreground ">
                         {t("certificate.expiryDate")}{new Date(row.original.expireDate).toLocaleDateString()}
                         {isExpiringSoon(row.original.expireDate) && (
-                            <span className="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs dark:text-shadow-glow-white">
+                            <span className="ml-2 px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded text-xs ">
                                 {t("certificate.expiringSoon")}
                             </span>
                         )}
                         {isExpired(row.original.expireDate) && (
-                            <span className="ml-2 px-1.5 py-0.5 bg-red-100 text-red-800 rounded text-xs dark:text-shadow-glow-white">
+                            <span className="ml-2 px-1.5 py-0.5 bg-red-100 text-red-800 rounded text-xs ">
                                 {t("certificate.expired")}
                             </span>
                         )}
@@ -200,20 +200,20 @@ export function CertificateTable() {
             cell: ({ row }) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="dark:text-shadow-glow-white">
-                            <MoreHorizontal className="h-4 w-4 dark:text-shadow-glow-white" />
+                        <Button variant="ghost" size="icon" className="">
+                            <MoreHorizontal className="h-4 w-4 " />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
                             onClick={() => openUpdateDialog(row.original)}
                         >
-                            <Pencil className="mr-2 h-4 w-4 dark:text-shadow-glow-white" />
+                            <Pencil className="mr-2 h-4 w-4 " />
                             {t("certificate.edit")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => openDeleteDialog(row.original.id)}
-                            className="text-red-600 dark:text-red-400 dark:text-shadow-glow-white"
+                            className="text-red-600 dark:text-red-400 "
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             {t("certificate.delete")}
@@ -243,7 +243,7 @@ export function CertificateTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={refreshSites}
-                                className="flex items-center gap-2 justify-center dark:text-shadow-glow-white"
+                                className="flex items-center gap-2 justify-center "
                             >
                                 <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
                                     <RefreshCcw className="h-4 w-4" />
@@ -255,9 +255,9 @@ export function CertificateTable() {
                             <Button
                                 size="sm"
                                 onClick={openCreateDialog}
-                                className="flex items-center gap-1 dark:text-shadow-glow-white"
+                                className="flex items-center gap-1 "
                             >
-                                <Plus className="h-3.5 w-3.5 dark:text-shadow-glow-white" />
+                                <Plus className="h-3.5 w-3.5 " />
                                 {t("certificate.add")}
                             </Button>
                         </AnimatedButton>

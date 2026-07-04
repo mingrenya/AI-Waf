@@ -63,7 +63,7 @@ export function DeleteRuleDialog({
                     <AlertDialogTitle>
                         {t('alert.deleteRuleTitle')}
                     </AlertDialogTitle>
-                    <AlertDialogDescription className="dark:text-shadow-glow-white">
+                    <AlertDialogDescription className="">
                         {t('alert.deleteRuleDescription')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>

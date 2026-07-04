@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next'
 import { Heart, Shield, Activity, Globe, Server } from 'lucide-react'
 
 const features = [
-  { icon: Shield, label: 'WAF Engine', value: 'Coraza 3.0', color: 'text-indigo-300' },
-  { icon: Activity, label: 'Threats Blocked', value: '12.4K', color: 'text-emerald-300' },
-  { icon: Globe, label: 'Protected Sites', value: '8', color: 'text-sky-300' },
-  { icon: Server, label: 'Uptime', value: '99.9%', color: 'text-amber-300' },
+  { icon: Shield, label: 'WAF Engine', value: 'Coraza 3.0', color: 'text-primary-400' },
+  { icon: Activity, label: 'Threats Blocked', value: '12.4K', color: 'text-primary-300' },
+  { icon: Globe, label: 'Protected Sites', value: '8', color: 'text-primary-300' },
+  { icon: Server, label: 'Uptime', value: '99.9%', color: 'text-primary-300' },
 ]
 
 export default function LoginPage() {
@@ -35,7 +35,7 @@ export default function LoginPage() {
     }, [isAuthenticated, needPasswordReset, navigate, from])
 
     return (
-        <div className="glass-bg-animated min-h-screen flex flex-col relative overflow-hidden">
+        <div className="dark glass-bg-animated min-h-screen flex flex-col relative overflow-hidden">
             {/* Floating particles */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div className="glass-particle w-72 h-72 top-[10%] left-[5%]" style={{ animationDelay: '0s' }} />
@@ -45,7 +45,7 @@ export default function LoginPage() {
             </div>
 
             {/* Status bar */}
-            <div className="glass-nav text-white text-center py-1.5 text-sm font-medium flex items-center justify-center gap-2">
+            <div className="surface-card text-center py-1.5 text-sm font-medium flex items-center justify-center gap-2" style={{ color: 'var(--text-primary)' }}>
                 <span className="status-dot-online" />
                 {t('sidebar.title')} — Secure Access
             </div>
@@ -55,18 +55,18 @@ export default function LoginPage() {
                     {/* Left: Product showcase */}
                     <div className="hidden lg:flex flex-col justify-center animate-slide-up">
                         <div className="mb-10">
-                            <h1 className="text-5xl font-bold text-white mb-3 font-mono tracking-tight stagger-1">
-                                MRYa<span className="text-indigo-300">WAF</span>
+                            <h1 className="text-5xl font-bold mb-3 font-mono tracking-tight stagger-1" style={{ color: 'var(--text-primary)' }}>
+                                MRYa<span className="text-primary-300">WAF</span>
                             </h1>
-                            <p className="text-white/70 text-lg stagger-2">
+                            <p className="text-lg stagger-2" style={{ color: 'var(--text-secondary)' }}>
                                 智能 Web 应用防火墙管理平台
                             </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             {features.map((f, i) => (
-                                <div key={f.label} className={`glass-card-light p-5 animate-scale-in stagger-${i + 3}`}>
+                                <div key={f.label} className={`surface-card p-5 animate-scale-in stagger-${i + 3}`}>
                                     <f.icon className={`w-5 h-5 ${f.color} mb-2`} />
-                                    <p className="text-xs text-white/50 mb-1">{f.label}</p>
+                                    <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>{f.label}</p>
                                     <p className={`text-xl font-bold font-mono ${f.color}`}>{f.value}</p>
                                 </div>
                             ))}
@@ -75,10 +75,10 @@ export default function LoginPage() {
 
                     {/* Right: Login form */}
                     <div className="flex items-center justify-center animate-slide-in-right">
-                        <div className="w-full max-w-md glass-card-emphasis p-8">
+                        <div className="w-full max-w-md surface-card p-8" style={{ borderRadius: 'var(--radius-lg)' }}>
                             <div className="text-center mb-6">
-                                <h2 className="text-2xl font-bold text-white">{t('auth.login')}</h2>
-                                <p className="text-white/50 text-sm mt-1">{t('auth.loginDescription')}</p>
+                                <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{t('auth.login')}</h2>
+                                <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{t('auth.loginDescription')}</p>
                             </div>
                             <LoginForm />
                         </div>
@@ -87,13 +87,13 @@ export default function LoginPage() {
             </div>
 
             {/* Bottom status */}
-            <div className="py-3 text-center text-xs text-white/40 border-t border-white/10 relative z-10 flex items-center justify-center gap-1">
+            <div className="py-3 text-center text-xs border-t relative z-10 flex items-center justify-center gap-1" style={{ color: 'var(--text-dim)', borderColor: 'rgba(255,255,255,0.1)' }}>
                 System Status: <span className="text-emerald-400">All Systems Operational</span>
                 <span className="mx-2 opacity-30">|</span>
                 <span>Made with</span>
                 <Heart className="h-3 w-3 text-red-500 fill-red-500" />
                 <span>by</span>
-                <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white/90 transition-colors">MRYa WAF team</a>
+                <a href="https://github.com/mingrenya/AI-Waf" target="_blank" rel="noopener noreferrer" className="transition-colors" style={{ color: 'var(--text-secondary)' }}>MRYa WAF team</a>
             </div>
         </div>
     )

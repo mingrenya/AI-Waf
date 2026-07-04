@@ -18,7 +18,6 @@ import { useAttackPatterns, useDeleteAttackPattern } from "../hooks"
 import type { AttackPattern } from "@/types/ai-analyzer"
 import { format } from "date-fns"
 import { AttackPatternDetailDialog } from "./AttackPatternDetailDialog"
-import { Card } from "@/components/ui/card"
 import { useQueryClient } from "@tanstack/react-query"
 
 export function AttackPatternTable() {
@@ -53,7 +52,7 @@ export function AttackPatternTable() {
             header: "攻击类型",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <Shield className="h-4 w-4 text-white/40" />
                     <span className="font-medium">{row.original.attack_type}</span>
                 </div>
             ),
@@ -90,7 +89,7 @@ export function AttackPatternTable() {
             accessorKey: "detected_at",
             header: "检测时间",
             cell: ({ row }) => (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-white/40">
                     {format(new Date(row.original.detected_at), "yyyy-MM-dd HH:mm")}
                 </span>
             ),
@@ -130,11 +129,11 @@ export function AttackPatternTable() {
     })
 
     return (
-        <Card className="p-6 w-full min-h-full border-none shadow-none rounded-none">
+        <div className="surface-card overflow-hidden p-6 w-full min-h-full">
             <div className="flex justify-between items-center mb-6 bg-zinc-50 dark:bg-muted/30 rounded-md p-4">
                 <div>
                     <h2 className="text-xl font-semibold text-primary dark:text-white">攻击模式检测</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-white/40 mt-1">
                         基于机器学习算法自动检测的攻击模式
                     </p>
                 </div>
@@ -156,6 +155,6 @@ export function AttackPatternTable() {
                 onOpenChange={setDetailDialogOpen}
                 pattern={selectedPattern}
             />
-        </Card>
+        </div>
     )
 }

@@ -60,7 +60,7 @@ export default function AlertChannelPage() {
     }
 
     return (
-        <Card className="glass-card-light p-6 w-full min-h-full m-4">
+        <Card className="surface-card p-6 w-full min-h-full m-4">
             <div className="flex justify-between items-center mb-6 bg-white/5 rounded-md p-4 transition-colors duration-200">
                 <h2 className="text-xl font-semibold text-primary dark:text-white">{t('alert.channelManagement')}</h2>
                 <div className="flex gap-2">
@@ -69,7 +69,7 @@ export default function AlertChannelPage() {
                             variant="outline"
                             size="sm"
                             onClick={refreshChannels}
-                            className="flex items-center gap-2 dark:text-shadow-glow-white"
+                            className="flex items-center gap-2 "
                         >
                             <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
                                 <RefreshCw className="h-4 w-4" />
@@ -81,7 +81,7 @@ export default function AlertChannelPage() {
                         <Button
                             size="sm"
                             onClick={handleAddChannel}
-                            className="flex items-center gap-1 dark:text-shadow-glow-white"
+                            className="flex items-center gap-1 "
                         >
                             <Plus className="h-4 w-4" />
                             {t('alert.addChannel')}

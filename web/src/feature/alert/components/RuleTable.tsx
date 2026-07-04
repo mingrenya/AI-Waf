@@ -99,7 +99,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
         {
             accessorKey: 'name',
             header: () => (
-                <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                     {t('alert.ruleName')}
                 </div>
             ),
@@ -107,7 +107,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`font-medium dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={`font-medium  ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {row.original.name || '-'}
                     </div>
                 )
@@ -116,7 +116,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
         {
             accessorKey: 'severity',
             header: () => (
-                <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                     {t('alert.severityLabel', { defaultValue: t('alert.severity.high') })}
                 </div>
             ),
@@ -124,7 +124,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={` ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {getSeverityLabel(row.original.severity)}
                     </div>
                 )
@@ -133,7 +133,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
         {
             accessorKey: 'enabled',
             header: () => (
-                <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                     {t('alert.status')}
                 </div>
             ),
@@ -153,7 +153,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
         {
             accessorKey: 'cooldown',
             header: () => (
-                <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                     {t('alert.cooldown', { defaultValue: 'Cooldown (min)' })}
                 </div>
             ),
@@ -161,7 +161,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={` ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {row.original.cooldown ?? '-'}
                     </div>
                 )
@@ -170,7 +170,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
         {
             accessorKey: 'createdAt',
             header: () => (
-                <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                     {t('createdAt')}
                 </div>
             ),
@@ -178,7 +178,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={` ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {row.original.createdAt ? new Date(row.original.createdAt).toLocaleString() : '-'}
                     </div>
                 )
@@ -187,7 +187,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
         {
             id: 'actions',
             header: () => (
-                <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                     {t('ipGroup.table.actions')}
                 </div>
             ),
@@ -199,7 +199,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 dark:text-shadow-glow-white"
+                                className="h-8 w-8 "
                                 aria-label={t('ipGroup.table.actions')}
                             >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -210,7 +210,7 @@ export function RuleTable({ onEdit, onDelete }: RuleTableProps) {
                             {onEdit && (
                                 <DropdownMenuItem
                                     onClick={() => onEdit(row.original)}
-                                    className="dark:text-shadow-glow-white dark:hover:bg-primary/20 cursor-pointer"
+                                    className=" dark:hover:bg-primary/20 cursor-pointer"
                                 >
                                     <Pencil className="h-4 w-4 mr-2" />
                                     {t('certificate.edit')}

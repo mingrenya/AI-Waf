@@ -159,10 +159,10 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                     {/* 访问频率限制配置 */}
                     <div className="bg-background/50 rounded-xl p-6 space-y-6">
                         <div className="space-y-2">
-                            <h3 className="text-xl font-semibold dark:text-shadow-glow-white">
+                            <h3 className="text-xl font-semibold ">
                                 {t('flowControl.visitLimit.title', '访问频率限制')}
                             </h3>
-                            <p className="text-muted-foreground dark:text-shadow-glow-white">
+                            <p className="text-muted-foreground ">
                                 {t('flowControl.visitLimit.description', '限制单个IP在指定时间窗口内的访问次数，防止高频访问')}
                             </p>
                         </div>
@@ -173,10 +173,10 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-center justify-between py-4">
                                     <div className="space-y-1">
-                                        <FormLabel className="text-base font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="text-base font-medium ">
                                             {t('flowControl.enabled', '启用限制')}
                                         </FormLabel>
-                                        <FormDescription className="text-sm dark:text-shadow-glow-white">
+                                        <FormDescription className="text-sm ">
                                             {t('flowControl.enabledDescription', '开启此限制规则')}
                                         </FormDescription>
                                     </div>
@@ -196,19 +196,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="visitLimit.threshold"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.threshold', '触发阈值')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="100"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.thresholdDescription', '统计时间窗口内的最大请求数')}
                                         </FormDescription>
                                         <FormMessage />
@@ -221,19 +221,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="visitLimit.statDuration"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.statDuration', '统计时间窗口')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="60"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.statDurationDescription', '统计时间窗口长度（秒）')}
                                         </FormDescription>
                                         <FormMessage />
@@ -246,19 +246,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="visitLimit.blockDuration"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.blockDuration', '封禁时长')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="600"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.blockDurationDescription', '触发限制后的封禁时长（秒）')}
                                         </FormDescription>
                                         <FormMessage />
@@ -271,19 +271,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="visitLimit.burstCount"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.burstCount', '突发请求数')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="10"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.burstCountDescription', '允许的突发请求数量')}
                                         </FormDescription>
                                         <FormMessage />
@@ -296,19 +296,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="visitLimit.paramsCapacity"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.paramsCapacity', '缓存容量')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="10000"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.paramsCapacityDescription', '最多缓存的IP数量')}
                                         </FormDescription>
                                         <FormMessage />
@@ -321,10 +321,10 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                     {/* 攻击频率限制配置 */}
                     <div className="bg-background/50 rounded-xl p-6 space-y-6">
                         <div className="space-y-2">
-                            <h3 className="text-xl font-semibold dark:text-shadow-glow-white">
+                            <h3 className="text-xl font-semibold ">
                                 {t('flowControl.attackLimit.title', '攻击频率限制')}
                             </h3>
-                            <p className="text-muted-foreground dark:text-shadow-glow-white">
+                            <p className="text-muted-foreground ">
                                 {t('flowControl.attackLimit.description', '限制单个IP在指定时间窗口内的攻击次数，防止恶意攻击')}
                             </p>
                         </div>
@@ -335,10 +335,10 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-center justify-between py-4">
                                     <div className="space-y-1">
-                                        <FormLabel className="text-base font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="text-base font-medium ">
                                             {t('flowControl.enabled', '启用限制')}
                                         </FormLabel>
-                                        <FormDescription className="text-sm dark:text-shadow-glow-white">
+                                        <FormDescription className="text-sm ">
                                             {t('flowControl.enabledDescription', '开启此限制规则')}
                                         </FormDescription>
                                     </div>
@@ -358,19 +358,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="attackLimit.threshold"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.threshold', '触发阈值')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="5"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.attackThresholdDescription', '统计时间窗口内的最大攻击次数')}
                                         </FormDescription>
                                         <FormMessage />
@@ -383,19 +383,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="attackLimit.statDuration"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.statDuration', '统计时间窗口')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="60"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.statDurationDescription', '统计时间窗口长度（秒）')}
                                         </FormDescription>
                                         <FormMessage />
@@ -408,19 +408,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="attackLimit.blockDuration"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.blockDuration', '封禁时长')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="3600"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.blockDurationDescription', '触发限制后的封禁时长（秒）')}
                                         </FormDescription>
                                         <FormMessage />
@@ -433,19 +433,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="attackLimit.burstCount"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.burstCount', '突发请求数')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="2"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.burstCountDescription', '允许的突发请求数量')}
                                         </FormDescription>
                                         <FormMessage />
@@ -458,19 +458,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="attackLimit.paramsCapacity"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.paramsCapacity', '缓存容量')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="10000"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.paramsCapacityDescription', '最多缓存的IP数量')}
                                         </FormDescription>
                                         <FormMessage />
@@ -483,10 +483,10 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                     {/* 错误频率限制配置 */}
                     <div className="bg-background/50 rounded-xl p-6 space-y-6">
                         <div className="space-y-2">
-                            <h3 className="text-xl font-semibold dark:text-shadow-glow-white">
+                            <h3 className="text-xl font-semibold ">
                                 {t('flowControl.errorLimit.title', '错误频率限制')}
                             </h3>
-                            <p className="text-muted-foreground dark:text-shadow-glow-white">
+                            <p className="text-muted-foreground ">
                                 {t('flowControl.errorLimit.description', '限制单个IP在指定时间窗口内的错误响应次数，防止恶意探测')}
                             </p>
                         </div>
@@ -497,10 +497,10 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-center justify-between py-4">
                                     <div className="space-y-1">
-                                        <FormLabel className="text-base font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="text-base font-medium ">
                                             {t('flowControl.enabled', '启用限制')}
                                         </FormLabel>
-                                        <FormDescription className="text-sm dark:text-shadow-glow-white">
+                                        <FormDescription className="text-sm ">
                                             {t('flowControl.enabledDescription', '开启此限制规则')}
                                         </FormDescription>
                                     </div>
@@ -520,19 +520,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="errorLimit.threshold"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.threshold', '触发阈值')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="20"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.errorThresholdDescription', '统计时间窗口内的最大错误次数')}
                                         </FormDescription>
                                         <FormMessage />
@@ -545,19 +545,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="errorLimit.statDuration"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.statDuration', '统计时间窗口')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="60"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.statDurationDescription', '统计时间窗口长度（秒）')}
                                         </FormDescription>
                                         <FormMessage />
@@ -570,19 +570,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="errorLimit.blockDuration"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.blockDuration', '封禁时长')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="1800"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.blockDurationDescription', '触发限制后的封禁时长（秒）')}
                                         </FormDescription>
                                         <FormMessage />
@@ -595,19 +595,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="errorLimit.burstCount"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.burstCount', '突发请求数')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="5"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.burstCountDescription', '允许的突发请求数量')}
                                         </FormDescription>
                                         <FormMessage />
@@ -620,19 +620,19 @@ export function FlowControlForm({ onSuccess }: FlowControlFormProps) {
                                 name="errorLimit.paramsCapacity"
                                 render={({ field }) => (
                                     <FormItem className="space-y-2">
-                                        <FormLabel className="font-medium dark:text-shadow-glow-white">
+                                        <FormLabel className="font-medium ">
                                             {t('flowControl.paramsCapacity', '缓存容量')}
                                         </FormLabel>
                                         <FormControl>
                                             <Input
                                                 type="number"
                                                 placeholder="10000"
-                                                className="dark:text-shadow-glow-white"
+                                                className=""
                                                 {...field}
                                                 onChange={(e) => field.onChange(parseInt(e.target.value))}
                                             />
                                         </FormControl>
-                                        <FormDescription className="text-xs dark:text-shadow-glow-white">
+                                        <FormDescription className="text-xs ">
                                             {t('flowControl.paramsCapacityDescription', '最多缓存的IP数量')}
                                         </FormDescription>
                                         <FormMessage />

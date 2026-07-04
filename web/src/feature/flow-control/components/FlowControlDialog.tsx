@@ -31,14 +31,14 @@ export function FlowControlDialog({
             <AnimatePresence mode="wait">
                 {open && (
                     <motion.div {...dialogEnterExitAnimation}>
-                        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-neon p-0">
+                        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-custom p-0">
                             <motion.div {...dialogContentAnimation}>
                                 <motion.div {...dialogHeaderAnimation}>
                                     <DialogHeader className="p-6 pb-3">
                                         <DialogTitle className="text-xl">
                                             {t('flowControl.dialog.title', '流量控制配置')}
                                         </DialogTitle>
-                                        <DialogDescription className="dark:text-shadow-glow-white">
+                                        <DialogDescription className="">
                                             {t('flowControl.dialog.description', '配置基于IP的访问频率、攻击频率和错误频率限制，保护系统免受恶意攻击')}
                                         </DialogDescription>
                                     </DialogHeader>

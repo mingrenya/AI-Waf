@@ -50,7 +50,7 @@ export function TestChannelDialog({ open, onOpenChange, channel }: TestChannelDi
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle>{t('alert.testChannel')}</DialogTitle>
-                    <DialogDescription className='dark:text-shadow-glow-white'>
+                    <DialogDescription className=''>
                         {t('alert.testChannelDescription')}
                     </DialogDescription>
                 </DialogHeader>

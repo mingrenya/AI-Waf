@@ -49,7 +49,7 @@ export default function AlertHistoryPage() {
                             variant="outline"
                             size="sm"
                             onClick={refreshHistory}
-                            className="flex items-center gap-2 dark:text-shadow-glow-white"
+                            className="flex items-center gap-2 "
                         >
                             <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
                                 <RefreshCw className="h-4 w-4" />

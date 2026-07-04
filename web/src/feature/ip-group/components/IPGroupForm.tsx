@@ -153,9 +153,9 @@ export function IPGroupForm({
                         name="name"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="dark:text-shadow-glow-white">{t("ipGroup.form.name")}</FormLabel>
+                                <FormLabel className="">{t("ipGroup.form.name")}</FormLabel>
                                 <FormControl>
-                                    <Input className="dark:text-shadow-glow-white" placeholder={t("ipGroup.form.namePlaceholder")} {...field} />
+                                    <Input className="" placeholder={t("ipGroup.form.namePlaceholder")} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -164,7 +164,7 @@ export function IPGroupForm({
 
                     <div className="space-y-4">
                         <div>
-                            <FormLabel className="dark:text-shadow-glow-white">{t("ipGroup.form.ipAddresses")}</FormLabel>
+                            <FormLabel className="">{t("ipGroup.form.ipAddresses")}</FormLabel>
                             <div className="flex mt-2">
                                 <Input
                                     placeholder={t("ipGroup.form.ipAddressPlaceholder")}
@@ -174,21 +174,21 @@ export function IPGroupForm({
                                         setIpAddressError(null)
                                     }}
                                     onKeyDown={handleKeyDown}
-                                    className="mr-2 dark:text-shadow-glow-white"
+                                    className="mr-2 "
                                 />
                                 <AnimatedButton>
                                     <Button
                                         type="button"
                                         onClick={handleAddIpAddress}
                                         size="icon"
-                                        className="dark:text-shadow-glow-white dark:button-neon"
+                                        className=" "
                                     >
-                                        <Plus className="h-4 w-4 dark:icon-neon" />
+                                        <Plus className="h-4 w-4 " />
                                     </Button>
                                 </AnimatedButton>
                             </div>
                             {ipAddressError && (
-                                <p className="text-sm font-medium text-destructive mt-2 dark:text-shadow-glow-white">{ipAddressError}</p>
+                                <p className="text-sm font-medium text-destructive mt-2 ">{ipAddressError}</p>
                             )}
                         </div>
 
@@ -199,7 +199,7 @@ export function IPGroupForm({
                                 <FormItem>
                                     <div className="rounded-md border dark:border-slate-700">
                                         {ipItems.length === 0 ? (
-                                            <div className="py-6 text-center text-muted-foreground dark:text-slate-400 dark:text-shadow-glow-white">
+                                            <div className="py-6 text-center text-muted-foreground dark:text-slate-400 ">
                                                 {t("ipGroup.form.noIpAddresses")}
                                             </div>
                                         ) : (
@@ -210,7 +210,7 @@ export function IPGroupForm({
                                                         placeholder="Search IP addresses..."
                                                         value={searchQuery}
                                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                                        className="pl-8 dark:bg-slate-700/50 dark:border-slate-600 dark:text-shadow-glow-white"
+                                                        className="pl-8 dark:bg-slate-700/50 dark:border-slate-600 "
                                                     />
                                                 </div>
                                                 <ScrollArea scrollbarVariant="neon" className="h-[200px] pr-4">
@@ -223,16 +223,16 @@ export function IPGroupForm({
                                                                     key={`ip-${item}-${originalIndex}`}
                                                                     className="flex items-center justify-between py-2 px-4"
                                                                 >
-                                                                    <span className="font-mono dark:text-shadow-glow-white">{item}</span>
+                                                                    <span className="font-mono ">{item}</span>
                                                                     <AnimatedButton>
                                                                         <Button
                                                                             variant="ghost"
                                                                             size="icon"
                                                                             type="button"
                                                                             onClick={() => handleRemoveIpAddress(originalIndex)}
-                                                                            className="h-8 w-8 text-destructive hover:text-destructive dark:text-red-500 dark:hover:text-red-400 dark:button-neon"
+                                                                            className="h-8 w-8 text-destructive hover:text-destructive dark:text-red-500 dark:hover:text-red-400 "
                                                                         >
-                                                                            <Trash2 className="h-4 w-4 dark:icon-neon" />
+                                                                            <Trash2 className="h-4 w-4 " />
                                                                         </Button>
                                                                     </AnimatedButton>
                                                                 </li>
@@ -253,7 +253,7 @@ export function IPGroupForm({
                         <Button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full dark:text-shadow-glow-white dark:button-neon"
+                            className="w-full  "
                         >
                             {isLoading
                                 ? t("common.submitting")

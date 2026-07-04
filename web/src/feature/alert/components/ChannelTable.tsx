@@ -224,12 +224,12 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
     const columns: ColumnDef<AlertChannel>[] = useMemo(() => [
         {
             accessorKey: 'name',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('alert.channelName')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('alert.channelName')}</div>,
             cell: ({ row }) => {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`font-medium dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={`font-medium  ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {row.original.name || '-'}
                     </div>
                 )
@@ -237,12 +237,12 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         },
         {
             accessorKey: 'type',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('alert.channels')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('alert.channels')}</div>,
             cell: ({ row }) => {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`flex items-center gap-1 dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={`flex items-center gap-1  ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {getChannelIcon(row.original.type)}
                         <span>{getChannelTypeLabel(row.original.type)}</span>
                     </div>
@@ -251,7 +251,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         },
         {
             accessorKey: 'enabled',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('alert.status')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('alert.status')}</div>,
             cell: ({ row }) => {
                 if (!row.original) return null
                 return (
@@ -267,12 +267,12 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         },
         {
             accessorKey: 'createdAt',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('createdAt')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('createdAt')}</div>,
             cell: ({ row }) => {
                 if (!row.original) return null
                 const isDisabled = !row.original.enabled
                 return (
-                    <div className={`dark:text-shadow-glow-white ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
+                    <div className={` ${isDisabled ? 'text-gray-400 dark:text-gray-500' : 'dark:text-slate-200'}`}>
                         {row.original.createdAt ? new Date(row.original.createdAt).toLocaleString() : '-'}
                     </div>
                 )
@@ -280,7 +280,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
         },
         {
             id: 'actions',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('ipGroup.table.actions')}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t('ipGroup.table.actions')}</div>,
             cell: ({ row }) => {
                 if (!row.original) return null
                 return (
@@ -289,7 +289,7 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 dark:text-shadow-glow-white"
+                                className="h-8 w-8 "
                                 aria-label={t('ipGroup.table.actions')}
                             >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -299,14 +299,14 @@ export function ChannelTable({ onEdit, onDelete, onTest }: ChannelTableProps) {
                         <DropdownMenuContent align="end" className="dark:bg-muted/95 dark:border-primary/20">
                             <DropdownMenuItem
                                 onClick={() => onTest(row.original)}
-                                className="dark:text-shadow-glow-white dark:hover:bg-primary/20 cursor-pointer"
+                                className=" dark:hover:bg-primary/20 cursor-pointer"
                             >
                                 <TestTube2 className="h-4 w-4 mr-2" />
                                 {t('alert.testChannel')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => onEdit(row.original)}
-                                className="dark:text-shadow-glow-white dark:hover:bg-primary/20 cursor-pointer"
+                                className=" dark:hover:bg-primary/20 cursor-pointer"
                             >
                                 <Pencil className="h-4 w-4 mr-2" />
                                 {t('certificate.edit')}

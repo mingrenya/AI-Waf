@@ -73,7 +73,7 @@ export function ConditionBuilder({
     const isMaxDepth = currentDepth >= MAX_NESTING_DEPTH
 
     // Common styles
-    const shadowTextStyles = "dark:text-shadow-glow-white"
+    const shadowTextStyles = ""
 
     // Get current condition type
     const conditionType = form.watch(`${path}.type` as FieldPath<MicroRuleCreateRequest>) as "simple" | "composite"

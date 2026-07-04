@@ -51,12 +51,12 @@ export function DeleteSiteDialog({
             <AnimatePresence mode="wait">
                 {open && (
                     <motion.div {...dialogEnterExitAnimation}>
-                        <AlertDialogContent className="p-0 overflow-hidden dark:bg-accent/10 dark:border-slate-800 dark:card-neon">
+                        <AlertDialogContent className="p-0 overflow-hidden dark:bg-accent/10 dark:border-slate-800 ">
                             <motion.div {...dialogContentAnimation}>
                                 <motion.div {...dialogHeaderAnimation}>
                                     <AlertDialogHeader className="p-6 pb-3">
                                         <AlertDialogTitle className="text-xl">{t('site.deleteDialog.confirmTitle')}</AlertDialogTitle>
-                                        <AlertDialogDescription className="dark:text-shadow-glow-white">
+                                        <AlertDialogDescription className="">
                                             {t('site.deleteDialog.confirmDescription')}
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>

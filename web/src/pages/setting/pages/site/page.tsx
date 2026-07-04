@@ -71,7 +71,7 @@ export default function SiteManagerPage() {
                             variant="outline"
                             size="sm"
                             onClick={refreshSites}
-                            className="flex items-center gap-2 dark:text-shadow-glow-white"
+                            className="flex items-center gap-2 "
                         >
                             <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
                                 <RefreshCw className="h-4 w-4" />
@@ -83,7 +83,7 @@ export default function SiteManagerPage() {
                         <Button
                             size="sm"
                             onClick={handleAddSite}
-                            className="flex items-center gap-1 dark:text-shadow-glow-white"
+                            className="flex items-center gap-1 "
                         >
                             <Plus className="h-4 w-4" />
                             {t('site.add')}

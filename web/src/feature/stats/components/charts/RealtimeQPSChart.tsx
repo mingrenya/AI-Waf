@@ -199,7 +199,7 @@ export function RealtimeQPSChart() {
         <Card className="border-none shadow-none">
             <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
                 <div className="flex items-center gap-3">
-                    <CardTitle className="text-lg font-medium dark:text-shadow-glow-white">
+                    <CardTitle className="text-lg font-medium ">
                         {t('stats.realtimeQPS')}
                     </CardTitle>
                     <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-md py-1 px-3">

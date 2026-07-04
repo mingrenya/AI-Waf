@@ -47,7 +47,7 @@ export function DeleteChannelDialog({ open, onOpenChange, channelId }: DeleteCha
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>{t('alert.deleteChannelTitle')}</AlertDialogTitle>
-                    <AlertDialogDescription className='dark:text-shadow-glow-white'>
+                    <AlertDialogDescription className=''>
                         {t('alert.deleteChannelDescription')}
                     </AlertDialogDescription>
                 </AlertDialogHeader>

@@ -39,17 +39,17 @@ const IPAddressesCell = ({ items }: IPAddressesCellProps) => {
                     {items.length > 3 ? (
                         <>
                             {items.slice(0, 3).map((item, index) => (
-                                <Badge key={`${item}-${index}`} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
+                                <Badge key={`${item}-${index}`} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 ">
                                     {item}
                                 </Badge>
                             ))}
-                            <Badge variant="outline" className="dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
+                            <Badge variant="outline" className="dark:border-slate-700 dark:bg-slate-800/70 ">
                                 +{items.length - 3}
                             </Badge>
                         </>
                     ) : (
                         items.map((item, index) => (
-                            <Badge key={`${item}-${index}`} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 dark:text-shadow-glow-white">
+                            <Badge key={`${item}-${index}`} variant="outline" className="font-mono dark:border-slate-700 dark:bg-slate-800/70 ">
                                 {item}
                             </Badge>
                         ))
@@ -64,7 +64,7 @@ const IPAddressesCell = ({ items }: IPAddressesCellProps) => {
                             placeholder="Search IP addresses..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-8 dark:bg-slate-700/50 dark:border-slate-600 dark:text-shadow-glow-white"
+                            className="pl-8 dark:bg-slate-700/50 dark:border-slate-600 "
                         />
                     </div>
                     <ScrollArea scrollbarVariant="neon" className="h-[300px] pr-4">
@@ -72,7 +72,7 @@ const IPAddressesCell = ({ items }: IPAddressesCellProps) => {
                             {filteredItems.map((item, index) => (
                                 <div
                                     key={`filtered-${item}-${index}`}
-                                    className="px-2 py-1.5 text-sm font-mono rounded-md hover:bg-slate-700/50 dark:text-shadow-glow-white cursor-pointer"
+                                    className="px-2 py-1.5 text-sm font-mono rounded-md hover:bg-slate-700/50  cursor-pointer"
                                 >
                                     {item}
                                 </div>
@@ -118,16 +118,16 @@ export default function IPGroupPage() {
     const columns: ColumnDef<IPGroup>[] = [
         {
             accessorKey: "name",
-            header: () => <div className="whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('ipGroup.table.name')}</div>,
+            header: () => <div className="whitespace-nowrap  dark:text-white">{t('ipGroup.table.name')}</div>,
             cell: ({ row }) => (
-                <div className="font-medium dark:text-shadow-glow-white">
+                <div className="font-medium ">
                     {row.getValue("name")}
                 </div>
             )
         },
         {
             accessorKey: "items",
-            header: () => <div className="whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('ipGroup.table.ipAddresses')}</div>,
+            header: () => <div className="whitespace-nowrap  dark:text-white">{t('ipGroup.table.ipAddresses')}</div>,
             cell: ({ row }) => {
                 const items = row.getValue("items") as string[]
                 return <IPAddressesCell items={items} />
@@ -135,7 +135,7 @@ export default function IPGroupPage() {
         },
         {
             id: "actions",
-            header: () => <div className="whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t('ipGroup.table.actions')}</div>,
+            header: () => <div className="whitespace-nowrap  dark:text-white">{t('ipGroup.table.actions')}</div>,
             cell: ({ row }) => {
                 const ipGroup = row.original
                 return (
@@ -145,9 +145,9 @@ export default function IPGroupPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleOpenEditDialog(ipGroup)}
-                                className="h-8 w-8 dark:text-shadow-glow-white dark:button-neon"
+                                className="h-8 w-8  "
                             >
-                                <Pencil className="h-4 w-4 dark:icon-neon" />
+                                <Pencil className="h-4 w-4 " />
                             </Button>
                         </AnimatedButton>
                         <AnimatedButton>
@@ -155,9 +155,9 @@ export default function IPGroupPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleOpenDeleteDialog(ipGroup)}
-                                className="h-8 w-8 text-destructive hover:text-destructive dark:text-red-500 dark:hover:text-red-400 dark:button-neon"
+                                className="h-8 w-8 text-destructive hover:text-destructive dark:text-red-500 dark:hover:text-red-400 "
                             >
-                                <Trash2 className="h-4 w-4 dark:icon-neon" />
+                                <Trash2 className="h-4 w-4 " />
                             </Button>
                         </AnimatedButton>
                     </div>
@@ -212,9 +212,9 @@ export default function IPGroupPage() {
                     <Button
                         size="sm"
                         onClick={handleOpenCreateDialog}
-                        className="flex items-center gap-1 dark:text-shadow-glow-white dark:button-neon"
+                        className="flex items-center gap-1  "
                     >
-                        <Plus className="h-4 w-4 dark:icon-neon dark:text-shadow-glow-white" />
+                        <Plus className="h-4 w-4  " />
                         {t('ipGroup.createButton')}
                     </Button>
                 </AnimatedButton>

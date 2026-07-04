@@ -52,10 +52,10 @@ export function IPGroupDialog({ open, onOpenChange, mode = 'create', ipGroup = n
                             <motion.div {...dialogContentAnimation}>
                                 <DialogHeader className="px-2">
                                     <motion.div {...dialogContentItemAnimation}>
-                                        <DialogTitle className="text-xl font-semibold dark:text-shadow-glow-white dark:text-white">
+                                        <DialogTitle className="text-xl font-semibold  dark:text-white">
                                             {title}
                                         </DialogTitle>
-                                        <DialogDescription className="dark:text-shadow-glow-white">
+                                        <DialogDescription className="">
                                             {description}
                                         </DialogDescription>
                                     </motion.div>

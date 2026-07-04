@@ -43,12 +43,12 @@ export function DeleteIPGroupDialog({ open, onOpenChange, ipGroup }: DeleteIPGro
             <AnimatePresence mode="wait">
                 {open && (
                     <motion.div {...dialogEnterExitAnimation}>
-                        <AlertDialogContent className="p-0 overflow-hidden dark:bg-accent/10 dark:border-slate-800 dark:card-neon">
+                        <AlertDialogContent className="p-0 overflow-hidden dark:bg-accent/10 dark:border-slate-800 ">
                             <motion.div {...dialogContentAnimation}>
                                 <motion.div {...dialogHeaderAnimation}>
                                     <AlertDialogHeader className="p-6 pb-3">
-                                        <AlertDialogTitle className="flex items-center gap-2 dark:text-shadow-glow-white dark:text-white">
-                                            <AlertCircle className="h-5 w-5 text-destructive dark:text-red-500 dark:icon-neon" />
+                                        <AlertDialogTitle className="flex items-center gap-2  dark:text-white">
+                                            <AlertCircle className="h-5 w-5 text-destructive dark:text-red-500 " />
                                             {t('ipGroup.deleteDialog.title')}
                                         </AlertDialogTitle>
                                         <AlertDialogDescription>
@@ -63,7 +63,7 @@ export function DeleteIPGroupDialog({ open, onOpenChange, ipGroup }: DeleteIPGro
                                 >
                                     <AlertDialogFooter className="mt-2 flex justify-end space-x-2">
                                         <AnimatedButton>
-                                            <AlertDialogCancel className="dark:border-slate-700 dark:text-slate-300 dark:text-shadow-glow-white dark:button-neon">
+                                            <AlertDialogCancel className="dark:border-slate-700 dark:text-slate-300  ">
                                                 {t('common.cancel')}
                                             </AlertDialogCancel>
                                         </AnimatedButton>
@@ -71,7 +71,7 @@ export function DeleteIPGroupDialog({ open, onOpenChange, ipGroup }: DeleteIPGro
                                             <AlertDialogAction
                                                 onClick={confirmDelete}
                                                 disabled={isDeleting}
-                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-900 dark:hover:bg-red-800 dark:text-white dark:text-shadow-glow-white"
+                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90 dark:bg-red-900 dark:hover:bg-red-800 dark:text-white "
                                             >
                                                 {t('common.delete')}
                                             </AlertDialogAction>

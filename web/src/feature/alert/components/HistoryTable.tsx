@@ -120,12 +120,12 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
             {
                 accessorKey: 'ruleName',
                 header: () => (
-                    <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                    <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                         {t('alert.ruleName')}
                     </div>
                 ),
                 cell: ({ row }) => (
-                    <div className="font-medium dark:text-shadow-glow-white">
+                    <div className="font-medium ">
                         {row.original.ruleName || '-'}
                     </div>
                 ),
@@ -133,12 +133,12 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
             {
                 accessorKey: 'severity',
                 header: () => (
-                    <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                    <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                         {t('alert.severityLabel', { defaultValue: 'Severity' })}
                     </div>
                 ),
                 cell: ({ row }) => (
-                    <div className="dark:text-shadow-glow-white">
+                    <div className="">
                         {t(`alert.severity.${row.original.severity}`)}
                     </div>
                 ),
@@ -146,12 +146,12 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
             {
                 accessorKey: 'status',
                 header: () => (
-                    <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                    <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                         {t('alert.status')}
                     </div>
                 ),
                 cell: ({ row }) => (
-                    <div className="dark:text-shadow-glow-white capitalize">
+                    <div className=" capitalize">
                         {row.original.status}
                     </div>
                 ),
@@ -159,12 +159,12 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
             {
                 accessorKey: 'message',
                 header: () => (
-                    <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                    <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                         {t('message', { defaultValue: 'Message' })}
                     </div>
                 ),
                 cell: ({ row }) => (
-                    <div className="max-w-xs truncate dark:text-shadow-glow-white">
+                    <div className="max-w-xs truncate ">
                         {row.original.message}
                     </div>
                 ),
@@ -172,14 +172,14 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
             {
                 accessorKey: 'triggeredAt',
                 header: () => (
-                    <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                    <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                         {t('alert.triggeredAt', {
                             defaultValue: 'Triggered at',
                         })}
                     </div>
                 ),
                 cell: ({ row }) => (
-                    <div className="dark:text-shadow-glow-white">
+                    <div className="">
                         {row.original.triggeredAt
                             ? new Date(
                                   row.original.triggeredAt,
@@ -191,7 +191,7 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
             {
                 id: 'actions',
                 header: () => (
-                    <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">
+                    <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">
                         {t('ipGroup.table.actions')}
                     </div>
                 ),
@@ -201,7 +201,7 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 dark:text-shadow-glow-white"
+                                className="h-8 w-8 "
                                 aria-label={t('ipGroup.table.actions')}
                             >
                                 <MoreHorizontal className="h-4 w-4" />
@@ -217,7 +217,7 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
                             {onViewDetail && (
                                 <DropdownMenuItem
                                     onClick={() => onViewDetail(row.original)}
-                                    className="dark:text-shadow-glow-white dark:hover:bg-primary/20 cursor-pointer"
+                                    className=" dark:hover:bg-primary/20 cursor-pointer"
                                 >
                                     {t('detail')}
                                 </DropdownMenuItem>
@@ -281,7 +281,7 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
         <div className="space-y-4">
             {/* 筛选器 */}
             <div className="flex flex-wrap items-center gap-3 mb-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-shadow-glow-white">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground ">
                     <ListFilter className="h-4 w-4" />
                     {t('filter')}
                 </div>
@@ -289,7 +289,7 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
                     value={severityFilter}
                     onValueChange={(val) => setSeverityFilter(val === 'all' ? '' : val)}
                 >
-                    <SelectTrigger className="w-40 dark:text-shadow-glow-white">
+                    <SelectTrigger className="w-40 ">
                         <SelectValue
                             placeholder={t('alert.severityFilter', {
                                 defaultValue: 'Severity',
@@ -319,7 +319,7 @@ export function HistoryTable({ onViewDetail }: HistoryTableProps) {
                     value={statusFilter}
                     onValueChange={(val) => setStatusFilter(val === 'all' ? '' : val)}
                 >
-                    <SelectTrigger className="w-40 dark:text-shadow-glow-white">
+                    <SelectTrigger className="w-40 ">
                         <SelectValue
                             placeholder={t('alert.status', {
                                 defaultValue: 'Status',

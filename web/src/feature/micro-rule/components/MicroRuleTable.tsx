@@ -150,21 +150,21 @@ export function MicroRuleTable() {
     const columns: ColumnDef<MicroRule>[] = [
         {
             accessorKey: 'name',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("microRule.table.name")}</div>,
-            cell: ({ row }) => <div className="font-medium dark:text-shadow-glow-white">{row.original.name}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("microRule.table.name")}</div>,
+            cell: ({ row }) => <div className="font-medium ">{row.original.name}</div>,
         },
         {
             accessorKey: 'type',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("microRule.table.type")}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("microRule.table.type")}</div>,
             cell: ({ row }) => (
-                <Badge variant={row.original.type === 'whitelist' ? 'outline' : 'destructive'} className="dark:text-shadow-glow-white">
+                <Badge variant={row.original.type === 'whitelist' ? 'outline' : 'destructive'} className="">
                     {row.original.type === 'whitelist' ? t("microRule.form.whitelist") : t("microRule.form.blacklist")}
                 </Badge>
             ),
         },
         {
             accessorKey: 'status',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("microRule.table.status")}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("microRule.table.status")}</div>,
             cell: ({ row }) => (
                 <div className="flex items-center">
                     {row.original.status === 'enabled' ? (
@@ -172,7 +172,7 @@ export function MicroRuleTable() {
                     ) : (
                         <ShieldOff className="h-4 w-4 text-gray-400 mr-1" />
                     )}
-                    <span className="dark:text-shadow-glow-white">
+                    <span className="">
                         {row.original.status === 'enabled' ? t("microRule.form.enabled") : t("microRule.form.disabled")}
                     </span>
                 </div>
@@ -180,12 +180,12 @@ export function MicroRuleTable() {
         },
         {
             accessorKey: 'priority',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">{t("microRule.table.priority")}</div>,
-            cell: ({ row }) => <div className="dark:text-shadow-glow-white">{row.original.priority}</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">{t("microRule.table.priority")}</div>,
+            cell: ({ row }) => <div className="">{row.original.priority}</div>,
         },
         {
             id: 'effectiveness',
-            header: () => <div className="font-medium py-3.5 whitespace-nowrap dark:text-shadow-glow-white dark:text-white">规则评分</div>,
+            header: () => <div className="font-medium py-3.5 whitespace-nowrap  dark:text-white">规则评分</div>,
             cell: ({ row }) => (
                 <RuleEffectivenessCell ruleId={row.original.id} ruleName={row.original.name} />
             ),
@@ -195,21 +195,21 @@ export function MicroRuleTable() {
             cell: ({ row }) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="dark:text-shadow-glow-white">
-                            <MoreHorizontal className="h-4 w-4 dark:text-shadow-glow-white" />
+                        <Button variant="ghost" size="icon" className="">
+                            <MoreHorizontal className="h-4 w-4 " />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                            className="dark:text-shadow-glow-white"
+                            className=""
                             onClick={() => openUpdateDialog(row.original)}
                         >
-                            <Pencil className="mr-2 h-4 w-4 dark:text-shadow-glow-white" />
+                            <Pencil className="mr-2 h-4 w-4 " />
                             {t("microRule.table.edit")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => openDeleteDialog(row.original.id)}
-                            className="text-red-600 dark:text-red-400 dark:text-shadow-glow-white"
+                            className="text-red-600 dark:text-red-400 "
                         >
                             <Trash2 className="mr-2 h-4 w-4" />
                             {t("microRule.table.delete")}
@@ -229,7 +229,7 @@ export function MicroRuleTable() {
 
     return (
         <>
-            <Card className="glass-card-light p-6 flex flex-col h-full m-4">
+            <Card className="surface-card p-6 flex flex-col h-full m-4">
                 {/* 标题和操作按钮 - 固定在顶部 */}
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-semibold text-primary dark:text-white">{t("microRule.title")}</h2>
@@ -239,7 +239,7 @@ export function MicroRuleTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setTemplateDialogOpen(true)}
-                                className="flex items-center gap-2 justify-center dark:text-shadow-glow-white"
+                                className="flex items-center gap-2 justify-center "
                             >
                                 <FileText className="h-4 w-4" />
                                 OWASP 模板
@@ -250,7 +250,7 @@ export function MicroRuleTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setProfileDialogOpen(true)}
-                                className="flex items-center gap-2 justify-center dark:text-shadow-glow-white"
+                                className="flex items-center gap-2 justify-center "
                             >
                                 <Shield className="h-4 w-4" />
                                 保护配置
@@ -261,7 +261,7 @@ export function MicroRuleTable() {
                                 variant="outline"
                                 size="sm"
                                 onClick={refreshRules}
-                                className="flex items-center gap-2 justify-center dark:text-shadow-glow-white"
+                                className="flex items-center gap-2 justify-center "
                             >
                                 <AnimatedIcon animationVariant="continuous-spin" isAnimating={isRefreshAnimating} className="h-4 w-4">
                                     <RefreshCcw className="h-4 w-4" />
@@ -273,9 +273,9 @@ export function MicroRuleTable() {
                             <Button
                                 size="sm"
                                 onClick={openCreateDialog}
-                                className="flex items-center gap-1 dark:text-shadow-glow-white"
+                                className="flex items-center gap-1 "
                             >
-                                <Plus className="h-3.5 w-3.5 dark:text-shadow-glow-white" />
+                                <Plus className="h-3.5 w-3.5 " />
                                 {t("microRule.add")}
                             </Button>
                         </AnimatedButton>

@@ -275,7 +275,7 @@ export function RequestsBlocksChart({ timeRange }: RequestsBlocksChartProps) {
     return (
         <Card className="border-none shadow-none">
             <CardHeader className="p-4 pb-0">
-                <CardTitle className="text-lg font-medium dark:text-shadow-glow-white">{t('stats.requestsAndBlocks')}</CardTitle>
+                <CardTitle className="text-lg font-medium ">{t('stats.requestsAndBlocks')}</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
                 <div className="h-[300px]">

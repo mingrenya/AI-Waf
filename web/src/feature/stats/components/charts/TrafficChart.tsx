@@ -212,7 +212,7 @@ export function TrafficChart({ timeRange }: TrafficChartProps) {
     return (
         <Card className="border-none shadow-none">
             <CardHeader className="p-4 pb-0">
-                <CardTitle className="text-lg font-medium dark:text-shadow-glow-white">{t('stats.trafficTrend')}</CardTitle>
+                <CardTitle className="text-lg font-medium ">{t('stats.trafficTrend')}</CardTitle>
             </CardHeader>
             <CardContent className="p-4">
                 <div className="h-[300px]">

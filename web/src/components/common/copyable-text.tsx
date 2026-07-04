@@ -47,7 +47,7 @@ export function CopyableText({ text, className, showTooltip = true }: CopyableTe
                                     transition={{ duration: 0.15 }}
                                     className="flex items-center justify-center h-5 w-5 rounded-full bg-green-200 dark:bg-green-900/70"
                                 >
-                                    <Check className="h-3 w-3 text-green-500 dark:text-green-400 dark:icon-neon" strokeWidth={3} />
+                                    <Check className="h-3 w-3 text-green-500 dark:text-green-400 " strokeWidth={3} />
                                 </motion.div>
                             ) : (
                                 <motion.div
@@ -58,7 +58,7 @@ export function CopyableText({ text, className, showTooltip = true }: CopyableTe
                                     transition={{ duration: 0.15 }}
                                     className="flex items-center justify-center h-5 w-5 rounded-full bg-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 dark:bg-slate-700"
                                 >
-                                    <Copy className="h-3 w-3 text-slate-500 dark:text-slate-300 dark:icon-neon" />
+                                    <Copy className="h-3 w-3 text-slate-500 dark:text-slate-300 " />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -67,7 +67,7 @@ export function CopyableText({ text, className, showTooltip = true }: CopyableTe
                 {showTooltip && (
                     <TooltipContent
                         side="top"
-                        className="max-w-[350px] break-all bg-white border border-slate-200 shadow-md py-2 px-3 text-sm text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:!text-slate-200 dark:text-shadow-glow-white"
+                        className="max-w-[350px] break-all bg-white border border-slate-200 shadow-md py-2 px-3 text-sm text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:!text-slate-200 "
                     >
                         {copied ? t("common.copied") : text}
                     </TooltipContent>

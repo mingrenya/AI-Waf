@@ -71,7 +71,7 @@ const NoResults = <TData, TValue>({
     const { t } = useTranslation()
     return (
         <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center dark:text-shadow-glow-white">
+            <TableCell colSpan={columns.length} className="h-24 text-center ">
                 {t('noResult')}
             </TableCell>
         </TableRow>
@@ -199,7 +199,7 @@ export function DataTable<TData, TValue>({
 
     // 使用滚动容器
     const renderScrollableTable = () => (
-        <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-neon">
+        <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-custom">
             <table className="w-full caption-bottom text-sm">
                 {renderTableHeader()}
                 <tbody className={cn(
@@ -230,7 +230,7 @@ export function DataTable<TData, TValue>({
         case 'simple':
             return (
                 <div className="w-full h-full">
-                    <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-neon">
+                    <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-custom">
                         <Table>
                             {renderTableHeader()}
                             <TableBody>
@@ -244,7 +244,7 @@ export function DataTable<TData, TValue>({
         case 'border':
             return (
                 <div className="rounded-md border h-full w-full">
-                    <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-neon">
+                    <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-custom">
                         <Table>
                             {renderTableHeader()}
                             <TableBody>
@@ -258,7 +258,7 @@ export function DataTable<TData, TValue>({
         default:
             return (
                 <div className="w-full h-full">
-                    <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-neon">
+                    <TableScrollContainer showShadows={showScrollShadows} className="scrollbar-custom">
                         <Table>
                             {renderTableHeader()}
                             <TableBody className={isLoading || !table.getRowModel().rows?.length ? "[&_tr:last-child]:!border-b-0" : ""}>
