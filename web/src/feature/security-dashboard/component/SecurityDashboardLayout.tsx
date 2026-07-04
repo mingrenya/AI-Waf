@@ -158,7 +158,7 @@ export const SecurityDashboardLayout: React.FC = () => {
 
     return (
         <div
-            className={`relative w-full bg-gradient-to-br from-[#0d0c27] via-[#1a1336] to-[#2d1b54] overflow-hidden ${isFullscreen
+            className={`relative w-full bg-[#0d0c27] overflow-hidden dark ${isFullscreen
                 ? 'fixed inset-0 z-[9999] h-screen w-screen'
                 : 'h-screen'
                 }`}
@@ -179,19 +179,19 @@ export const SecurityDashboardLayout: React.FC = () => {
                 <div className="flex items-center justify-between h-full px-6">
                     <div className="flex items-center ml-2">
                         <div className="font-bold text-2xl gap-2 flex">
-                            <span className="text-[#E8DFFF] dark:text-[#F0EBFF] text-shadow-glow-purple transition-all duration-300">MRYa WAF</span>
-                            <span className="text-[#8ED4FF] dark:text-[#A5DEFF] text-shadow-glow-blue transition-all duration-300">{t('securityDashboard.title')}</span>
+                            <span className="text-[#E8DFFF] dark:text-[#F0EBFF] transition-all duration-300">MRYa WAF</span>
+                            <span className="text-[#8ED4FF] dark:text-[#A5DEFF] transition-all duration-300">{t('securityDashboard.title')}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <div className="text-white text-lg font-mono text-shadow-glow-white">
+                        <div className="text-lg font-mono" style={{color:'var(--text-primary)'}}>
                             {formatCurrentTime(currentTime)}
                         </div>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={toggleFullscreen}
-                            className="text-white transition-all duration-200"
+                            className="transition-all duration-200" style={{color:'var(--text-primary)'}}
                             title={isFullscreen ? "退出全屏模式" : "进入全屏模式"}
                         >
                             {isFullscreen ? (

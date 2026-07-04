@@ -28,11 +28,11 @@ export function MetricCard({ label, value, trend, icon: Icon, color = 'cyan' }: 
 
   return (
     <div className={cn(
-      'glass-card p-5 rounded-xl border backdrop-blur-sm transition-all duration-300 hover:shadow-lg',
+      'surface-card p-5 rounded-xl border transition-all duration-300 hover:shadow-lg',
       c.border, c.bg,
     )}>
       <div className="flex items-start justify-between mb-3">
-        <p className="text-xs font-medium text-white/50 uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-medium uppercase tracking-wider" style={{color:'var(--text-muted)'}}>{label}</p>
         {Icon && <Icon className={cn('h-5 w-5', c.icon)} />}
       </div>
       <div className="flex items-baseline gap-2">

@@ -66,8 +66,8 @@ export function StatsCard({
             className={`border-none shadow-none p-4 hover:bg-gray-50 dark:hover:bg-gray-900/10 transition-colors ${link ? 'cursor-pointer' : ''}`}
             onClick={link ? handleCardClick : undefined}
         >
-            <CardTitle className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2 dark:text-shadow-glow-white">
-                {icon && <span className="text-primary dark:text-white flex-shrink-0">{icon}</span>}
+            <CardTitle className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                {icon && <span className="text-primary flex-shrink-0">{icon}</span>}
                 {title}
             </CardTitle>
 
@@ -79,12 +79,12 @@ export function StatsCard({
                         <TooltipProvider delayDuration={300}>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="text-2xl font-bold dark:text-shadow-glow-white truncate">
+                                    <div className="text-2xl font-bold truncate">
                                         {displayValue}
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent
-                                    className="max-w-[350px] break-all bg-white border border-slate-200 shadow-md py-2 px-3 text-sm text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:!text-slate-200 dark:text-shadow-glow-white"
+                                    className="max-w-[350px] break-all bg-white border border-slate-200 shadow-md py-2 px-3 text-sm text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:!text-slate-200"
                                     side="top"
                                 >
                                     {displayValue}
@@ -103,7 +103,7 @@ export function StatsCard({
                                         </div>
                                     </TooltipTrigger>
                                     <TooltipContent
-                                        className="max-w-[350px] break-all bg-white border border-slate-200 shadow-md py-2 px-3 text-sm text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:!text-slate-200 dark:text-shadow-glow-white"
+                                        className="max-w-[350px] break-all bg-white border border-slate-200 shadow-md py-2 px-3 text-sm text-slate-800 dark:bg-slate-800 dark:border-slate-700 dark:!text-slate-200"
                                         side="top"
                                     >
                                         {trend === 'up' ? '↑ ' : trend === 'down' ? '↓ ' : ''}{change}

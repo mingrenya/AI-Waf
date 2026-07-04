@@ -50,12 +50,12 @@ export function DashboardQPSChart() {
                     type: 'category',
                     data: [],
                     axisLabel: {
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        color: 'rgba(160, 113, 218, 0.4)',
                         fontSize: 10
                     },
                     axisLine: {
                         lineStyle: {
-                            color: 'rgba(255, 255, 255, 0.3)'
+                            color: 'rgba(160, 113, 218, 0.2)'
                         }
                     }
                 },
@@ -114,7 +114,7 @@ export function DashboardQPSChart() {
                 backgroundColor: 'transparent',
                 borderColor: 'transparent',
                 textStyle: {
-                    color: '#fff',
+                    color: '#a071da',
                     fontSize: 12,
                     fontWeight: 'normal'
                 },
@@ -133,14 +133,14 @@ export function DashboardQPSChart() {
                 data: localData.map(item => formatTimeLabel(item.timestamp)),
                 axisLabel: {
                     show: true,
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    color: 'rgba(160, 113, 218, 0.4)',
                     fontSize: 10,
                     interval: Math.floor(localData.length / 8) // 显示8个左右的标签
                 },
                 axisLine: {
                     show: true,
                     lineStyle: {
-                        color: 'rgba(255, 255, 255, 0.3)'
+                        color: 'rgba(160, 113, 218, 0.2)'
                     }
                 },
                 axisTick: {
@@ -244,8 +244,8 @@ export function DashboardQPSChart() {
         <div className="h-full pb-12">
             <div className="flex items-center mb-2 ml-8">
                 <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold text-white text-shadow-glow-white">{currentQPS}</span>
-                    <span className="text-white text-xs text-shadow-glow-white">QPS</span>
+                    <span className="text-xl font-bold" style={{color:'var(--text-primary)'}}>{currentQPS}</span>
+                    <span className="text-xs" style={{color:'var(--text-primary)'}}>QPS</span>
                 </div>
             </div>
             <div

@@ -8,7 +8,7 @@ interface StatusBarProps {
 export function StatusBar({ online = true, lastSync }: StatusBarProps) {
   return (
     <div className={cn(
-      'flex items-center justify-between px-4 py-2.5 rounded-xl text-sm border backdrop-blur-sm',
+      'flex items-center justify-between px-4 py-2.5 rounded-xl text-sm border',
       online
         ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400'
         : 'bg-red-500/5 border-red-500/20 text-red-400',
@@ -27,7 +27,7 @@ export function StatusBar({ online = true, lastSync }: StatusBarProps) {
         )}
       </div>
       {lastSync && (
-        <span className="text-xs font-mono text-white/40">
+        <span className="text-xs font-mono" style={{color:'var(--text-primary)', opacity:0.4}}>
           Last sync: {lastSync}
         </span>
       )}
