@@ -78,6 +78,7 @@ type Application struct {
 	scanProtector     *ScanProtector       // 扫描防护器
 	onAttack          cwtypes.AttackCallback // 攻击事件回调（取证捕获等）
 	botDetector       *BotDetector           // Bot管理检测器
+	antiEvasion       *AntiEvasion           // 反逃逸编码处理器
 
 	AppConfig
 }
@@ -222,6 +223,34 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 	}
 
 	realIP := getRealClientIP(&req)
+
+	// 反逃逸编码预处理：在 Coraza 规则引擎检测之前对请求内容进行多层解码还原
+	// 防止攻击者通过 URL 编码/Unicode 编码/Base64/同形字符等方式绕过 WAF
+	if a.antiEvasion != nil && a.antiEvasion.IsEnabled() {
+		pathResult := a.antiEvasion.Decode(string(req.Path))
+		if pathResult.Changed {
+			a.Logger.Info().
+				Str("ip", realIP).
+				Str("chain", strings.Join(pathResult.DecodeChain, " → ")).
+				Int("original_len", len(pathResult.Original)).
+				Int("decoded_len", len(pathResult.Decoded)).
+				Msg("anti-evasion decoded path — potential encoding bypass attempt")
+			req.Path = []byte(pathResult.Decoded)
+		}
+		// 同时检测 query 和 body 中的逃逸编码
+		if len(req.Query) > 0 {
+			queryResult := a.antiEvasion.Decode(string(req.Query))
+			if queryResult.Changed {
+				req.Query = []byte(queryResult.Decoded)
+			}
+		}
+		if len(req.Body) > 0 {
+			bodyResult := a.antiEvasion.Decode(string(req.Body))
+			if bodyResult.Changed {
+				req.Body = []byte(bodyResult.Decoded)
+			}
+		}
+	}
 
 	// 扫描器指纹检测：在 IP 封禁检查之前执行
 	if a.scanProtector != nil && a.scanProtector.IsEnabled() {
