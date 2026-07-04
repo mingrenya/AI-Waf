@@ -1,552 +1,351 @@
-/* stylelint-disable-next-line at-rule-no-unknown */
 @tailwind base;
-/* stylelint-disable-next-line at-rule-no-unknown */
 @tailwind components;
-/* stylelint-disable-next-line at-rule-no-unknown */
 @tailwind utilities;
-/* stylelint-disable-next-line at-rule-no-unknown */
 
-@layer base {
-    /* ============================================
-       浅色模式 — Light Glassmorphism
-       背景：柔和渐变白底，玻璃卡片带微透效果
-       ============================================ */
-    :root {
-        --background: 240 20% 97%;
-        --foreground: 240 10% 10%;
-        --card: 255 255 255 / 0.6;
-        --card-foreground: 240 10% 10%;
-        --popover: 240 20% 99%;
-        --popover-foreground: 240 10% 10%;
-        --primary: 262 83% 58%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 240 10% 94%;
-        --secondary-foreground: 240 6% 20%;
-        --muted: 240 10% 94%;
-        --muted-foreground: 240 4% 50%;
-        --accent: 262 83% 58%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 0 72% 51%;
-        --destructive-foreground: 0 0% 100%;
-        --success: 142 71% 40%;
-        --success-foreground: 0 0% 100%;
-        --warning: 38 92% 45%;
-        --warning-foreground: 0 0% 100%;
-        --border: 240 6% 88%;
-        --input: 240 6% 92%;
-        --ring: 262 83% 58%;
-        --radius: 0.75rem;
-        --chart-1: 262 83% 58%;
-        --chart-2: 217 91% 60%;
-        --chart-3: 330 81% 60%;
-        --chart-4: 142 71% 40%;
-        --chart-5: 38 92% 45%;
-        /* 浅色玻璃态 */
-        --glass-bg: rgba(255, 255, 255, 0.55);
-        --glass-bg-hover: rgba(255, 255, 255, 0.7);
-        --glass-bg-light: rgba(255, 255, 255, 0.35);
-        --glass-bg-nav: rgba(255, 255, 255, 0.45);
-        --glass-border: rgba(31, 38, 135, 0.12);
-        --glass-border-light: rgba(31, 38, 135, 0.06);
-        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
-        --glass-shadow-hover: 0 12px 48px 0 rgba(31, 38, 135, 0.2);
-        --glass-shadow-light: 0 4px 16px 0 rgba(31, 38, 135, 0.08);
-        --glass-blur: blur(20px);
-        --glass-blur-light: blur(10px);
-        --glass-blur-strong: blur(40px);
-        /* 滚动条 */
-        --scrollbar-track: 240 6% 90%;
-        --scrollbar-thumb: 240 4% 75%;
-        --scrollbar-thumb-hover: 240 4% 55%;
-        /* 字体 */
-        --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    }
+/* ============================================
+   Design Tokens — 浅色模式
+   ============================================ */
+:root {
+  /* 底座背景 */
+  --bg-page: linear-gradient(135deg, #f5f6fa 0%, #eef0f9 100%);
 
-    /* ============================================
-       深色模式 — Dark Glassmorphism
-       背景：紫蓝渐变，白色半透明玻璃卡片
-       ============================================ */
-    .dark {
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 255 255 255 / 0.1;
-        --card-foreground: 0 0% 100%;
-        --popover: 240 10% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 217 91% 60%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 240 4% 16%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 240 4% 16%;
-        --muted-foreground: 240 5% 65%;
-        --accent: 262 83% 58%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 0 63% 31%;
-        --destructive-foreground: 0 0% 100%;
-        --success: 142 71% 45%;
-        --success-foreground: 0 0% 100%;
-        --warning: 38 92% 50%;
-        --warning-foreground: 0 0% 100%;
-        --border: 0 0% 100% / 0.1;
-        --input: 0 0% 100% / 0.05;
-        --ring: 217 91% 60%;
-        --radius: 0.75rem;
-        --chart-1: 217 91% 60%;
-        --chart-2: 262 83% 58%;
-        --chart-3: 330 81% 60%;
-        --chart-4: 142 71% 45%;
-        --chart-5: 38 92% 50%;
-        /* 深色玻璃态 */
-        --glass-bg: rgba(255, 255, 255, 0.1);
-        --glass-bg-hover: rgba(255, 255, 255, 0.15);
-        --glass-bg-light: rgba(255, 255, 255, 0.05);
-        --glass-bg-nav: rgba(255, 255, 255, 0.08);
-        --glass-border: rgba(255, 255, 255, 0.18);
-        --glass-border-light: rgba(255, 255, 255, 0.1);
-        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        --glass-shadow-hover: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
-        --glass-shadow-light: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
-        --glass-blur: blur(20px);
-        --glass-blur-light: blur(10px);
-        --glass-blur-strong: blur(40px);
-        --scrollbar-track: 240 6% 15%;
-        --scrollbar-thumb: 240 4% 35%;
-        --scrollbar-thumb-hover: 240 4% 55%;
-        --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-        --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-    }
-}
+  /* Surface 背景 (Z=0 实底) */
+  --surface-root-bg: #ffffff;
+  --surface-root-border: rgba(31, 38, 135, 0.06);
 
-@layer base {
-    * {
-        @apply border-border;
-    }
+  /* Surface 卡片 (Z=1 微玻璃) */
+  --surface-card-bg: rgba(255, 255, 255, 0.65);
+  --surface-card-bg-hover: rgba(255, 255, 255, 0.82);
+  --surface-card-border: rgba(31, 38, 135, 0.08);
+  --surface-card-border-top: rgba(255, 255, 255, 0.7);
 
-    html,
-    body {
-        @apply bg-background text-foreground;
-        font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        height: 100%;
-        overflow: hidden;
-    }
+  /* Surface 浮层 (Z=2 中玻璃) */
+  --surface-floating-bg: rgba(255, 255, 255, 0.8);
+  --surface-floating-border: rgba(31, 38, 135, 0.12);
 
-    #root {
-        height: 100%;
-        overflow: hidden;
-    }
+  /* Surface 模态 (Z=3 强玻璃) */
+  --surface-modal-bg: rgba(255, 255, 255, 0.9);
+  --surface-modal-border: rgba(31, 38, 135, 0.15);
 
-    /* JetBrains Mono for data/metrics */
-    .font-mono, [data-mono] {
-        font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-feature-settings: 'tnum' 1, 'cv01' 1;
-    }
-}
+  /* 阴影 (Ant Design 风格，级联) */
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-floating: 0 6px 16px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.12);
 
-/* 滚动区域无滚动条样式 */
-.scrollbar-none {
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE/Edge */
-}
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
-.scrollbar-none::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-}
+  /* 品牌色板 (Primary — 紫蓝) */
+  --color-primary-1: #ede9fe;
+  --color-primary-2: #d4c9fc;
+  --color-primary-3: #b7a4f8;
+  --color-primary-4: #9b7ff3;
+  --color-primary-5: #667eea;
+  --color-primary-6: #5a6fd6;
+  --color-primary-7: #4d5cc2;
+  --color-primary-8: #3b3fa5;
+  --color-primary-9: #4c1d95;
+  --color-primary-10: #3a1078;
 
-/* 自定义滚动条 */
-.scrollbar-custom {
-    scrollbar-width: thin;
-    /* Firefox */
-    scrollbar-color: hsl(var(--scrollbar-thumb)) hsl(var(--scrollbar-track));
-    /* Firefox */
-}
+  /* 文本层级 */
+  --text-primary: #0f1133;
+  --text-secondary: rgba(15, 17, 51, 0.65);
+  --text-muted: rgba(15, 17, 51, 0.45);
+  --text-dim: rgba(15, 17, 51, 0.25);
 
-/* Webkit浏览器 (Chrome, Safari) 的滚动条样式 */
-.scrollbar-custom::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
+  /* 动效 */
+  --ease-natural: cubic-bezier(0.23, 0.23, 0.23, 0.96);
 
-.scrollbar-custom::-webkit-scrollbar-track {
-    background: hsl(var(--scrollbar-track));
-    border-radius: 4px;
-}
-
-.scrollbar-custom::-webkit-scrollbar-thumb {
-    background: hsl(var(--scrollbar-thumb));
-    border-radius: 4px;
-}
-
-.scrollbar-custom::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--scrollbar-thumb-hover));
+  /* 保留 — Tailwind 主题变量兼容 */
+  --background: 240 20% 97%;
+  --foreground: 240 10% 10%;
+  --card: 255 255 255 / 0.6;
+  --card-foreground: 240 10% 10%;
+  --popover: 240 20% 99%;
+  --popover-foreground: 240 10% 10%;
+  --primary: 262 83% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 10% 94%;
+  --secondary-foreground: 240 6% 20%;
+  --muted: 240 10% 94%;
+  --muted-foreground: 240 4% 50%;
+  --accent: 262 83% 58%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 142 71% 40%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 45%;
+  --warning-foreground: 0 0% 100%;
+  --border: 240 6% 88%;
+  --input: 240 6% 92%;
+  --ring: 262 83% 58%;
+  --radius: 0.75rem;
+  --chart-1: 262 83% 58%;
+  --chart-2: 217 91% 60%;
+  --chart-3: 330 81% 60%;
+  --chart-4: 142 71% 40%;
+  --chart-5: 38 92% 45%;
+  --scrollbar-track: 240 6% 90%;
+  --scrollbar-thumb: 240 4% 75%;
+  --scrollbar-thumb-hover: 240 4% 55%;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 /* ============================================
-   Glassmorphism Utility Classes
+   Design Tokens — 深色模式
+   ============================================ */
+.dark {
+  --bg-page: linear-gradient(135deg, #1a1040 0%, #0f0728 50%, #1a1040 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 30s ease infinite;
+
+  --surface-root-bg: rgba(255, 255, 255, 0.03);
+  --surface-root-border: rgba(255, 255, 255, 0.08);
+
+  --surface-card-bg: rgba(255, 255, 255, 0.06);
+  --surface-card-bg-hover: rgba(255, 255, 255, 0.1);
+  --surface-card-border: rgba(255, 255, 255, 0.1);
+  --surface-card-border-top: rgba(255, 255, 255, 0.14);
+
+  --surface-floating-bg: rgba(255, 255, 255, 0.1);
+  --surface-floating-border: rgba(255, 255, 255, 0.15);
+
+  --surface-modal-bg: rgba(255, 255, 255, 0.12);
+  --surface-modal-border: rgba(255, 255, 255, 0.18);
+
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-floating: 0 6px 16px rgba(0, 0, 0, 0.25);
+  --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.4);
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-muted: rgba(255, 255, 255, 0.45);
+  --text-dim: rgba(255, 255, 255, 0.25);
+
+  /* Tailwind 兼容变量 */
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 255 255 255 / 0.1;
+  --card-foreground: 0 0% 100%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 4% 16%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+  --accent: 262 83% 58%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+  --border: 0 0% 100% / 0.1;
+  --input: 0 0% 100% / 0.05;
+  --ring: 217 91% 60%;
+  --chart-1: 217 91% 60%;
+  --chart-2: 262 83% 58%;
+  --chart-3: 330 81% 60%;
+  --chart-4: 142 71% 45%;
+  --chart-5: 38 92% 50%;
+  --scrollbar-track: 240 6% 15%;
+  --scrollbar-thumb: 240 4% 35%;
+  --scrollbar-thumb-hover: 240 4% 55%;
+}
+
+/* ============================================
+   Base Layer
+   ============================================ */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body {
+    color: var(--text-primary);
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #root {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* ============================================
+   Surface Utility Classes
    ============================================ */
 
-/* --- Glass Card --- */
-.glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 16px;
-}
-.glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 16px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    transition: all 0.3s ease;
-}
-.glass-card:hover {
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.45);
-    transform: translateY(-2px);
+/* Z=0 实底 — 侧边栏 / 内容区底 */
+.surface-root {
+  background: var(--surface-root-bg);
+  border-color: var(--surface-root-border);
 }
 
-/* Glass card variants */
-.glass-card-light {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 14px;
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+/* Z=1 微玻璃卡片 — 统计卡片 / 图表容器 / 表格面板 */
+.surface-card {
+  background: var(--surface-card-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--surface-card-border);
+  border-top: 1px solid var(--surface-card-border-top);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: all 0.2s var(--ease-natural);
 }
-.glass-card-emphasis {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-}
-
-/* --- Glass Button --- */
-.glass-btn {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: #ffffff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
-}
-.glass-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 6px 24px 0 rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-}
-.glass-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.2);
+.surface-card:hover {
+  background: var(--surface-card-bg-hover);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
 }
 
-/* --- Glass Input --- */
-.glass-input {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: #ffffff;
-    transition: all 0.3s ease;
-}
-.glass-input:focus {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    outline: none;
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
-}
-.glass-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+/* Z=1 hover 提升态 */
+.surface-card-raised {
+  background: var(--surface-card-bg-hover);
+  box-shadow: var(--shadow-card-hover);
 }
 
-/* --- Glass Navigation --- */
-.glass-nav {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+/* Z=2 浮层 — 下拉菜单 / Popover / 选择 */
+.surface-floating {
+  background: var(--surface-floating-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--surface-floating-border);
+  border-radius: var(--radius-base);
+  box-shadow: var(--shadow-floating);
 }
 
-/* --- Glass Container Backgrounds --- */
-.glass-bg-purple {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-}
-.glass-bg-rainbow {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-    min-height: 100vh;
-}
-.glass-bg-animated {
-    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
-}
-@keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+/* Z=3 强玻璃模态 — Dialog / 抽屉 */
+.surface-modal {
+  background: var(--surface-modal-bg);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid var(--surface-modal-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-modal);
 }
 
-/* --- Floating Particle Effects --- */
-.glass-particle {
-    position: absolute;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-    animation: float-particle 20s ease-in-out infinite;
-    pointer-events: none;
+/* ============================================
+   滚动条
+   ============================================ */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--scrollbar-thumb)) hsl(var(--scrollbar-track));
 }
-@keyframes float-particle {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    25% { transform: translate(30px, -40px) scale(1.1); }
-    50% { transform: translate(-20px, -80px) scale(0.9); }
-    75% { transform: translate(-40px, -40px) scale(1.05); }
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: hsl(var(--scrollbar-track));
+  border-radius: 4px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background: hsl(var(--scrollbar-thumb));
+  border-radius: 4px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--scrollbar-thumb-hover));
 }
 
-/* --- Scrollbar (glass-adapted) --- */
+/* 玻璃风格滚动条 */
 .scrollbar-glass::-webkit-scrollbar { width: 6px; }
 .scrollbar-glass::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
 .scrollbar-glass::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
 }
 .scrollbar-glass::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* ============================================
-   Animation & Motion Utility Classes
+   保留 — 登录页专用动画
    ============================================ */
-
-/* --- Page Transition Utilities --- */
-.animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
+.glass-bg-animated {
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
 }
-.animate-slide-up {
-    animation: slideUp 0.5s ease-out forwards;
-}
-.animate-slide-in-right {
-    animation: slideInRight 0.4s ease-out forwards;
-}
-.animate-scale-in {
-    animation: scaleIn 0.35s ease-out forwards;
-}
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes slideInRight {
-    from { opacity: 0; transform: translateX(16px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-@keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
-/* --- Stagger Delay Helpers --- */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.3s; }
-.stagger-7 { animation-delay: 0.35s; }
-.stagger-8 { animation-delay: 0.4s; }
-
-/* --- Hover Effects --- */
-.hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+.glass-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+  animation: float-particle 20s ease-in-out infinite;
+  pointer-events: none;
 }
-.hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.2);
-}
-.hover-scale {
-    transition: transform 0.3s ease;
-}
-.hover-scale:hover {
-    transform: scale(1.03);
-}
-.hover-glow {
-    transition: box-shadow 0.3s ease;
-}
-.hover-glow:hover {
-    box-shadow: 0 0 24px 0 rgba(102, 126, 234, 0.4);
-}
-/* 浅色模式 hover 效果 */
-.light .hover-lift:hover {
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.1);
+@keyframes float-particle {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -40px) scale(1.1); }
+  50% { transform: translate(-20px, -80px) scale(0.9); }
+  75% { transform: translate(-40px, -40px) scale(1.05); }
 }
 
-/* --- 状态指示动画 --- */
+/* ============================================
+   保留 — 状态指示动画
+   ============================================ */
 .status-dot-online {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #22c55e;
-    animation: statusPulse 2s ease-in-out infinite;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  animation: statusPulse 2s ease-in-out infinite;
 }
 .status-dot-warning {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #eab308;
-    animation: statusPulse 1.5s ease-in-out infinite;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #eab308;
+  animation: statusPulse 1.5s ease-in-out infinite;
 }
 .status-dot-critical {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #ef4444;
-    animation: statusPulse 1s ease-in-out infinite;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ef4444;
+  animation: statusPulse 1s ease-in-out infinite;
 }
 @keyframes statusPulse {
-    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
-    50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px transparent; }
 }
 
-/* --- 加载骨架屏闪烁 --- */
+/* ============================================
+   保留 — 骨架屏
+   ============================================ */
 .skeleton-shimmer {
-    background: linear-gradient(90deg,
-        rgba(255,255,255,0.06) 25%,
-        rgba(255,255,255,0.12) 50%,
-        rgba(255,255,255,0.06) 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.06) 25%,
+    rgba(255,255,255,0.12) 50%,
+    rgba(255,255,255,0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }
 @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* --- 卡片入场交错动画 --- */
-.card-enter {
-    opacity: 0;
-    animation: cardEnter 0.5s ease-out forwards;
-}
-@keyframes cardEnter {
-    from { opacity: 0; transform: translateY(20px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* --- 数字跳动 --- */
-.number-pop {
-    animation: numberPop 0.3s ease-out;
-}
-@keyframes numberPop {
-    0% { transform: scale(0.8); opacity: 0; }
-    60% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-/* --- 边框呼吸动画（用于告警/高亮卡片） --- */
-.border-breathe {
-    animation: borderBreathe 3s ease-in-out infinite;
-}
-@keyframes borderBreathe {
-    0%, 100% { border-color: rgba(102, 126, 234, 0.3); }
-    50% { border-color: rgba(102, 126, 234, 0.8); }
-}
-
-/* --- 旋转加载 --- */
-.spin-slow {
-    animation: spinSlow 3s linear infinite;
-}
-@keyframes spinSlow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* --- 按钮点击波纹 --- */
-.ripple-effect {
-    position: relative;
-    overflow: hidden;
-}
-.ripple-effect::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-}
-.ripple-effect:active::after {
-    opacity: 1;
-    transition: opacity 0s;
-}
-
-/* --- 浅色模式适配 --- */
-:root {
-    --glass-bg: rgba(255, 255, 255, 0.55);
-    --glass-bg-hover: rgba(255, 255, 255, 0.7);
-    --glass-text: #1a1a2e;
-    --glass-text-secondary: rgba(26, 26, 46, 0.6);
-}
-.dark {
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-bg-hover: rgba(255, 255, 255, 0.15);
-    --glass-text: #ffffff;
-    --glass-text-secondary: rgba(255, 255, 255, 0.7);
-}
-
-/* 浅色模式下 glass 工具类覆盖 */
-:root .glass,
-:root .glass-card,
-:root .glass-card-light,
-:root .glass-card-emphasis {
-    color: #1a1a2e;
-}
-:root .glass-btn {
-    color: #1a1a2e;
-    background: rgba(255, 255, 255, 0.6);
-    border-color: rgba(31, 38, 135, 0.15);
-}
-:root .glass-btn:hover {
-    background: rgba(255, 255, 255, 0.8);
-}
-:root .glass-input {
-    color: #1a1a2e;
-    background: rgba(255, 255, 255, 0.4);
-    border-color: rgba(31, 38, 135, 0.1);
-}
-:root .glass-input::placeholder {
-    color: rgba(26, 26, 46, 0.4);
-}
-:root .glass-nav {
-    background: rgba(255, 255, 255, 0.5);
-    border-bottom-color: rgba(31, 38, 135, 0.08);
-}
-:root .glass-bg-purple,
-:root .glass-bg-rainbow {
-    /* 浅色模式用柔和渐变色 */
-    background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
-}
-:root .glass-bg-animated {
-    background: linear-gradient(135deg, #e0e7ff, #ede9fe, #fce7f3, #dbeafe);
-    background-size: 400% 400%;
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
