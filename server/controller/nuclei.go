@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"context"
+	"sync"
 	"time"
 
 	"net/http"
@@ -34,7 +36,99 @@ type NucleiControllerImpl struct {
 	logger  zerolog.Logger
 }
 
-// NewNucleiController 创建 Nuclei 控制器
+// ------- Cron Scanner -------
+
+type cronScannerState struct {
+	mu      sync.Mutex
+	jobs    map[string]*cronJobMeta
+	started bool
+}
+
+type cronJobMeta struct {
+	target   string
+	cronExpr string
+	severity string
+	lastRun  time.Time
+	lastErr  string
+}
+
+var cronState = cronScannerState{jobs: make(map[string]*cronJobMeta)}
+
+func startCronLoop(ctrl NucleiController) {
+	cronState.mu.Lock()
+	if cronState.started {
+		cronState.mu.Unlock()
+		return
+	}
+	cronState.started = true
+	cronState.mu.Unlock()
+
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			cronState.mu.Lock()
+			for id, job := range cronState.jobs {
+				if shouldRun(job) {
+					runCronJob(id, job, ctrl)
+				}
+			}
+			cronState.mu.Unlock()
+		}
+	}()
+	config.Logger.Info().Msg("Nuclei cron scheduler started")
+}
+
+func AddCronScan(id, target, cronExpr, severity string) {
+	cronState.mu.Lock()
+	defer cronState.mu.Unlock()
+	cronState.jobs[id] = &cronJobMeta{target: target, cronExpr: cronExpr, severity: severity}
+}
+
+func RemoveCronScan(id string) {
+	cronState.mu.Lock()
+	defer cronState.mu.Unlock()
+	delete(cronState.jobs, id)
+}
+
+func shouldRun(job *cronJobMeta) bool {
+	now := time.Now()
+	switch job.cronExpr {
+	case "every_1h": return now.Sub(job.lastRun) >= time.Hour
+	case "every_6h": return now.Sub(job.lastRun) >= 6*time.Hour
+	case "every_12h": return now.Sub(job.lastRun) >= 12*time.Hour
+	case "every_24h": return now.Sub(job.lastRun) >= 24*time.Hour
+	case "daily_03:00":
+		if now.Hour() != 3 || now.Minute() > 1 { return false }
+		return now.Sub(job.lastRun) >= 23*time.Hour
+	default: return false
+	}
+}
+
+func runCronJob(id string, job *cronJobMeta, ctrl NucleiController) {
+	job.lastRun = time.Now()
+	job.lastErr = ""
+
+	impl, ok := ctrl.(*NucleiControllerImpl)
+	if !ok || impl.scanner == nil {
+		job.lastErr = "scanner unavailable"
+		return
+	}
+
+	taskID := uuid.New().String()
+	task := nucleiSvc.ScanTask{
+		ID: taskID, Target: job.target, Severity: job.severity,
+		Status: "cron", CreatedAt: time.Now(),
+	}
+	handler := nucleiSvc.NewResultHandler()
+	if err := impl.scanner.StartScan(context.Background(), task, handler.HandleResult); err != nil {
+		job.lastErr = err.Error()
+		return
+	}
+	config.Logger.Info().Str("job_id", id).Str("target", job.target).Str("task_id", taskID).Msg("cron scan executed")
+}
+
+// // NewNucleiController 创建 Nuclei 控制器
 func NewNucleiController(scanner nucleiSvc.Scanner, repo repository.NucleiRepository, tmplMgr *nucleiSvc.TemplateManager) NucleiController {
 	return &NucleiControllerImpl{
 		scanner: scanner,
