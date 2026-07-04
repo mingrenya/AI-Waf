@@ -24,7 +24,7 @@ export function AttackPatternDetailDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="surface-modal max-w-3xl max-h-[80vh] overflow-y-auto" style={{color:'var(--text-primary)'}}>
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
                         <span>{pattern.attack_type}</span>

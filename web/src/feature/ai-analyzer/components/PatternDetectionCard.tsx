@@ -15,7 +15,7 @@ export function PatternDetectionCard({ config, onConfigChange }: PatternDetectio
     const patternDetection = config?.patternDetection || {}
 
     return (
-        <Card>
+        <Card className="surface-card">
             <CardHeader>
                 <div className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-primary" />

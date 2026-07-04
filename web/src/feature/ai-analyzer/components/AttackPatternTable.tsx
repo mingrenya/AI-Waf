@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import { DataTable } from "@/components/table/data-table"
 import {
     ColumnDef,
@@ -52,7 +53,7 @@ export function AttackPatternTable() {
             header: "攻击类型",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-white/40" />
+                    <Shield className="h-4 w-4" style={{color:'var(--text-dim)'}} />
                     <span className="font-medium">{row.original.attack_type}</span>
                 </div>
             ),
@@ -89,7 +90,7 @@ export function AttackPatternTable() {
             accessorKey: "detected_at",
             header: "检测时间",
             cell: ({ row }) => (
-                <span className="text-sm text-white/40">
+                <span className="text-sm" style={{color:'var(--text-dim)'}}>
                     {format(new Date(row.original.detected_at), "yyyy-MM-dd HH:mm")}
                 </span>
             ),
@@ -129,11 +130,11 @@ export function AttackPatternTable() {
     })
 
     return (
-        <div className="surface-card overflow-hidden p-6 w-full min-h-full">
-            <div className="flex justify-between items-center mb-6 bg-zinc-50 dark:bg-muted/30 rounded-md p-4">
+        <div className="rounded-md border overflow-hidden p-6 w-full min-h-full">
+            <div className="flex justify-between items-center mb-6 bg-black/5 dark:bg-white/5 rounded-md p-4">
                 <div>
-                    <h2 className="text-xl font-semibold text-primary dark:text-white">攻击模式检测</h2>
-                    <p className="text-sm text-white/40 mt-1">
+                    <h2 className="text-xl font-semibold" style={{color:'var(--text-primary)'}}>攻击模式检测</h2>
+                    <p className="text-sm mt-1" style={{color:'var(--text-dim)'}}>
                         基于机器学习算法自动检测的攻击模式
                     </p>
                 </div>
@@ -143,12 +144,14 @@ export function AttackPatternTable() {
                 </Button>
             </div>
 
+            <div className="[&_thead_tr]:bg-black/5 dark:[&_thead_tr]:bg-white/5 [&_tbody_tr]:bg-transparent [&_tbody_tr:hover]:bg-black/5 dark:[&_tbody_tr:hover]:bg-white/5">
             <DataTable
                 table={table}
                 columns={columns}
                 isLoading={isLoading}
                 loadingStyle="skeleton"
             />
+            </div>
 
             <AttackPatternDetailDialog
                 open={detailDialogOpen}

@@ -15,7 +15,7 @@ export function RuleDetailDialog({ open, onOpenChange, rule }: RuleDetailDialogP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="surface-modal max-w-4xl max-h-[80vh] overflow-y-auto" style={{color:'var(--text-primary)'}}>
                 <DialogHeader>
                     <DialogTitle className="flex items-center justify-between">
                         <span>规则详情</span>

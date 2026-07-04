@@ -12,7 +12,7 @@ interface AIConfigCardProps {
 
 export function AIConfigCard({ config, onConfigChange }: AIConfigCardProps) {
     return (
-        <Card>
+        <Card className="surface-card">
             <CardHeader>
                 <CardTitle>基础设置</CardTitle>
                 <CardDescription>AI分析器的基本运行参数</CardDescription>

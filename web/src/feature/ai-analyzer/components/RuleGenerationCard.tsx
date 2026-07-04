@@ -15,7 +15,7 @@ export function RuleGenerationCard({ config, onConfigChange }: RuleGenerationCar
     const ruleGeneration = config?.ruleGeneration || {}
 
     return (
-        <Card>
+        <Card className="surface-card">
             <CardHeader>
                 <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-primary" />

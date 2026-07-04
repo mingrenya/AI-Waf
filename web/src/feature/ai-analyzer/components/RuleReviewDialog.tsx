@@ -34,7 +34,7 @@ export function RuleReviewDialog({ open, onOpenChange, rule }: RuleReviewDialogP
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent>
+            <DialogContent className="surface-modal" style={{color:'var(--text-primary)'}}>
                 <DialogHeader>
                     <DialogTitle>审核规则</DialogTitle>
                 </DialogHeader>

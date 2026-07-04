@@ -19,7 +19,6 @@ import type { GeneratedRule } from "@/types/ai-analyzer"
 import { format } from "date-fns"
 import { RuleReviewDialog } from "./RuleReviewDialog"
 import { RuleDetailDialog } from "./RuleDetailDialog"
-import { Card } from "@/components/ui/card"
 import { useQueryClient } from "@tanstack/react-query"
 
 export function GeneratedRuleTable() {
@@ -157,11 +156,11 @@ export function GeneratedRuleTable() {
     })
 
     return (
-        <Card className="p-6 w-full min-h-full border-none shadow-none rounded-none">
-            <div className="flex justify-between items-center mb-6 bg-zinc-50 dark:bg-muted/30 rounded-md p-4">
+        <div className="rounded-md border p-6 w-full min-h-full">
+            <div className="flex justify-between items-center mb-6 bg-black/5 dark:bg-white/5 rounded-md p-4">
                 <div>
-                    <h2 className="text-xl font-semibold text-primary dark:text-white">AI生成规则</h2>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <h2 className="text-xl font-semibold" style={{color:'var(--text-primary)'}}>AI生成规则</h2>
+                    <p className="text-sm mt-1" style={{color:'var(--text-muted)'}}>
                         自动生成的ModSecurity和MicroRule防护规则
                     </p>
                 </div>
@@ -171,12 +170,14 @@ export function GeneratedRuleTable() {
                 </Button>
             </div>
 
+            <div className="[&_thead_tr]:bg-black/5 dark:[&_thead_tr]:bg-white/5 [&_tbody_tr]:bg-transparent [&_tbody_tr:hover]:bg-black/5 dark:[&_tbody_tr:hover]:bg-white/5">
             <DataTable
                 table={table}
                 columns={columns}
                 isLoading={isLoading}
                 loadingStyle="skeleton"
             />
+            </div>
 
             <RuleReviewDialog
                 open={reviewDialogOpen}
@@ -189,6 +190,6 @@ export function GeneratedRuleTable() {
                 onOpenChange={setDetailDialogOpen}
                 rule={selectedRule}
             />
-        </Card>
+            </div>
     )
 }
