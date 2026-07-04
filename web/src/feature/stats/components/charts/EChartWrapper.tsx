@@ -23,22 +23,28 @@ export function EChartWrapper({
     // 监听容器大小变化
     const { width } = useResizeObserver(chartRef)
 
-    // 初始化图表和处理主题变化 - 合并为一个useEffect
+    // 初始化图表 - 只在首次挂载时创建实例
     useEffect(() => {
-        if (!chartRef.current) return
+        if (!chartRef.current || chartInstanceRef.current) return
+
+        const isDarkMode = theme === 'dark'
+        chartInstanceRef.current = echarts.init(chartRef.current, isDarkMode ? 'dark' : undefined)
+
+        return () => {
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.dispose()
+                chartInstanceRef.current = null
+            }
+        }
+    }, []) // 空依赖数组，只在首次挂载执行
+
+    // 更新图表选项和主题
+    useEffect(() => {
+        if (!chartInstanceRef.current) return
 
         const isDarkMode = theme === 'dark'
 
-        // 如果实例不存在，创建新实例；如果已存在，不重新创建而是应用主题
-        if (!chartInstanceRef.current) {
-            chartInstanceRef.current = echarts.init(chartRef.current, isDarkMode ? 'dark' : undefined)
-        } else {
-            // 如果主题改变，应用新主题
-            chartInstanceRef.current.dispose()
-            chartInstanceRef.current = echarts.init(chartRef.current, isDarkMode ? 'dark' : undefined)
-        }
-
-        // 设置加载状态
+        // 加载状态
         if (loading) {
             chartInstanceRef.current.showLoading({
                 text: '',
@@ -50,16 +56,8 @@ export function EChartWrapper({
             chartInstanceRef.current.hideLoading()
         }
 
-        // 更新图表
-        chartInstanceRef.current.setOption(options)
-
-        // 清理函数
-        return () => {
-            if (chartInstanceRef.current) {
-                chartInstanceRef.current.dispose()
-                chartInstanceRef.current = null
-            }
-        }
+        // 更新图表 options
+        chartInstanceRef.current.setOption(options, { notMerge: true })
     }, [options, theme, loading])
 
     // 响应容器大小变化

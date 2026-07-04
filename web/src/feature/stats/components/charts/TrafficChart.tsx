@@ -18,13 +18,13 @@ export function TrafficChart({ timeRange }: TrafficChartProps) {
     // 判断是否为暗色模式
     const isDarkMode = theme === 'dark'
 
-    // 使用项目的紫色主题
-    const THEME_PRIMARY = '#9d76db'         // 主色紫 (157, 118, 219)
-    const THEME_SECONDARY = '#10b981'       // 绿色 - 搭配紫色
-    
+    // 蓝 + 金 配色（暗色模式下更亮）
+    const THEME_PRIMARY = '#3b82f6'         // 蓝色 - 入站流量
+    const THEME_SECONDARY = '#f59e0b'       // 金色 - 出站流量
+
     // 暗色模式下加强色彩亮度和辉光效果
-    const THEME_PRIMARY_DARK = '#b394e9'    // 更亮的紫色
-    const THEME_SECONDARY_DARK = '#34d399'  // 更亮的绿色
+    const THEME_PRIMARY_DARK = '#60a5fa'    // 更亮的蓝色
+    const THEME_SECONDARY_DARK = '#fbbf24'  // 更亮的金色
 
     // 获取当前主题下的颜色
     const primaryColor = isDarkMode ? THEME_PRIMARY_DARK : THEME_PRIMARY

@@ -63,7 +63,7 @@ export function StatsCard({
 
     return (
         <Card 
-            className={`border-none shadow-none p-4 hover:bg-gray-50 dark:hover:bg-gray-900/10 transition-colors ${link ? 'cursor-pointer' : ''}`}
+            className={`border-none shadow-none p-4 hover:bg-blue-50 dark:hover:bg-white/5 transition-colors ${link ? 'cursor-pointer' : ''}`}
             onClick={link ? handleCardClick : undefined}
         >
             <CardTitle className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
@@ -73,7 +73,7 @@ export function StatsCard({
 
             <CardContent className="p-0">
                 {loading ? (
-                    <div className="h-9 w-24 animate-pulse bg-gray-200 dark:bg-gray-800 rounded"></div>
+                    <div className="h-9 w-24 animate-pulse bg-blue-100 dark:bg-white/10 rounded"></div>
                 ) : (
                     <div className="flex flex-col">
                         <TooltipProvider delayDuration={300}>
