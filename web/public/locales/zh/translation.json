@@ -9,7 +9,8 @@
     "alerts": "告警",
     "situation": "态势感知",
     "nuclei": "Nuclei扫描",
-    "aiAnalyzer": "AI分析"
+    "aiAnalyzer": "AI分析",
+    "aiAssistant": "AI 智能助手"
   },
   "breadcrumb": {
     "logs": {
@@ -136,7 +137,8 @@
     "confirmNewPassword": "确认新密码",
     "enterNewPasswordAgain": "再次输入新密码",
     "submitting": "提交中...",
-    "passwordRequirement": "密码长度至少为6位字符"
+    "passwordRequirement": "密码长度至少为6位字符",
+    "profile": "个人设置"
   },
   "securityMetrics": {
     "title": "综合安全指标",
@@ -189,6 +191,9 @@
     "24Hours": "24 小时",
     "7Days": "7 天",
     "30Days": "30 天"
+  },
+  "system": {
+    "status": "系统正常运行"
   },
   "filter": "筛选",
   "reset": "重置",
