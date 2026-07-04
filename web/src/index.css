@@ -223,6 +223,27 @@
   transform: translateY(-1px);
 }
 
+/* ============================================
+   页面路由过渡动画 — 轻量级 CSS 实现
+   ============================================ */
+
+/* 页面首次渲染: 200ms 淡入 */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-page-enter {
+  animation: page-enter 0.2s ease-out both;
+}
+
+/* prefers-reduced-motion 用户跳过动画 */
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-enter {
+    animation: none;
+  }
+}
+
 /* Z=1 hover 提升态 */
 .surface-card-raised {
   background: var(--surface-card-bg-hover);

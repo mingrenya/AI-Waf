@@ -1,62 +1,33 @@
 import { ReactNode } from "react"
-import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { useLocation } from "react-router"
-import { 
-    pageSlideTransition, 
-    pageFadeTransition, 
-    pageScaleTransition, 
-    pageFlipTransition 
-} from "@/components/ui/animation/route-animation"
 
 interface AnimatedRouteProps {
     children: ReactNode
     transitionType?: "slide" | "fade" | "scale" | "flip"
 }
 
-export function AnimatedRoute({ 
-    children, 
-    transitionType = "slide"
+/**
+ * 轻量版路由过渡组件
+ *
+ * 修复要点:
+ * 1. 去掉 AnimatePresence mode="wait" — 不再阻塞页面切换
+ * 2. 去掉 blur filter 动画 — 避免 GPU 重排
+ * 3. 去掉 spring 弹性动画 — 减少帧计算
+ * 4. 只用 CSS transition + opacity/transform — GPU 硬件加速、零 JS 开销
+ *
+ * 过渡时间 <200ms, 几乎无感但视觉平滑
+ */
+export function AnimatedRoute({
+    children,
 }: AnimatedRouteProps) {
     const location = useLocation()
-    const prefersReducedMotion = useReducedMotion()
-    
-    // 如果用户设置了减少动画，则使用简单淡入淡出
-    if (prefersReducedMotion) {
-        return (
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={location.pathname}
-                    {...pageFadeTransition}
-                >
-                    {children}
-                </motion.div>
-            </AnimatePresence>
-        )
-    }
-    
-    // 根据传入的类型选择不同的动画效果
-    const getTransitionProps = () => {
-        switch (transitionType) {
-            case "fade":
-                return pageFadeTransition
-            case "scale":
-                return pageScaleTransition
-            case "flip":
-                return pageFlipTransition
-            case "slide":
-            default:
-                return pageSlideTransition
-        }
-    }
 
     return (
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={location.pathname}
-                {...getTransitionProps()}
-            >
-                {children}
-            </motion.div>
-        </AnimatePresence>
+        <div
+            key={location.pathname}
+            className="animate-page-enter"
+        >
+            {children}
+        </div>
     )
 } 
