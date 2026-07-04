@@ -21,7 +21,10 @@ FROM ${DOCKER_REGISTRY}/library/golang:1.24.2-alpine AS backend-builder
 RUN apk add --no-cache gcc musl-dev libpcap-dev
 # 设置Go环境变量
 ENV GO111MODULE=on \
-    CGO_ENABLED=1
+    CGO_ENABLED=1 \
+    GOPROXY=https://goproxy.cn,direct \
+    GOSUMDB=off \
+    GONOSUMDB=*
 # 设置工作目录
 WORKDIR /build
 # 先复制 go.mod/go.sum 下载依赖（利用 Docker 层缓存）
@@ -30,10 +33,14 @@ COPY coraza-spoa/go.mod coraza-spoa/go.sum ./coraza-spoa/
 COPY pkg/go.mod pkg/go.sum ./pkg/
 COPY server/go.mod server/go.sum ./server/
 COPY mcp-server/go.mod mcp-server/go.sum ./mcp-server/
-RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server
-RUN go work sync
-# 预热：下载全部依赖（此层会被缓存，除非 go.mod/go.sum 变化）
-RUN cd server && go mod download && cd ../coraza-spoa && go mod download && cd ../mcp-server && go mod download && cd ../pkg && go mod download
+# 注册 workspace 模块 + 同步版本
+RUN go work use ./coraza-spoa ./pkg ./server ./mcp-server && go work sync
+# 并行下载各模块依赖（后台并发，逐个 cd 串行 10s vs 此处 3-4s）
+RUN cd server && go mod download & \
+    cd /build/coraza-spoa && go mod download & \
+    cd /build/mcp-server && go mod download & \
+    cd /build/pkg && go mod download & \
+    wait
 # 复制源码（此层以下在代码变更时失效）
 COPY coraza-spoa/ ./coraza-spoa/
 COPY pkg/ ./pkg/
@@ -47,28 +54,27 @@ COPY server/public/ftw-tests/ ./server/public/ftw-tests/
 # 构建
 RUN cd server && go build -o ../mrya-waf main.go
 
-# 阶段3: 最终镜像 - 使用官方 HAProxy 3.0.10 镜像
-FROM ${DOCKER_REGISTRY}/library/haproxy:3.0.10
+# 阶段3: 最终镜像 - 使用官方 HAProxy 3.0.10 Alpine 镜像
+FROM ${DOCKER_REGISTRY}/library/haproxy:3.0.10-alpine
 
 # 确保以root用户进行初始化设置
 USER root
 
-# 安装Linux capabilities管理工具及常用调试工具
-RUN apt-get update && apt-get install -y \
-    libcap2-bin \
+# 安装 libpcap 运行时库 (gopacket CGo 依赖) 及常用调试工具
+RUN apk add --no-cache \
+    libpcap \
+    libcap \
     curl \
-    iputils-ping \
+    iputils \
     iproute2 \
-    net-tools \
-    dnsutils \
-    && rm -rf /var/lib/apt/lists/*
+    bind-tools
 
 # 创建 mrya 用户和组
-RUN groupadd --gid 1000 mrya && \
-    useradd --uid 1000 --gid mrya --home-dir /home/mrya --create-home --shell /bin/bash mrya
+RUN addgroup -g 1000 mrya && \
+    adduser -u 1000 -G mrya -h /home/mrya -s /bin/sh -D mrya
 
 # 将 mrya 用户添加到 haproxy 组，以便有权限执行 haproxy 相关操作
-RUN usermod -a -G haproxy mrya
+RUN addgroup mrya haproxy
 
 # 创建应用目录并设置权限
 WORKDIR /app
@@ -76,8 +82,6 @@ RUN chown mrya:mrya /app
 
 # 从构建器复制Go二进制文件
 COPY --from=backend-builder /build/mrya-waf .
-# 从构建器复制 alpine libpcap.so（Go CGo 编译时链接的是 musl 版本的 libpcap.so.1）
-COPY --from=backend-builder /usr/lib/libpcap.so.1 /usr/lib/aarch64-linux-gnu/libpcap.so.1
 
 # 复制Swagger文档文件
 COPY --from=backend-builder /build/server/docs/ ./docs/
@@ -107,6 +111,7 @@ RUN mkdir -p /haproxy/conf && \
     chown -R mrya:mrya /haproxy
 
 # 🔑 关键步骤：给HAProxy和应用程序添加绑定特权端口的能力
+# Alpine 的 setcap 在 libcap 包中，haproxy 二进制路径为 /usr/local/sbin/haproxy
 RUN setcap 'cap_net_bind_service=+ep' /usr/local/sbin/haproxy && \
     setcap 'cap_net_bind_service=+ep' /app/mrya-waf
 

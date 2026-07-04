@@ -13,6 +13,7 @@ import { getConstant } from './constant/index.ts'
 import { I18nextProvider } from 'react-i18next'
 import i18n from './i18n'
 import { LoadingFallback } from './components/common/loading-fallback.tsx'
+import { ThemeProvider } from './provider/theme-provider'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -27,15 +28,17 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <ErrorBoundary>
-            <QueryClientProvider client={queryClient}>
-                <I18nextProvider i18n={i18n}>
-                    <Suspense fallback={<LoadingFallback />}>
-                        <App />
-                        <Toaster />
-                    </Suspense>
-                </I18nextProvider>
-                {ENV.isDevelopment && <ReactQueryDevtools />}
-            </QueryClientProvider>
+            <ThemeProvider defaultTheme="system" storageKey="waf-ui-theme">
+                <QueryClientProvider client={queryClient}>
+                    <I18nextProvider i18n={i18n}>
+                        <Suspense fallback={<LoadingFallback />}>
+                            <App />
+                            <Toaster />
+                        </Suspense>
+                    </I18nextProvider>
+                    {ENV.isDevelopment && <ReactQueryDevtools />}
+                </QueryClientProvider>
+            </ThemeProvider>
         </ErrorBoundary>
     </StrictMode>,
 )

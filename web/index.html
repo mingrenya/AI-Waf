@@ -28,10 +28,8 @@
         <!-- 安全设置 -->
         <meta http-equiv="X-Content-Type-Options" content="nosniff" />
 
-        <!-- 预加载关键资源 -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+        <!-- 字体: 优先系统字体 + Inter/JetBrains Mono fallback -->
+        <!-- Google Fonts 被墙时使用系统字体，无需等待网络加载 -->
         <link rel="stylesheet" href="/app-loading.css" />
 
         <title>MRYa WAF</title>

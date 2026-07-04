@@ -181,7 +181,7 @@ func SecurityHeaders() gin.HandlerFunc {
 		// 1) 禁止内联脚本，仅允许同源脚本
 		// 2) 允许内联样式以兼容前端运行时样式注入（例如动画库/图表库）
 		// 3) 保持资源默认同源，最小化放行范围
-		c.Header("Content-Security-Policy", "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ws: wss:; object-src 'none'")
+		c.Header("Content-Security-Policy", "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com https://fonts.googleapis.com; connect-src 'self' ws: wss:; object-src 'none'")
 
 		// 引用策略
 		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")

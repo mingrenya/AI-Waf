@@ -3,10 +3,13 @@ package controller
 import (
 	"time"
 
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/dto"
+	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/repository"
 	nucleiSvc "github.com/mingrenya/AI-Waf/server/service/nuclei"
 	"github.com/mingrenya/AI-Waf/server/utils/response"
@@ -43,6 +46,10 @@ func NewNucleiController(scanner nucleiSvc.Scanner, repo repository.NucleiReposi
 
 // StartScan 发起扫描任务
 func (c *NucleiControllerImpl) StartScan(ctx *gin.Context) {
+	if c.scanner == nil {
+		response.Error(ctx, model.NewAPIError(http.StatusServiceUnavailable, "扫描引擎未初始化，无法启动扫描", nil), true)
+		return
+	}
 	var req dto.ScanRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(ctx, err, true)
@@ -91,6 +98,10 @@ func (c *NucleiControllerImpl) StartScan(ctx *gin.Context) {
 
 // GetTask 获取扫描任务
 func (c *NucleiControllerImpl) GetTask(ctx *gin.Context) {
+	if c.scanner == nil {
+		response.Error(ctx, model.NewAPIError(http.StatusServiceUnavailable, "扫描引擎未初始化", nil), true)
+		return
+	}
 	id := ctx.Param("id")
 	task, err := c.scanner.GetTask(id)
 	if err != nil {
@@ -110,6 +121,10 @@ func (c *NucleiControllerImpl) GetTask(ctx *gin.Context) {
 
 // CancelTask 取消扫描任务
 func (c *NucleiControllerImpl) CancelTask(ctx *gin.Context) {
+	if c.scanner == nil {
+		response.Error(ctx, model.NewAPIError(http.StatusServiceUnavailable, "扫描引擎未初始化", nil), true)
+		return
+	}
 	id := ctx.Param("id")
 	if err := c.scanner.CancelScan(id); err != nil {
 		response.InternalServerError(ctx, err, true)
@@ -121,6 +136,10 @@ func (c *NucleiControllerImpl) CancelTask(ctx *gin.Context) {
 
 // ListTasks 列出所有扫描任务
 func (c *NucleiControllerImpl) ListTasks(ctx *gin.Context) {
+	if c.scanner == nil {
+		response.Success(ctx, "扫描引擎未初始化", []dto.ScanTaskResponse{})
+		return
+	}
 	tasks := c.scanner.ListTasks()
 	resp := make([]dto.ScanTaskResponse, 0, len(tasks))
 	for _, t := range tasks {
@@ -139,6 +158,10 @@ func (c *NucleiControllerImpl) ListTasks(ctx *gin.Context) {
 
 // ListTemplates 列出可用模板
 func (c *NucleiControllerImpl) ListTemplates(ctx *gin.Context) {
+	if c.tmplMgr == nil {
+		response.Success(ctx, "模板管理器未初始化", []any{})
+		return
+	}
 	templates, err := c.tmplMgr.ListTemplates(ctx.Request.Context())
 	if err != nil {
 		response.InternalServerError(ctx, err, true)

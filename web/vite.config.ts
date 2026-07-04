@@ -18,5 +18,7 @@ export default defineConfig({
         secure: false,
       }
     }
-  }
+  },
+  // SPA fallback: 直接访问子路由时返回 index.html
+  appType: 'spa',
 })

@@ -1,7 +1,7 @@
 # AI-Waf MCP Server Dockerfile
 # 使用官方go-sdk实现标准MCP协议
 ARG DOCKER_REGISTRY=docker.io
-FROM ${DOCKER_REGISTRY}/library/golang:1.24.1-alpine AS builder
+FROM ${DOCKER_REGISTRY}/library/golang:1.24.2-alpine AS builder
 
 RUN apk add --no-cache git ca-certificates
 
