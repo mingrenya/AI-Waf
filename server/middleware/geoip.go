@@ -1,21 +1,40 @@
 package middleware
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
+	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/model"
 )
+
+
+var geoipMu sync.RWMutex
+var geoipCfg = struct {
+	blockCountries []string
+	allowMode      bool
+	initialized    bool
+}{}
 
 // GeoIPBlock 按国家/地区封禁请求
 // 通过 GEOIP_BLOCK_COUNTRIES 环境变量配置（ISO 代码，逗号分隔，如 "CN,RU,KP"）
 // GEOIP_ALLOW_MODE 设为 "true" 时切换为白名单模式
 func GeoIPBlock() gin.HandlerFunc {
-	blockCountries := parseCountryList(os.Getenv("GEOIP_BLOCK_COUNTRIES"))
-	allowMode := os.Getenv("GEOIP_ALLOW_MODE") == "true"
+	geoipMu.RLock()
+	blockCountries := geoipCfg.blockCountries
+	allowMode := geoipCfg.allowMode
+	geoipMu.RUnlock()
+	if !geoipCfg.initialized {
+		blockCountries = parseCountryList(os.Getenv("GEOIP_BLOCK_COUNTRIES"))
+		allowMode = os.Getenv("GEOIP_ALLOW_MODE") == "true"
+	}
 
 	if len(blockCountries) == 0 {
 		return func(c *gin.Context) { c.Next() }
@@ -103,18 +122,34 @@ type GeoIPConfig struct {
 
 // GetGeoIPConfig 获取当前 GeoIP 配置
 func GetGeoIPConfig() GeoIPConfig {
+	geoipMu.RLock()
+	defer geoipMu.RUnlock()
 	return GeoIPConfig{
-		BlockCountries: parseCountryList(os.Getenv("GEOIP_BLOCK_COUNTRIES")),
-		AllowMode:      os.Getenv("GEOIP_ALLOW_MODE") == "true",
+		BlockCountries: geoipCfg.blockCountries,
+		AllowMode:      geoipCfg.allowMode,
 	}
 }
 
 // UpdateGeoIPConfig 更新 GeoIP 配置
 func UpdateGeoIPConfig(countries []string, allowMode bool) {
-	os.Setenv("GEOIP_BLOCK_COUNTRIES", strings.Join(countries, ","))
-	if allowMode {
-		os.Setenv("GEOIP_ALLOW_MODE", "true")
-	} else {
-		os.Setenv("GEOIP_ALLOW_MODE", "false")
-	}
+	geoipMu.Lock()
+	geoipCfg.blockCountries = countries
+	geoipCfg.allowMode = allowMode
+	geoipCfg.initialized = true
+	geoipMu.Unlock()
+
+	// Async persist to MongoDB
+	go func() {
+		client, err := mongodb.Connect(config.Global.DBConfig.URI)
+		if err != nil || client == nil { return }
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		collection := client.Database(config.Global.DBConfig.Database).Collection("config")
+		collection.UpdateOne(ctx,
+			map[string]interface{}{"name": "AppConfig"},
+			map[string]interface{}{"$set": map[string]interface{}{
+				"geoip": map[string]interface{}{"blockCountries": countries, "allowMode": allowMode},
+			}},
+		)
+	}()
 }

@@ -19,12 +19,14 @@ type CaptureController interface {
 	GetSession(ctx *gin.Context)
 	ListSessions(ctx *gin.Context)
 	DownloadPCAP(ctx *gin.Context)
+	GetForensicsStats(ctx *gin.Context)
 }
 
 // CaptureControllerImpl 流量捕获控制器实现
 type CaptureControllerImpl struct {
-	svc    *captureSvc.CaptureService
-	logger zerolog.Logger
+	svc       *captureSvc.CaptureService
+	forensics *captureSvc.ForensicsCapture
+	logger    zerolog.Logger
 }
 
 // NewCaptureController 创建捕获控制器
@@ -32,6 +34,14 @@ func NewCaptureController(svc *captureSvc.CaptureService) CaptureController {
 	return &CaptureControllerImpl{
 		svc:    svc,
 		logger: config.GetControllerLogger("capture"),
+	}
+}
+
+func NewCaptureControllerWithForensics(svc *captureSvc.CaptureService, forensics *captureSvc.ForensicsCapture) CaptureController {
+	return &CaptureControllerImpl{
+		svc:       svc,
+		forensics: forensics,
+		logger:    config.GetControllerLogger("capture"),
 	}
 }
 
@@ -97,4 +107,12 @@ func (c *CaptureControllerImpl) DownloadPCAP(ctx *gin.Context) {
 	ctx.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, fileName))
 	ctx.Header("Content-Type", "application/vnd.tcpdump.pcap")
 	ctx.File(filePath)
+}
+
+func (c *CaptureControllerImpl) GetForensicsStats(ctx *gin.Context) {
+	if c.forensics == nil {
+		response.Success(ctx, "forensics capture not initialized", map[string]interface{}{"enabled": false})
+		return
+	}
+	response.Success(ctx, "forensics capture stats", c.forensics.Stats())
 }
