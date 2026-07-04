@@ -1,6 +1,4 @@
-import { tabFadeAnimation, tabScaleAnimation, tabContentAnimation } from "../tab-animation"
 import React from "react"
-import { AnimatePresence, motion } from "motion/react"
 
 interface TabsAnimationProviderProps {
     children: React.ReactNode
@@ -8,32 +6,16 @@ interface TabsAnimationProviderProps {
     animationVariant?: "slide" | "fade" | "scale"
 }
 
+/**
+ * 轻量版 Tab 过渡 — 去掉 AnimatePresence mode="wait"
+ * 避免 tab 切换时阻塞渲染
+ */
 export function TabsAnimationProvider({
     children,
-    currentView,
-    animationVariant = "slide"
 }: TabsAnimationProviderProps) {
-    // 根据选择的变体选择相应的动画
-    const getAnimationProps = () => {
-        switch (animationVariant) {
-            case "fade":
-                return tabFadeAnimation
-            case "scale":
-                return tabScaleAnimation
-            case "slide":
-            default:
-                return tabContentAnimation
-        }
-    }
-
     return (
-        <AnimatePresence mode="wait">
-            <motion.div
-                key={currentView}
-                {...getAnimationProps()}
-            >
-                {children}
-            </motion.div>
-        </AnimatePresence>
+        <div className="animate-page-enter">
+            {children}
+        </div>
     )
 }
