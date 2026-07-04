@@ -53,7 +53,7 @@ export function AttackPatternTable() {
             header: "攻击类型",
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" style={{color:'var(--text-dim)'}} />
+                    <Shield className="h-4 w-4" style={{color:'var(--text-muted)'}} />
                     <span className="font-medium">{row.original.attack_type}</span>
                 </div>
             ),
@@ -90,7 +90,7 @@ export function AttackPatternTable() {
             accessorKey: "detected_at",
             header: "检测时间",
             cell: ({ row }) => (
-                <span className="text-sm" style={{color:'var(--text-dim)'}}>
+                <span className="text-sm" style={{color:'var(--text-muted)'}}>
                     {format(new Date(row.original.detected_at), "yyyy-MM-dd HH:mm")}
                 </span>
             ),
@@ -130,11 +130,11 @@ export function AttackPatternTable() {
     })
 
     return (
-        <div className="rounded-md border overflow-hidden p-6 w-full min-h-full">
+        <Card className="surface-card overflow-hidden p-6 w-full min-h-full border-none shadow-none rounded-none">
             <div className="flex justify-between items-center mb-6 bg-black/5 dark:bg-white/5 rounded-md p-4">
                 <div>
                     <h2 className="text-xl font-semibold" style={{color:'var(--text-primary)'}}>攻击模式检测</h2>
-                    <p className="text-sm mt-1" style={{color:'var(--text-dim)'}}>
+                    <p className="text-sm mt-1" style={{color:'var(--text-muted)'}}>
                         基于机器学习算法自动检测的攻击模式
                     </p>
                 </div>
@@ -158,6 +158,6 @@ export function AttackPatternTable() {
                 onOpenChange={setDetailDialogOpen}
                 pattern={selectedPattern}
             />
-        </div>
+        </Card>
     )
 }
