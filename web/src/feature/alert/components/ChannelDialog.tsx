@@ -50,12 +50,12 @@ export function ChannelDialog({
             <AnimatePresence mode="wait">
                 {open && (
                     <motion.div {...dialogEnterExitAnimation}>
-                        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-neon p-0">
+                        <DialogContent className="surface-modal max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-custom p-0" style={{ color: 'var(--text-primary)' }}>
                             <motion.div {...dialogContentAnimation}>
                                 <motion.div {...dialogHeaderAnimation}>
                                     <DialogHeader className="p-6 pb-3">
                                         <DialogTitle className="text-xl">{title}</DialogTitle>
-                                        <DialogDescription className='dark:text-shadow-glow-white'>{description}</DialogDescription>
+                                        <DialogDescription className='text-muted-foreground'>{description}</DialogDescription>
                                     </DialogHeader>
                                 </motion.div>
 

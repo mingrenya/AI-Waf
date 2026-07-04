@@ -68,14 +68,14 @@ export function HistoryDetailDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-neon">
+            <DialogContent className="surface-modal max-w-2xl max-h-[85vh] overflow-y-auto scrollbar-custom" style={{ color: 'var(--text-primary)' }}>
                 <DialogHeader>
                     <DialogTitle>
                         {t('alert.historyDetailTitle', {
                             defaultValue: 'Alert details',
                         })}
                     </DialogTitle>
-                    <DialogDescription className="dark:text-shadow-glow-white">
+                    <DialogDescription className="text-muted-foreground">
                         {t('alert.historyDetailDescription', {
                             defaultValue:
                                 'View alert details and optionally acknowledge it.',
@@ -89,7 +89,7 @@ export function HistoryDetailDialog({
                             <div className="font-semibold">
                                 {t('alert.ruleName')}
                             </div>
-                            <div className="text-muted-foreground dark:text-shadow-glow-white">
+                            <div className="text-muted-foreground">
                                 {history.ruleName}
                             </div>
                         </div>
@@ -101,7 +101,7 @@ export function HistoryDetailDialog({
                                         defaultValue: 'Severity',
                                     })}
                                 </div>
-                                <div className="text-muted-foreground dark:text-shadow-glow-white">
+                                <div className="text-muted-foreground">
                                     {t(`alert.severity.${history.severity}`)}
                                 </div>
                             </div>
@@ -109,7 +109,7 @@ export function HistoryDetailDialog({
                                 <div className="font-semibold">
                                     {t('alert.status')}
                                 </div>
-                                <div className="text-muted-foreground dark:text-shadow-glow-white capitalize">
+                                <div className="text-muted-foreground capitalize">
                                     {history.status}
                                 </div>
                             </div>
@@ -119,7 +119,7 @@ export function HistoryDetailDialog({
                                         defaultValue: 'Triggered at',
                                     })}
                                 </div>
-                                <div className="text-muted-foreground dark:text-shadow-glow-white">
+                                <div className="text-muted-foreground">
                                     {history.triggeredAt
                                         ? new Date(
                                               history.triggeredAt,
@@ -132,7 +132,7 @@ export function HistoryDetailDialog({
                                     <div className="font-semibold">
                                         {t('sentAt', { defaultValue: 'Sent at' })}
                                     </div>
-                                    <div className="text-muted-foreground dark:text-shadow-glow-white">
+                                    <div className="text-muted-foreground">
                                         {new Date(history.sentAt).toLocaleString()}
                                     </div>
                                 </div>
@@ -143,7 +143,7 @@ export function HistoryDetailDialog({
                             <div className="font-semibold">
                                 {t('message', { defaultValue: 'Message' })}
                             </div>
-                            <div className="text-muted-foreground whitespace-pre-wrap break-words dark:text-shadow-glow-white">
+                            <div className="text-muted-foreground whitespace-pre-wrap break-words">
                                 {history.message}
                             </div>
                         </div>
@@ -167,7 +167,7 @@ export function HistoryDetailDialog({
                                     defaultValue: 'Channels',
                                 })}
                             </div>
-                            <div className="text-muted-foreground dark:text-shadow-glow-white">
+                            <div className="text-muted-foreground">
                                 {history.channels?.join(', ') || '-'}
                             </div>
                         </div>
@@ -180,7 +180,7 @@ export function HistoryDetailDialog({
                                             defaultValue: 'Acknowledged by',
                                         })}
                                     </div>
-                                    <div className="text-muted-foreground dark:text-shadow-glow-white">
+                                    <div className="text-muted-foreground">
                                         {history.acknowledgedBy}
                                     </div>
                                 </div>
@@ -190,7 +190,7 @@ export function HistoryDetailDialog({
                                             defaultValue: 'Acknowledged at',
                                         })}
                                     </div>
-                                    <div className="text-muted-foreground dark:text-shadow-glow-white">
+                                    <div className="text-muted-foreground">
                                         {history.acknowledgedAt
                                             ? new Date(
                                                   history.acknowledgedAt,
