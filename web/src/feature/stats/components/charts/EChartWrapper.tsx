@@ -23,28 +23,17 @@ export function EChartWrapper({
     // 监听容器大小变化
     const { width } = useResizeObserver(chartRef)
 
-    // 初始化图表 - 只在首次挂载时创建实例
+    // 初始化图表
     useEffect(() => {
-        if (!chartRef.current || chartInstanceRef.current) return
+        if (!chartRef.current) return
 
         const isDarkMode = theme === 'dark'
-        chartInstanceRef.current = echarts.init(chartRef.current, isDarkMode ? 'dark' : undefined)
 
-        return () => {
-            if (chartInstanceRef.current) {
-                chartInstanceRef.current.dispose()
-                chartInstanceRef.current = null
-            }
+        if (!chartInstanceRef.current) {
+            chartInstanceRef.current = echarts.init(chartRef.current, isDarkMode ? 'dark' : undefined)
         }
-    }, []) // 空依赖数组，只在首次挂载执行
 
-    // 更新图表选项和主题
-    useEffect(() => {
-        if (!chartInstanceRef.current) return
-
-        const isDarkMode = theme === 'dark'
-
-        // 加载状态
+        // 设置加载状态
         if (loading) {
             chartInstanceRef.current.showLoading({
                 text: '',
@@ -56,8 +45,15 @@ export function EChartWrapper({
             chartInstanceRef.current.hideLoading()
         }
 
-        // 更新图表 options
+        // 更新图表
         chartInstanceRef.current.setOption(options, { notMerge: true })
+
+        return () => {
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.dispose()
+                chartInstanceRef.current = null
+            }
+        }
     }, [options, theme, loading])
 
     // 响应容器大小变化
