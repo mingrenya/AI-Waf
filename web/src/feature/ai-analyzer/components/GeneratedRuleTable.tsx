@@ -69,7 +69,7 @@ export function GeneratedRuleTable() {
             case "rejected":
                 return <Badge variant="destructive">已拒绝</Badge>
             case "deployed":
-                return <Badge variant="outline" className="border-green-500 text-green-600">已部署</Badge>
+                return <Badge variant="outline" className="border-success text-success">已部署</Badge>
             default:
                 return <Badge>{status}</Badge>
         }

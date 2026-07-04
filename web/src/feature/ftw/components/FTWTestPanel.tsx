@@ -105,7 +105,7 @@ export function FTWTestPanel() {
                         <Badge variant={r.blockRate >= 90 ? 'default' : r.blockRate >= 50 ? 'secondary' : 'destructive'}>
                           {r.blockRate.toFixed(0)}% block
                         </Badge>
-                        <span className="text-xs text-green-600">{r.passed} passed</span>
+                        <span className="text-xs text-success">{r.passed} passed</span>
                         <span className="text-xs text-red-600">{r.failed} failed</span>
                       </div>
                     </div>
@@ -125,7 +125,7 @@ function RunSummary({ report }: { report: FTWReport }) {
     <div className="flex items-center gap-3 text-xs bg-muted/30 rounded-lg p-2">
       <span className="font-medium">Latest:</span>
       <Badge variant="outline">{report.totalTests} tests</Badge>
-      <span className="text-green-600 flex items-center gap-0.5"><Check className="h-3 w-3" />{report.passed}</span>
+      <span className="text-success flex items-center gap-0.5"><Check className="h-3 w-3" />{report.passed}</span>
       <span className="text-red-600 flex items-center gap-0.5"><X className="h-3 w-3" />{report.failed}</span>
       <span className="flex items-center gap-0.5"><Shield className="h-3 w-3" />{report.blockRate.toFixed(0)}%</span>
       {report.falseNegs > 0 && (
@@ -147,7 +147,7 @@ function ReportDetail({ report, onBack }: { report: FTWReport; onBack: () => voi
 
       <div className="grid grid-cols-6 gap-3 mb-4">
         <StatBox label="Total" value={report.totalTests} />
-        <StatBox label="Passed" value={report.passed} color="text-green-600" />
+        <StatBox label="Passed" value={report.passed} color="text-success" />
         <StatBox label="Failed" value={report.failed} color="text-red-600" />
         <StatBox label="Block Rate" value={`${report.blockRate.toFixed(0)}%`} />
         <StatBox label="False Neg" value={report.falseNegs} color="text-orange-600" />
@@ -156,13 +156,13 @@ function ReportDetail({ report, onBack }: { report: FTWReport; onBack: () => voi
 
       <div className="space-y-1">
         {results.map((r: FTWResult, i: number) => (
-          <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded text-xs ${r.passed ? 'bg-green-50 dark:bg-green-900/10' : 'bg-red-50 dark:bg-red-900/10'}`}>
-            <span>{r.passed ? <Check className="h-3.5 w-3.5 text-green-600" /> : <X className="h-3.5 w-3.5 text-red-600" />}</span>
+          <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded text-xs ${r.passed ? 'bg-success/5 dark:bg-success/10' : 'bg-red-50 dark:bg-red-900/10'}`}>
+            <span>{r.passed ? <Check className="h-3.5 w-3.5 text-success" /> : <X className="h-3.5 w-3.5 text-red-600" />}</span>
             <span className="w-14 text-muted-foreground font-mono">#{r.testId}</span>
             <span className="flex-1 truncate">{r.title}</span>
             <Badge variant="outline" className="text-[10px]">{r.statusCode}</Badge>
             {r.wafHit ? (
-              <Badge variant="default" className="text-[10px] bg-green-600">WAF HIT</Badge>
+              <Badge variant="default" className="text-[10px] bg-success">WAF HIT</Badge>
             ) : (
               <Badge variant="outline" className="text-[10px] text-red-600">MISS</Badge>
             )}

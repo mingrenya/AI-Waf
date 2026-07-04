@@ -137,7 +137,7 @@ export function SiteGrid({ onEdit, onDelete }: SiteGridProps) {
         ${isInactive || !site.wafEnabled
                                 ? 'bg-gradient-to-r from-slate-100 to-white dark:from-zinc-800/60 dark:to-accent/40'
                                 : site.wafMode === WAFMode.Protection
-                                    ? 'bg-gradient-to-r from-green-50 to-white dark:from-green-950/20 dark:to-accent/50'
+                                    ? 'bg-gradient-to-r from-success/5 to-white dark:from-success/5 dark:to-accent/50'
                                     : site.wafMode === WAFMode.Observation
                                         ? 'bg-gradient-to-r from-amber-50 to-white dark:from-amber-900/20 dark:to-accent/50'
                                         : 'bg-gradient-to-r from-slate-100 to-white dark:from-zinc-800/60 dark:to-accent/40'
@@ -184,8 +184,8 @@ export function SiteGrid({ onEdit, onDelete }: SiteGridProps) {
                             <div className="flex flex-wrap gap-2">
                                 {/* 站点状态 */}
                                 {site.activeStatus ? (
-                                    <Badge variant="outline" className="flex items-center gap-1 bg-green-300 border-green-300 text-green-700 dark:bg-green-900/50 dark:border-green-800 dark:text-green-300 rounded-full px-3 py-1 ">
-                                        <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-300 " />
+                                    <Badge variant="outline" className="flex items-center gap-1 bg-success/20 border-success/30 text-success dark:text-success rounded-full px-3 py-1 ">
+                                        <CheckCircle className="h-3 w-3 text-success" />
                                         <span className="font-medium ">{t("site.active")}</span>
                                     </Badge>
                                 ) : (

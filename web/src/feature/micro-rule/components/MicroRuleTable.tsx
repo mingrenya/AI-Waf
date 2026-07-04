@@ -168,7 +168,7 @@ export function MicroRuleTable() {
             cell: ({ row }) => (
                 <div className="flex items-center">
                     {row.original.status === 'enabled' ? (
-                        <ShieldCheck className="h-4 w-4 text-green-500 mr-1" />
+                        <ShieldCheck className="h-4 w-4 text-success mr-1" />
                     ) : (
                         <ShieldOff className="h-4 w-4 text-gray-400 mr-1" />
                     )}

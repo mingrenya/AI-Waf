@@ -208,8 +208,8 @@ export function SiteTable({ onEdit, onDelete }: SiteTableProps) {
                 return (
                     <div className="flex items-center gap-1">
                         {isActive ? (
-                            <Badge variant="outline" className=" bg-green-300 border-green-300 text-green-700 dark:bg-green-900/50 dark:border-green-800 dark:text-green-300 rounded-full px-3 py-1 flex items-center gap-1">
-                                <CheckCircle className="h-3 w-3 text-green-600 dark:text-green-300 " />
+                            <Badge variant="outline" className=" bg-success/20 border-success/30 text-success dark:text-success rounded-full px-3 py-1 flex items-center gap-1">
+                                <CheckCircle className="h-3 w-3 text-success" />
                                 <span className="font-medium whitespace-nowrap ">{t('site.active')}</span>
                             </Badge>
                         ) : (
