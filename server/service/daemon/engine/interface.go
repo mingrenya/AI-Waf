@@ -13,6 +13,7 @@ type EngineService interface {
 	Stop() error
 	Reload() error
 	ReloadRules() error
+	GetAgentServer() server.AgentServer
 }
 
 // NewEngineService 创建一个新的引擎服务实例
@@ -59,4 +60,9 @@ func (s *EngineServiceImpl) Reload() error {
 
 func (s *EngineServiceImpl) ReloadRules() error {
 	return s.agent.ReloadRules()
+}
+
+// GetAgentServer returns the underlying AgentServer for callback registration.
+func (s *EngineServiceImpl) GetAgentServer() server.AgentServer {
+	return s.agent
 }

@@ -16,6 +16,7 @@ import (
 
 	flowcontroller "github.com/mingrenya/AI-Waf/coraza-spoa/internal/flow-controller"
 	trafficanalyzer "github.com/mingrenya/AI-Waf/coraza-spoa/internal/traffic-analyzer"
+	cwtypes "github.com/mingrenya/AI-Waf/coraza-spoa/pkg/types"
 	"github.com/mingrenya/AI-Waf/pkg/model"
 	coreruleset "github.com/corazawaf/coraza-coreruleset"
 	"github.com/corazawaf/coraza/v3"
@@ -44,11 +45,12 @@ type AppConfig struct {
 
 // ApplicationOptions 应用程序配置选项 配置应用是否开启 ip 解析，日志记录
 type ApplicationOptions struct {
-	MongoConfig          *MongoConfig          // MongoDB配置，用于日志存储
-	GeoIPConfig          *GeoIP2Options        // GeoIP配置，用于IP地理位置处理
-	RuleEngineDbConfig   *MongoDBConfig        // 规则引擎数据库配置
-	FlowControllerConfig *FlowControllerConfig // 流量控制器配置
+	MongoConfig           *MongoConfig           // MongoDB配置，用于日志存储
+	GeoIPConfig           *GeoIP2Options         // GeoIP配置，用于IP地理位置处理
+	RuleEngineDbConfig    *MongoDBConfig         // 规则引擎数据库配置
+	FlowControllerConfig  *FlowControllerConfig  // 流量控制器配置
 	TrafficAnalyzerConfig *TrafficAnalyzerConfig // 流量分析器配置
+	OnAttack              cwtypes.AttackCallback // 攻击事件回调（可选，用于取证捕获等上层服务）
 }
 
 // TrafficAnalyzerConfig 流量分析器配置
@@ -64,19 +66,28 @@ type FlowControllerConfig struct {
 }
 
 type Application struct {
-	waf             coraza.WAF
-	cache           cache.ExpiringCache
-	logStore        LogStore
-	ipProcessor     IPProcessor
-	ruleEngine      *RuleEngine
-	flowController  *flowcontroller.FlowController
-	ipRecorder      flowcontroller.IPRecorder
-	trafficAnalyzer *trafficanalyzer.TrafficAnalyzer
+	waf               coraza.WAF
+	cache             cache.ExpiringCache
+	logStore          LogStore
+	ipProcessor       IPProcessor
+	ruleEngine        *RuleEngine
+	flowController    *flowcontroller.FlowController
+	ipRecorder        flowcontroller.IPRecorder
+	trafficAnalyzer   *trafficanalyzer.TrafficAnalyzer
+	sensitiveFilter   *SensitiveDataFilter // 敏感数据过滤器
+	scanProtector     *ScanProtector       // 扫描防护器
+	onAttack          cwtypes.AttackCallback // 攻击事件回调（取证捕获等）
+	botDetector       *BotDetector           // Bot管理检测器
 
 	AppConfig
 }
 
-// ReloadRules triggers a lightweight hot-reload of MicroEngine rules and IP groups
+// SetAttackCallback 设置攻击事件回调（用于延迟注册取证捕获等上层服务）
+func (a *Application) SetAttackCallback(cb cwtypes.AttackCallback) {
+	a.onAttack = cb
+}
+
+// // ReloadRules triggers a lightweight hot-reload of MicroEngine rules and IP groups
 // from MongoDB without recreating the Application or interrupting traffic processing.
 // Returns (ruleCount, ipGroupCount, error).
 func (a *Application) ReloadRules() (int, int, error) {
@@ -211,6 +222,60 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 	}
 
 	realIP := getRealClientIP(&req)
+
+	// 扫描器指纹检测：在 IP 封禁检查之前执行
+	if a.scanProtector != nil && a.scanProtector.IsEnabled() {
+		ua := getHeaderValueStr(req.Headers, "user-agent")
+		if scanner := DetectScanner(ua); scanner != "" {
+			a.Logger.Info().
+				Str("ip", realIP).
+				Str("scanner", scanner).
+				Str("user_agent", ua).
+				Msg("scanner fingerprint matched, blocked")
+
+			a.scanProtector.RecordHit(realIP, 9999)
+
+			return ErrInterrupted{
+				Interruption: &types.Interruption{
+					Action: "deny",
+					Status: 403,
+					Data:   fmt.Sprintf("Scanner detected: %s", scanner),
+				},
+			}
+		}
+	}
+
+	// Bot 管理：UA指纹 + 行为频率检测
+	if a.botDetector != nil && a.botDetector.IsEnabled() {
+		ua := getHeaderValueStr(req.Headers, "user-agent")
+		result := a.botDetector.DetectBot(realIP, ua)
+		if result.Decision == "block" {
+			a.Logger.Info().
+				Str("ip", realIP).
+				Str("bot_name", result.BotName).
+				Str("category", string(result.Category)).
+				Str("reason", result.Reason).
+				Int("score", result.Score).
+				Msg("bot detected and blocked")
+			return ErrInterrupted{
+				Interruption: &types.Interruption{
+					Action: "deny",
+					Status: 403,
+					Data:   fmt.Sprintf("Bot blocked: %s (%s)", result.BotName, result.Reason),
+				},
+			}
+		}
+		if result.Decision == "tag" {
+			a.Logger.Debug().
+				Str("ip", realIP).
+				Str("bot_name", result.BotName).
+				Str("category", string(result.Category)).
+				Str("reason", result.Reason).
+				Int("score", result.Score).
+				Msg("bot tagged (allowed with label)")
+		}
+	}
+
 	// 检查IP是否已被限制
 	if a.ipRecorder != nil {
 		if blocked, record := a.ipRecorder.IsIPBlocked(realIP); blocked {
@@ -294,6 +359,8 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 					Msg("failed to save micro engine log")
 			}
 
+			a.notifyAttack(realIP, host, int(req.DstPort), "micro_engine", "high", 0, req.ID)
+
 			return ErrInterrupted{
 				Interruption: &types.Interruption{
 					Action: "deny",
@@ -324,6 +391,19 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 				_, _ = a.flowController.RecordAttack(realIP, buildFullURL(host, req.Path, req.Query))
 			}
 
+			// 扫描防护：记录命中的规则
+			if a.scanProtector != nil && a.scanProtector.IsEnabled() {
+				interruption := tx.Interruption()
+				if shouldBlock := a.scanProtector.RecordHit(realIP, interruption.RuleID); shouldBlock {
+					a.Logger.Warn().
+						Str("ip", realIP).
+						Int("rule_id", interruption.RuleID).
+						Msg("scan protection threshold reached, auto-blocking IP")
+					go a.scanProtector.BlockIP(context.Background(), realIP,
+						"自动封禁：高频扫描/攻击触发扫描防护阈值")
+				}
+			}
+
 			interruption := tx.Interruption()
 			if matchedRules := tx.MatchedRules(); len(matchedRules) > 0 {
 				err := a.saveFirewallLog(matchedRules, interruption, &req, req.Headers)
@@ -331,6 +411,8 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 					a.Logger.Error().Err(err).Msg("failed to save firewall log")
 				}
 			}
+
+			a.notifyAttack(realIP, host, int(req.DstPort), "coraza", severityToString(interruption.RuleID), interruption.RuleID, req.ID)
 		}
 
 		tx.ProcessLogging()
@@ -604,6 +686,7 @@ func (a *Application) HandleResponse(ctx context.Context, writer *encoding.Actio
 					a.Logger.Error().Err(err).Msg("failed to save firewall log")
 				}
 			}
+			a.notifyAttack(realIP, host, int(t.request.DstPort), "coraza", severityToString(interruption.RuleID), interruption.RuleID, t.request.ID)
 		}
 
 		tx.ProcessLogging()
@@ -624,11 +707,26 @@ func (a *Application) HandleResponse(ctx context.Context, writer *encoding.Actio
 		return ErrInterrupted{it}
 	}
 
-	switch it, _, err := tx.WriteResponseBody(res.Body); {
-	case err != nil:
-		return err
-	case it != nil:
-		return ErrInterrupted{it}
+	// 敏感数据过滤：在返回给客户端前对响应体进行脱敏
+	{
+		responseBody := res.Body
+		if a.sensitiveFilter != nil && a.sensitiveFilter.IsEnabled() && len(responseBody) > 0 {
+			filtered, matches := a.sensitiveFilter.Filter(responseBody)
+			if len(matches) > 0 {
+				a.Logger.Info().
+					Int("match_count", len(matches)).
+					Str("request_id", res.ID).
+					Msg("response body contained sensitive data, filtered")
+				responseBody = filtered
+			}
+		}
+
+		switch it, _, err := tx.WriteResponseBody(responseBody); {
+		case err != nil:
+			return err
+		case it != nil:
+			return ErrInterrupted{it}
+		}
 	}
 
 	switch it, err := tx.ProcessResponseBody(); {
@@ -682,6 +780,23 @@ func buildRequestString(req *applicationRequest, headers []byte) string {
 	}
 
 	return sb.String()
+}
+
+
+// notifyAttack 异步通知上层攻击事件（取证捕获等）
+func (a *Application) notifyAttack(sourceIP, targetHost string, targetPort int, attackType, severity string, ruleID int, requestID string) {
+	if a.onAttack == nil {
+		return
+	}
+	go a.onAttack(cwtypes.AttackInfo{
+		SourceIP:   sourceIP,
+		TargetHost: targetHost,
+		TargetPort: targetPort,
+		AttackType: attackType,
+		Severity:   severity,
+		RuleID:     ruleID,
+		RequestID:  requestID,
+	})
 }
 
 func (a *Application) saveMicroEngineLog(rule *Rule, req *applicationRequest, headers []byte) error {
@@ -927,6 +1042,46 @@ func (a AppConfig) NewApplicationWithContext(ctx context.Context, options Applic
 		a.Logger.Info().Msg("流量分析器已初始化")
 	}
 
+	// 初始化扫描防护器
+	scfg := DefaultScanProtectorConfig()
+	if os.Getenv("SCAN_PROTECTION") == "true" {
+		scfg.Enabled = true
+		a.Logger.Info().Msg("扫描防护器已启用（高频扫描封禁 + 扫描器指纹）")
+	} else {
+		a.Logger.Info().Msg("扫描防护器未启用（设置 SCAN_PROTECTION=true 开启）")
+	}
+	app.scanProtector = NewScanProtector(scfg, options.FlowControllerConfig.Client, "waf", a.Logger)
+	if scfg.Enabled {
+		app.scanProtector.Start()
+	}
+
+
+	// 攻击事件回调（取证捕获等上层服务）
+	app.onAttack = options.OnAttack
+
+	// 初始化 Bot 检测器（通过环境变量 BOT_PROTECTION=true 启用）
+	bcfg := DefaultBotDetectorConfig()
+	if os.Getenv("BOT_PROTECTION") == "true" {
+		bcfg.Enabled = true
+		a.Logger.Info().Msg("Bot 检测器已启用（UA指纹 + 行为频率分析）")
+	} else {
+		a.Logger.Info().Msg("Bot 检测器未启用（设置 BOT_PROTECTION=true 开启）")
+	}
+	app.botDetector = NewBotDetector(bcfg, a.Logger)
+	if bcfg.Enabled {
+		app.botDetector.Start()
+	}
+
+
+	// 初始化敏感数据过滤器（通过环境变量 SENSITIVE_DATA_FILTER=true 启用）
+	app.sensitiveFilter = NewSensitiveDataFilter()
+	if os.Getenv("SENSITIVE_DATA_FILTER") == "true" {
+		app.sensitiveFilter.Enable()
+		a.Logger.Info().Msg("敏感数据过滤器已启用（身份证/手机号/银行卡号脱敏）")
+	} else {
+		a.Logger.Info().Msg("敏感数据过滤器未启用（设置 SENSITIVE_DATA_FILTER=true 开启）")
+	}
+
 	debugLogger := debuglog.Default().
 		WithLevel(debuglog.LevelDebug).
 		WithOutput(os.Stdout)
@@ -984,6 +1139,31 @@ func (a AppConfig) NewApplicationWithContext(ctx context.Context, options Applic
 // NewDefaultApplication creates a new Application with background context
 func (a AppConfig) NewApplication(options ApplicationOptions) (*Application, error) {
 	return a.NewApplicationWithContext(context.Background(), options, false)
+}
+
+
+// severityToString converts a rule severity integer to a human-readable string.
+func severityToString(severity int) string {
+	switch severity {
+	case 0:
+		return "emergency"
+	case 1:
+		return "alert"
+	case 2:
+		return "critical"
+	case 3:
+		return "error"
+	case 4:
+		return "warning"
+	case 5:
+		return "notice"
+	case 6:
+		return "info"
+	case 7:
+		return "debug"
+	default:
+		return "unknown"
+	}
 }
 
 func (a *Application) logCallback(mr types.MatchedRule) {
@@ -1096,6 +1276,12 @@ func getHeaderValue(headers []byte, targetHeader string) (string, error) {
 	}
 
 	return "", nil
+}
+
+// getHeaderValueStr 简化版：从 headers 中获取指定头部的值（忽略错误）
+func getHeaderValueStr(headers []byte, target string) string {
+	val, _ := getHeaderValue(headers, target)
+	return val
 }
 
 func getHostFromRequest(req *applicationRequest) string {

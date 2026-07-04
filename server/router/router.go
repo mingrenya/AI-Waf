@@ -2,19 +2,23 @@ package router
 
 import (
 	"context"
+	"os"
 	"time"
 
+	corazaserver "github.com/mingrenya/AI-Waf/coraza-spoa/pkg/server"
+	cwtypes "github.com/mingrenya/AI-Waf/coraza-spoa/pkg/types"
 	"github.com/mingrenya/AI-Waf/server/config"
 	"github.com/mingrenya/AI-Waf/server/controller"
 	"github.com/mingrenya/AI-Waf/server/middleware"
 	"github.com/mingrenya/AI-Waf/server/model"
 	"github.com/mingrenya/AI-Waf/server/repository"
 	"github.com/mingrenya/AI-Waf/server/service"
-	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
-	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
-	nucleiSvc "github.com/mingrenya/AI-Waf/server/service/nuclei"
-	captureSvc "github.com/mingrenya/AI-Waf/server/service/capture"
 	backupSvc "github.com/mingrenya/AI-Waf/server/service/backup"
+	captureSvc "github.com/mingrenya/AI-Waf/server/service/capture"
+	alertChecker "github.com/mingrenya/AI-Waf/server/service/cornjob/alert"
+	"github.com/mingrenya/AI-Waf/server/service/daemon"
+	nucleiSvc "github.com/mingrenya/AI-Waf/server/service/nuclei"
+	situationSvc "github.com/mingrenya/AI-Waf/server/service/situation"
 	ws "github.com/mingrenya/AI-Waf/server/websocket"
 
 	"github.com/gin-gonic/gin"
@@ -80,15 +84,22 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	protectionProfileService := service.NewProtectionProfileService(db, ruleTemplateService)
 
 	// Nuclei 扫描服务
-	nucleiScanner, err := nucleiSvc.NewScanner(context.Background(), "/home/mrya/mrya-waf/nuclei-templates")
-	if err != nil {
-		logger := config.GetServiceLogger("router")
-		logger.Warn().Err(err).Msg("Failed to create nuclei scanner, scanning will be unavailable")
+	nucleiTemplatesPath, nucleiTemplatesExists := nucleiSvc.ResolveTemplatesPath()
+	logger := config.GetServiceLogger("router")
+	var nucleiScanner nucleiSvc.Scanner
+	if nucleiTemplatesPath != "" && nucleiTemplatesExists {
+		scanner, err := nucleiSvc.NewScanner(context.Background(), nucleiTemplatesPath)
+		if err != nil {
+			logger.Warn().Err(err).Str("templates_path", nucleiTemplatesPath).Msg("Failed to create nuclei scanner, scanning will be unavailable")
+		} else {
+			nucleiScanner = scanner
+		}
+	} else {
+		logger.Warn().Str("templates_path", nucleiTemplatesPath).Msg("Nuclei templates directory not found, scanning will be unavailable")
 	}
-	nucleiTmplMgr := nucleiSvc.NewTemplateManager("/home/mrya/mrya-waf/nuclei-templates")
+	nucleiTmplMgr := nucleiSvc.NewTemplateManager(nucleiTemplatesPath)
 
 	// 启动告警后台任务
-	logger := config.GetServiceLogger("router")
 
 	// 初始化OWASP模板和保护配置文件
 	bgCtx := context.Background()
@@ -127,7 +138,7 @@ func Setup(route *gin.Engine, db *mongo.Database) (cleanup func()) {
 	mcpController := controller.NewMCPController(mcpService)
 	aiChatController := controller.NewAIChatController(aiChatService)
 	lokiLogController := controller.NewLokiLogController(lokiLogService)
-ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateService, ruleEffectivenessService, protectionProfileService)
+	ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateService, ruleEffectivenessService, protectionProfileService)
 
 	// 态势感知控制器 (depends on situationRepo + quickActionSvc)
 	situationPublisher := situationSvc.NewPublisher(nil)
@@ -142,16 +153,64 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 	nucleiController := controller.NewNucleiController(nucleiScanner, nucleiRepo, nucleiTmplMgr)
 
 	// 流量捕获服务
-	captureSvc := captureSvc.NewCaptureService(captureRepo, "/app/data/captures")
-	captureController := controller.NewCaptureController(captureSvc)
+	captureDataPath, capturePathExists := captureSvc.ResolveCapturePath()
+	if !capturePathExists {
+		logger.Warn().Str("capture_data_path", captureDataPath).Msg("Capture data directory not found, creating it")
+	}
+	captureSvcInstance := captureSvc.NewCaptureService(captureRepo, captureDataPath)
+
+	// 取证式自动流量捕获（根据攻击事件自动抓包）
+	forensicsCapture := captureSvc.NewForensicsCapture(
+		captureSvc.DefaultForensicsConfig(),
+		captureRepo,
+	)
+	// 自动捕获通过环境变量 FORENSICS_CAPTURE=true 开启（默认关闭）
+	if os.Getenv("FORENSICS_CAPTURE") == "true" {
+		if err := forensicsCapture.Start("any"); err != nil {
+			logger.Warn().Err(err).Msg("Failed to start forensics capture")
+		} else {
+			logger.Info().Msg("Forensics auto-capture started on interface 'any'")
+		}
+	}
+
+	captureController := controller.NewCaptureControllerWithForensics(captureSvcInstance, forensicsCapture)
+
+	// 将取证捕获回调注册到 WAF 引擎：攻击事件触发 → 自动抓包
+	if os.Getenv("FORENSICS_CAPTURE") == "true" {
+		customRunner, err := daemon.GetRunnerService()
+		if err == nil {
+			if agent, ok := customRunner.GetAgentServer().(corazaserver.AgentServer); ok {
+				agent.SetAttackCallback(cwtypes.AttackCallback(func(info cwtypes.AttackInfo) {
+					event := captureSvc.AttackCaptureEvent{
+						SourceIP:   info.SourceIP,
+						TargetHost: info.TargetHost,
+						TargetPort: info.TargetPort,
+						AttackType: info.AttackType,
+						Severity:   info.Severity,
+					}
+					if _, err := forensicsCapture.CaptureAttackTraffic(event); err != nil {
+						logger.Warn().Err(err).
+							Str("source_ip", info.SourceIP).
+							Str("attack_type", info.AttackType).
+							Msg("自动取证捕获失败")
+					}
+				}))
+			}
+			logger.Info().Msg("取证捕获回调已注册到 WAF 引擎")
+		}
+	}
 
 	// GeoIP 国家过滤控制器
 	geoipController := controller.NewGeoIPController()
 
 	// 备份恢复服务
 	backupRepo := repository.NewBackupRepository(db)
-	backupSvc := backupSvc.NewService(db, backupRepo, "/app/data/backups")
-	backupController := controller.NewBackupController(backupSvc)
+	backupDataPath, backupPathExists := backupSvc.ResolveBackupPath()
+	if !backupPathExists {
+		logger.Warn().Str("backup_data_path", backupDataPath).Msg("Backup data directory not found, creating it")
+	}
+	backupSvcInstance := backupSvc.NewService(db, backupRepo, backupDataPath)
+	backupController := controller.NewBackupController(backupSvcInstance)
 
 	// 将仓库添加到上下文中，供中间件使用
 	route.Use(func(c *gin.Context) {
@@ -478,42 +537,43 @@ ruleEnhancedController := controller.NewRuleEnhancedController(ruleTemplateServi
 		situationRoutes.POST("/quick-action", middleware.HasPermission(model.PermConfigUpdate), situationController.QuickAction)
 	}
 
-		// Nuclei 扫描路由
-		nucleiRoutes := authenticated.Group("/nuclei")
-		{
-			nucleiRoutes.POST("/scan", middleware.HasPermission(model.PermConfigUpdate), nucleiController.StartScan)
-			nucleiRoutes.GET("/scan/:id", middleware.HasPermission(model.PermConfigRead), nucleiController.GetTask)
-			nucleiRoutes.POST("/scan/:id/cancel", middleware.HasPermission(model.PermConfigUpdate), nucleiController.CancelTask)
-			nucleiRoutes.GET("/tasks", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTasks)
-			nucleiRoutes.GET("/templates", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTemplates)
-		}
+	// Nuclei 扫描路由
+	nucleiRoutes := authenticated.Group("/nuclei")
+	{
+		nucleiRoutes.POST("/scan", middleware.HasPermission(model.PermConfigUpdate), nucleiController.StartScan)
+		nucleiRoutes.GET("/scan/:id", middleware.HasPermission(model.PermConfigRead), nucleiController.GetTask)
+		nucleiRoutes.POST("/scan/:id/cancel", middleware.HasPermission(model.PermConfigUpdate), nucleiController.CancelTask)
+		nucleiRoutes.GET("/tasks", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTasks)
+		nucleiRoutes.GET("/templates", middleware.HasPermission(model.PermConfigRead), nucleiController.ListTemplates)
+	}
 
-		// 流量捕获路由
-		captureRoutes := authenticated.Group("/capture")
-		{
-			captureRoutes.POST("/start", middleware.HasPermission(model.PermConfigUpdate), captureController.StartCapture)
-			captureRoutes.POST("/:id/stop", middleware.HasPermission(model.PermConfigUpdate), captureController.StopCapture)
-			captureRoutes.GET("/sessions", middleware.HasPermission(model.PermConfigRead), captureController.ListSessions)
-			captureRoutes.GET("/:id", middleware.HasPermission(model.PermConfigRead), captureController.GetSession)
-			captureRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), captureController.DownloadPCAP)
-			}
+	// 流量捕获路由
+	captureRoutes := authenticated.Group("/capture")
+	{
+		captureRoutes.POST("/start", middleware.HasPermission(model.PermConfigUpdate), captureController.StartCapture)
+		captureRoutes.POST("/:id/stop", middleware.HasPermission(model.PermConfigUpdate), captureController.StopCapture)
+		captureRoutes.GET("/sessions", middleware.HasPermission(model.PermConfigRead), captureController.ListSessions)
+		captureRoutes.GET("/:id", middleware.HasPermission(model.PermConfigRead), captureController.GetSession)
+		captureRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), captureController.DownloadPCAP)
+		captureRoutes.GET("/forensics/stats", middleware.HasPermission(model.PermConfigRead), captureController.GetForensicsStats)
+	}
 
-		// 备份恢复路由
-		backupRoutes := authenticated.Group("/backup")
-		{
-			backupRoutes.POST("/create", middleware.HasPermission(model.PermConfigUpdate), backupController.CreateBackup)
-			backupRoutes.GET("/list", middleware.HasPermission(model.PermConfigRead), backupController.ListBackups)
-			backupRoutes.POST("/:id/restore", middleware.HasPermission(model.PermConfigUpdate), backupController.RestoreBackup)
-			backupRoutes.DELETE("/:id", middleware.HasPermission(model.PermConfigUpdate), backupController.DeleteBackup)
-			backupRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), backupController.DownloadBackup)
-		}
+	// 备份恢复路由
+	backupRoutes := authenticated.Group("/backup")
+	{
+		backupRoutes.POST("/create", middleware.HasPermission(model.PermConfigUpdate), backupController.CreateBackup)
+		backupRoutes.GET("/list", middleware.HasPermission(model.PermConfigRead), backupController.ListBackups)
+		backupRoutes.POST("/:id/restore", middleware.HasPermission(model.PermConfigUpdate), backupController.RestoreBackup)
+		backupRoutes.DELETE("/:id", middleware.HasPermission(model.PermConfigUpdate), backupController.DeleteBackup)
+		backupRoutes.GET("/:id/download", middleware.HasPermission(model.PermConfigRead), backupController.DownloadBackup)
+	}
 
-		// GeoIP 国家过滤路由
-		geoipRoutes := authenticated.Group("/geoip")
-		{
-			geoipRoutes.GET("/config", middleware.HasPermission(model.PermConfigRead), geoipController.GetConfig)
-			geoipRoutes.PUT("/config", middleware.HasPermission(model.PermConfigUpdate), geoipController.UpdateConfig)
-		}
+	// GeoIP 国家过滤路由
+	geoipRoutes := authenticated.Group("/geoip")
+	{
+		geoipRoutes.GET("/config", middleware.HasPermission(model.PermConfigRead), geoipController.GetConfig)
+		geoipRoutes.PUT("/config", middleware.HasPermission(model.PermConfigUpdate), geoipController.UpdateConfig)
+	}
 
 	// ===== 前端静态资源托管 =====
 	SetStaticFileRouter(route)

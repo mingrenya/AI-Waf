@@ -17,6 +17,7 @@ import (
 
 	cfg "github.com/mingrenya/AI-Waf/coraza-spoa/config"
 	"github.com/mingrenya/AI-Waf/coraza-spoa/internal"
+	cwtypes "github.com/mingrenya/AI-Waf/coraza-spoa/pkg/types"
 	"github.com/mingrenya/AI-Waf/coraza-spoa/analyzer"
 	mongodb "github.com/mingrenya/AI-Waf/pkg/database/mongo"
 	"github.com/mingrenya/AI-Waf/pkg/model"
@@ -42,6 +43,7 @@ type AgentServer interface {
 	ReloadRules() error
 	UpdateNetworkAddress(network, address string)
 	UpdateLogger(logger zerolog.Logger)
+	SetAttackCallback(cb interface{})
 	GetState() ServerState
 	GetLastError() error
 	GetLatestConfig() (*model.Config, error)
@@ -61,7 +63,9 @@ type AgentServerImpl struct {
 	state         ServerState
 	lastError     error
 	mongoURI      string
+	dbName        string                             // MongoDB 数据库名（从 DB_NAME 环境变量读取）
 	aiAnalyzer    *analyzer.AISecurityAnalyzer // 引擎层 AI 安全分析器
+	onAttack      cwtypes.AttackCallback       // 攻击事件回调（取证捕获等）
 }
 
 func NewAgentServer(logger zerolog.Logger, mongoURI string) (AgentServer, error) {
@@ -69,10 +73,17 @@ func NewAgentServer(logger zerolog.Logger, mongoURI string) (AgentServer, error)
 		return nil, errors.New("mongoURI is required")
 	}
 
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "waf"
+	}
+	logger.Info().Str("db_name", dbName).Msg("AgentServer initializing with database")
+
 	return &AgentServerImpl{
 		logger:   logger,
 		state:    ServerStopped,
 		mongoURI: mongoURI,
+		dbName:   dbName,
 	}, nil
 }
 
@@ -104,7 +115,7 @@ func (s *AgentServerImpl) Start() error {
 	var wafLog model.WAFLog
 	mongoConfig := &internal.MongoConfig{
 		Client:     mongoClient,
-		Database:   "waf",
+		Database:   s.dbName,
 		Collection: wafLog.GetCollectionName(),
 	}
 
@@ -113,20 +124,20 @@ func (s *AgentServerImpl) Start() error {
 
 	ruleEngineMongoConfig := &internal.MongoDBConfig{
 		MongoClient:       mongoClient,
-		Database:          "waf",
+		Database:          s.dbName,
 		RuleCollection:    microRule.GetCollectionName(),
 		IPGroupCollection: ipGroup.GetCollectionName(),
 	}
 
 	flowControllerConfig := internal.FlowControllerConfig{
 		Client:   mongoClient,
-		Database: "waf",
+		Database: s.dbName,
 	}
 
 	// 流量分析器配置：启用自适应限流
 	trafficAnalyzerConfig := internal.TrafficAnalyzerConfig{
 		Client:   mongoClient,
-		Database: "waf",
+		Database: s.dbName,
 	}
 
 	geoIPConfig := internal.GeoIP2Options{
@@ -282,7 +293,7 @@ func (s *AgentServerImpl) UpdateApplications() error {
 	var wafLog model.WAFLog
 	mongoConfig := &internal.MongoConfig{
 		Client:     mongoClient,
-		Database:   "waf",
+		Database:   s.dbName,
 		Collection: wafLog.GetCollectionName(),
 	}
 
@@ -291,20 +302,20 @@ func (s *AgentServerImpl) UpdateApplications() error {
 
 	ruleEngineMongoConfig := &internal.MongoDBConfig{
 		MongoClient:       mongoClient,
-		Database:          "waf",
+		Database:          s.dbName,
 		RuleCollection:    microRule.GetCollectionName(),
 		IPGroupCollection: ipGroup.GetCollectionName(),
 	}
 
 	flowControllerConfig := internal.FlowControllerConfig{
 		Client:   mongoClient,
-		Database: "waf",
+		Database: s.dbName,
 	}
 
 	// 流量分析器配置：启用自适应限流
 	trafficAnalyzerConfig := internal.TrafficAnalyzerConfig{
 		Client:   mongoClient,
-		Database: "waf",
+		Database: s.dbName,
 	}
 
 	geoIPConfig := internal.GeoIP2Options{
@@ -434,6 +445,21 @@ func (s *AgentServerImpl) GetLastError() error {
 	return s.lastError
 }
 
+// SetAttackCallback 注册攻击事件回调，已存在的 Application 也会同步更新。
+// 应在 ForensicsCapture 等服务初始化后调用，确保攻击检测时回调已就绪。
+func (s *AgentServerImpl) SetAttackCallback(cb interface{}) {
+	if fn, ok := cb.(cwtypes.AttackCallback); ok {
+		s.mu.Lock()
+		defer s.mu.Unlock()
+		s.onAttack = fn
+		if s.applications != nil {
+			for _, app := range s.applications {
+				app.SetAttackCallback(fn)
+			}
+		}
+	}
+}
+
 func (s *AgentServerImpl) GetLatestConfig() (*model.Config, error) {
 	if s.mongoURI == "" {
 		return nil, errors.New("mongoURI is required")
@@ -446,7 +472,7 @@ func (s *AgentServerImpl) GetLatestConfig() (*model.Config, error) {
 
 	var cfg model.Config
 	// 获取配置集合
-	db := client.Database("waf")
+	db := client.Database(s.dbName)
 	collection := db.Collection(cfg.GetCollectionName())
 
 	// 创建带超时的上下文

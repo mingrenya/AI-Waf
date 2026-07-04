@@ -34,6 +34,7 @@ type ServiceRunner interface {
 	ReloadEngineRules() error
 	GetState() ServiceState
 	GetStats() (models.NativeStats, error)
+	GetAgentServer() interface{} // 暴露 AgentServer 供外部注册回调（如取证捕获）
 }
 
 // ServiceRunner 负责管理和协调所有后台服务
@@ -441,8 +442,16 @@ func (r *ServiceRunnerImpl) HotReload() error {
 	return nil
 }
 
-// ReloadEngineRules 轻量热加载引擎规则（仅重载 MicroEngine 规则和 IP 组，不重建整个引擎）。
-// 流量处理不中断，耗时约 50~200ms。
+// RegisterAttackCallback 向引擎注册攻击事件回调（如取证捕获等上层服务）
+func (r *ServiceRunnerImpl) RegisterAttackCallback(cb interface{}) {
+	// 将 AttackCallback 透传到引擎层的 AgentServer
+	// 调用方通过 router 层传入正确的 internal.AttackCallback 类型
+	agent := r.engineService.GetAgentServer()
+	if agent != nil {
+		agent.SetAttackCallback(cb)
+	}
+}
+
 func (r *ServiceRunnerImpl) ReloadEngineRules() error {
 	if r.state != ServiceRunning {
 		return fmt.Errorf("服务未在运行中，无法热加载规则")
@@ -465,6 +474,12 @@ func (r *ServiceRunnerImpl) GetState() ServiceState {
 }
 
 // GetStats 获取HAProxy的统计信息
+// GetAgentServer 返回底层的 AgentServer 实例，供外部直接注册回调。
+// 返回值类型为 interface{}，调用方需要断言为 server.AgentServer。
+func (r *ServiceRunnerImpl) GetAgentServer() interface{} {
+	return r.engineService.GetAgentServer()
+}
+
 func (r *ServiceRunnerImpl) GetStats() (models.NativeStats, error) {
 	if r.haproxyService == nil {
 		return models.NativeStats{}, fmt.Errorf("haproxy service not initialized")

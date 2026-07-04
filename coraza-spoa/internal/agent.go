@@ -54,15 +54,15 @@ func (a *Agent) HandleSPOE(ctx context.Context, writer *encoding.ActionWriter, m
 	k := encoding.AcquireKVEntry()
 	defer encoding.ReleaseKVEntry(k)
 	if !message.KV.Next(k) {
-		a.Logger.Panic().Msg("failed reading kv entry")
+		a.Logger.Error().Msg("failed reading kv entry — SPOE message has no app identifier")
 		return
 	}
 
 	appName := string(k.ValueBytes())
 	if !k.NameEquals("app") {
-		// Without knowing the app, we cannot continue. We could fall back to a default application,
-		// but all following code would have to support that as we now already read one of the kv entries.
-		a.Logger.Panic().Str("expected", "app").Str("got", string(k.NameBytes())).Msg("unexpected kv entry")
+		// Without knowing the app, we cannot continue. Log the error and return gracefully
+		// instead of panicking to avoid dropping the SPOE connection.
+		a.Logger.Error().Str("expected", "app").Str("got", string(k.NameBytes())).Msg("unexpected kv entry — first key must be 'app'")
 		return
 	}
 
@@ -70,8 +70,9 @@ func (a *Agent) HandleSPOE(ctx context.Context, writer *encoding.ActionWriter, m
 	app := a.Applications[appName]
 	a.mtx.RUnlock()
 	if app == nil {
-		// If we cannot resolve the app, we fail as this is an invalid configuration.
-		a.Logger.Panic().Str("app", appName).Msg("app not found")
+		// If we cannot resolve the app, log the error and return gracefully
+		// instead of panicking. This can happen during config transitions.
+		a.Logger.Error().Str("app", appName).Msg("app not found — skipping message processing")
 		return
 	}
 
@@ -91,6 +92,7 @@ func (a *Agent) HandleSPOE(ctx context.Context, writer *encoding.ActionWriter, m
 		return
 	}
 
-	// If the error is not an ErrInterrupted, we panic to let the spop stream fail.
-	a.Logger.Panic().Err(err).Msg("Error handling request")
+	// error is not ErrInterrupted — log and return gracefully instead of
+	// panicking, to avoid dropping the entire SPOE connection on transient failures.
+	a.Logger.Error().Err(err).Msg("Error handling request")
 }
