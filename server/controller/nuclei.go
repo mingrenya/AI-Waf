@@ -270,7 +270,7 @@ func (c *NucleiControllerImpl) GetTaskDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
 	dbTask, err := c.repo.GetTask(context.Background(), id)
 	if err != nil {
-		response.NotFound(ctx, "任务不存在", err)
+		response.NotFound(ctx, err)
 		return
 	}
 	response.Success(ctx, "获取任务详情成功", dto.ScanTaskDetailResponse{
