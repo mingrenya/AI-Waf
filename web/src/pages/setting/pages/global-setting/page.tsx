@@ -80,7 +80,7 @@ export default function GlobalSettingPage() {
                             <h3 className="text-lg font-medium text-foreground">{t("globalSetting.config.generalConfig")}</h3>
                         </div>
                         <div className="pl-7">
-                            <p className="text-sm text-muted-foreground dark:text-shadow-primary-bold">{t("globalSetting.description")}</p>
+                            <p className="text-sm text-muted-foreground">{t("globalSetting.description")}</p>
                         </div>
                     </div>
 

@@ -135,7 +135,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
         <Card className="h-full border-none shadow-none flex flex-col gap-8">
             <CardContent className="p-0 flex flex-col gap-8">
                 <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-primary dark:text-shadow-primary" />
+                    <Shield className="h-5 w-5 text-primary" />
                     <h3 className="text-lg font-medium ">{t("globalSetting.engine.setting")}</h3>
                 </div>
 
@@ -161,16 +161,16 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                                                 onValueChange={(value) => field.onChange(value[0])}
                                             />
                                         </FormControl>
-                                        <div className="w-12 text-center font-medium dark:text-shadow-primary">
+                                        <div className="w-12 text-center font-medium">
                                             {field.value}
                                         </div>
                                     </div>
-                                    <FormDescription className="dark:text-shadow-primary-bold">
+                                    <FormDescription className="">
                                         {t("globalSetting.config.threadsDescription")}
                                     </FormDescription>
                                     {showThreadWarning && (
                                         <Alert variant="default" className="mt-2 bg-zinc-50 dark:bg-muted border-none shadow-none">
-                                            <AlertCircle className="h-4 w-4 dark:text-shadow-primary" />
+                                            <AlertCircle className="h-4 w-4" />
                                             <AlertDescription className="">
                                                 {t("globalSetting.config.threadsWarning")}
                                             </AlertDescription>
@@ -192,7 +192,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                                             <Shield className="h-4 w-4 text-muted-foreground" />
                                             <FormLabel className="text-base ">{t("globalSetting.config.responseCheck")}</FormLabel>
                                         </div>
-                                        <FormDescription className="dark:text-shadow-primary-bold">
+                                        <FormDescription className="">
                                             {t("globalSetting.config.responseCheckDescription")}
                                         </FormDescription>
                                     </div>
@@ -217,7 +217,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                                             <Bug className="h-4 w-4 text-muted-foreground" />
                                             <FormLabel className="text-base ">{t("globalSetting.config.debugMode")}</FormLabel>
                                         </div>
-                                        <FormDescription className="dark:text-shadow-primary-bold">
+                                        <FormDescription className="">
                                             {t("globalSetting.config.debugModeDescription")}
                                         </FormDescription>
                                     </div>
@@ -238,7 +238,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Code className="h-4 w-4 text-muted-foreground dark:text-shadow-primary" />
+                                        <Code className="h-4 w-4 text-muted-foreground" />
                                         <FormLabel className="">{t("globalSetting.config.engineDirectives")}</FormLabel>
                                     </div>
                                     <FormControl>
@@ -248,7 +248,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                                             {...field}
                                         />
                                     </FormControl>
-                                    <FormDescription className="dark:text-shadow-primary-bold">
+                                    <FormDescription className="">
                                         {t("globalSetting.config.engineDirectivesDescription")}
                                     </FormDescription>
                                     <FormMessage />
@@ -263,7 +263,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Folder className="h-4 w-4 text-muted-foreground dark:text-shadow-primary" />
+                                        <Folder className="h-4 w-4 text-muted-foreground" />
                                         <FormLabel className="">{t("globalSetting.config.haproxyConfigDir")}</FormLabel>
                                     </div>
                                     <FormControl>
@@ -272,7 +272,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                                             className="border-0 border-b border-gray-300 rounded-none focus:ring-0 focus-visible:ring-0 focus-visible:border-primary px-0 "
                                         />
                                     </FormControl>
-                                    <FormDescription className="dark:text-shadow-primary-bold">
+                                    <FormDescription className="">
                                         {t("globalSetting.config.haproxyConfigDirDescription")}
                                     </FormDescription>
                                     <FormMessage />
@@ -287,7 +287,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex items-center gap-2 mb-2">
-                                        <Terminal className="h-4 w-4 text-muted-foreground dark:text-shadow-primary" />
+                                        <Terminal className="h-4 w-4 text-muted-foreground" />
                                         <FormLabel className="">{t("globalSetting.config.haproxyBinPath")}</FormLabel>
                                     </div>
                                     <FormControl>
@@ -296,7 +296,7 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                                             className="border-0 border-b border-gray-300 rounded-none focus:ring-0 focus-visible:ring-0 focus-visible:border-primary px-0 "
                                         />
                                     </FormControl>
-                                    <FormDescription className="dark:text-shadow-primary-bold">
+                                    <FormDescription className="">
                                         {t("globalSetting.config.haproxyBinPathDescription")}
                                     </FormDescription>
                                     <FormMessage />
@@ -322,10 +322,10 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                         <div className="flex flex-row items-center justify-between p-0 mt-6">
                             <div className="space-y-0.5">
                                 <div className="flex items-center gap-2">
-                                    <Palette className="h-4 w-4 text-muted-foreground dark:text-shadow-primary" />
+                                    <Palette className="h-4 w-4 text-muted-foreground" />
                                     <div className="text-base font-medium ">{t("globalSetting.config.theme") || "主题设置"}</div>
                                 </div>
-                                <div className="text-sm text-muted-foreground dark:text-shadow-primary-bold">
+                                <div className="text-sm text-muted-foreground-bold">
                                     {t("globalSetting.config.themeDescription") || "切换浅色和深色主题模式"}
                                 </div>
                             </div>
@@ -348,12 +348,12 @@ export function ConfigForm({ config, isLoading }: ConfigFormProps) {
                     >
                         {isUpdating ? (
                             <>
-                                <Loader2 className="h-4 w-4 animate-spin dark:text-shadow-primary" />
+                                <Loader2 className="h-4 w-4 animate-spin" />
                                 {t("globalSetting.config.saving")}
                             </>
                         ) : (
                             <>
-                                <Save className="h-4 w-4 dark:text-shadow-primary" />
+                                <Save className="h-4 w-4" />
                                 {t("globalSetting.config.saveSettings")}
                             </>
                         )}
