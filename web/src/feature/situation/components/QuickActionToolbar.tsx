@@ -46,7 +46,7 @@ export default function QuickActionToolbar({ sourceIp }: QuickActionToolbarProps
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-xs text-muted-foreground flex items-center gap-1 mr-1">
+      <span className="text-xs flex items-center gap-1 mr-1" style={{color:'var(--text-muted)'}}>
         <Shield className="h-3.5 w-3.5" />
         Quick Actions:
       </span>

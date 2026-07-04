@@ -1,5 +1,4 @@
 import { motion } from 'motion/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -53,114 +52,102 @@ export default function AttackChainTimeline({ onSelectAttacker }: AttackChainTim
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Attack Chain Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center gap-4">
-                <Skeleton className="h-10 w-10 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-48" />
-                </div>
+      <div className="surface-card p-5">
+        <h3 className="text-lg font-medium mb-4" style={{color:'var(--text-primary)'}}>Attack Chain Timeline</h3>
+        <div className="space-y-4">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex items-center gap-4">
+              <Skeleton className="h-10 w-10 rounded-full bg-white/10" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32 bg-white/10" />
+                <Skeleton className="h-3 w-48 bg-white/10" />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
   if (!data || !data.chains || data.chains.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Attack Chain Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-8">No active attack chains</p>
-        </CardContent>
-      </Card>
+      <div className="surface-card p-5">
+        <h3 className="text-lg font-medium mb-4" style={{color:'var(--text-primary)'}}>Attack Chain Timeline</h3>
+        <p className="text-sm text-center py-8" style={{color:'var(--text-dim)'}}>No active attack chains</p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Attack Chain Timeline</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[400px] pr-4">
-          <div className="relative">
-            {/* Timeline vertical line */}
-            <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
+    <div className="surface-card p-5">
+      <h3 className="text-lg font-medium mb-4" style={{color:'var(--text-primary)'}}>Attack Chain Timeline</h3>
+      <ScrollArea className="h-[400px] pr-4">
+        <div className="relative">
+          {/* Timeline vertical line */}
+          <div className="absolute left-5 top-0 bottom-0 w-px" style={{background:'var(--surface-root-border)'}} />
 
-            <div className="space-y-0">
-              {data.chains.map((chain: ChainSummary, idx: number) => (
-                <motion.div
-                  key={chain.id}
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.04, duration: 0.3 }}
-                  className="relative flex items-start gap-4 py-3 pl-12 pr-2 cursor-pointer hover:bg-muted/40 rounded-md transition-colors"
-                  onClick={() => onSelectAttacker?.(chain.source_ip)}
-                >
-                  {/* Timeline dot */}
-                  <div
-                    className={`absolute left-[14px] top-[18px] h-3 w-3 rounded-full border-2 border-background ${
-                      chain.active ? 'bg-green-500' : 'bg-gray-400'
-                    }`}
-                  />
+          <div className="space-y-0">
+            {data.chains.map((chain: ChainSummary, idx: number) => (
+              <motion.div
+                key={chain.id}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.04, duration: 0.3 }}
+                className="relative flex items-start gap-4 py-3 pl-12 pr-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-md transition-colors"
+                onClick={() => onSelectAttacker?.(chain.source_ip)}
+              >
+                {/* Timeline dot */}
+                <div
+                  className={`absolute left-[14px] top-[18px] h-3 w-3 rounded-full border-2 border-[rgba(102,126,234,0.4)] ${
+                    chain.active ? 'bg-green-500' : 'bg-gray-400'
+                  }`}
+                />
 
-                  {/* IP & Country */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-sm font-medium">{chain.source_ip}</span>
-                      {chain.geo_country && (
-                        <Badge variant="outline" className="text-xs">
-                          {chain.geo_country}
-                        </Badge>
-                      )}
-                      <Badge
-                        variant={riskBadge(chain.risk_score).variant}
-                        className="text-xs ml-auto shrink-0"
-                      >
-                        {chain.risk_score}
+                {/* IP & Country */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-sm font-medium" style={{color:'var(--text-primary)'}}>{chain.source_ip}</span>
+                    {chain.geo_country && (
+                      <Badge variant="outline" className="text-xs">
+                        {chain.geo_country}
                       </Badge>
-                    </div>
-
-                    {/* Stage progression dots */}
-                    <div className="flex items-center gap-1.5 mt-1.5">
-                      {chain.stages.map((stage, si) => (
-                        <div key={`${stage}-${si}`} className="flex items-center gap-1.5">
-                          {si > 0 && (
-                            <div className="w-3 h-px bg-border" />
-                          )}
-                          <div
-                            className={`h-2.5 w-2.5 rounded-full ${STAGE_COLORS[stage] ?? 'bg-gray-400'}`}
-                            title={STAGE_LABELS[stage] ?? stage}
-                          />
-                        </div>
-                      ))}
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {chain.stages.length} stage{chain.stages.length > 1 ? 's' : ''}
-                      </span>
-                    </div>
-
-                    {/* Time */}
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Last seen: {timeAgo(chain.last_seen)}
-                    </p>
+                    )}
+                    <Badge
+                      variant={riskBadge(chain.risk_score).variant}
+                      className="text-xs ml-auto shrink-0"
+                    >
+                      {chain.risk_score}
+                    </Badge>
                   </div>
-                </motion.div>
-              ))}
-            </div>
+
+                  {/* Stage progression dots */}
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {chain.stages.map((stage, si) => (
+                      <div key={`${stage}-${si}`} className="flex items-center gap-1.5">
+                        {si > 0 && (
+                          <div className="w-3 h-px bg-white/20" />
+                        )}
+                        <div
+                          className={`h-2.5 w-2.5 rounded-full ${STAGE_COLORS[stage] ?? 'bg-gray-400'}`}
+                          title={STAGE_LABELS[stage] ?? stage}
+                        />
+                      </div>
+                    ))}
+                    <span className="text-xs ml-2" style={{color:'var(--text-dim)'}}>
+                      {chain.stages.length} stage{chain.stages.length > 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  {/* Time */}
+                  <p className="text-xs mt-1" style={{color:'var(--text-dim)'}}>
+                    Last seen: {timeAgo(chain.last_seen)}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </div>
-        </ScrollArea>
-      </CardContent>
-    </Card>
+        </div>
+      </ScrollArea>
+    </div>
   );
 }

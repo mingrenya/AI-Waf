@@ -37,31 +37,31 @@ export default function AttackerDrawer({ ip, open, onOpenChange }: AttackerDrawe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 sm:rounded-lg">
+      <DialogContent className="surface-modal max-w-lg max-h-[90vh] p-0 gap-0 sm:rounded-lg" style={{color:'var(--text-primary)'}}>
         <ScrollArea className="max-h-[calc(90vh-64px)]" scrollbarVariant="neon">
           {isLoading ? (
-            <div className="p-6 space-y-4">
-              <Skeleton className="h-6 w-48" />
-              <Skeleton className="h-4 w-32" />
+            <div className="p-6 space-y-4" style={{color:'var(--text-primary)'}}>
+              <Skeleton className="h-6 w-48 bg-white/10" />
+              <Skeleton className="h-4 w-32 bg-white/10" />
               <div className="grid grid-cols-2 gap-4">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-4 w-20 bg-white/10" />
+                    <Skeleton className="h-5 w-28 bg-white/10" />
                   </div>
                 ))}
               </div>
               <div className="space-y-2">
                 {[0, 1, 2].map((i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
+                  <Skeleton key={i} className="h-12 w-full bg-white/10" />
                 ))}
               </div>
             </div>
           ) : data ? (
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6" style={{color:'var(--text-primary)'}}>
               {/* IP and risk */}
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 flex-wrap">
+                <DialogTitle className="flex items-center gap-2 flex-wrap" style={{color:'var(--text-primary)'}}>
                   <span className="font-mono text-lg">{data.source_ip}</span>
                   <Badge variant={riskBadge(data.risk_score, data.risk_label).variant}>
                     {data.risk_label} ({data.risk_score})
@@ -72,44 +72,44 @@ export default function AttackerDrawer({ ip, open, onOpenChange }: AttackerDrawe
               {/* Stats grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Country</p>
-                  <p className="text-sm font-medium">
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Country</p>
+                  <p className="text-sm font-medium" style={{color:'var(--text-secondary)'}}>
                     {data.geo_country}{data.geo_city ? `, ${data.geo_city}` : ''}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Attacks</p>
-                  <p className="text-sm font-medium">{data.total_attacks}</p>
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Total Attacks</p>
+                  <p className="text-sm font-medium" style={{color:'var(--text-secondary)'}}>{data.total_attacks}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Top Attack Type</p>
-                  <p className="text-sm font-medium">{data.top_attack_type}</p>
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Top Attack Type</p>
+                  <p className="text-sm font-medium" style={{color:'var(--text-secondary)'}}>{data.top_attack_type}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Unique Targets</p>
-                  <p className="text-sm font-medium">{data.unique_target_sites}</p>
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Unique Targets</p>
+                  <p className="text-sm font-medium" style={{color:'var(--text-secondary)'}}>{data.unique_target_sites}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Attack Phase</p>
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Attack Phase</p>
                   <Badge variant="secondary" className="capitalize">
                     {data.attack_phase?.replace(/_/g, ' ') ?? '-'}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Tools</p>
-                  <p className="text-sm font-medium truncate max-w-[160px]">
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Tools</p>
+                  <p className="text-sm font-medium truncate max-w-[160px]" style={{color:'var(--text-secondary)'}}>
                     {data.tools_identified ?? '-'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">First Seen</p>
-                  <p className="text-sm font-medium">
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>First Seen</p>
+                  <p className="text-sm font-medium" style={{color:'var(--text-secondary)'}}>
                     {data.first_seen ? new Date(data.first_seen).toLocaleString() : '-'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Last Seen</p>
-                  <p className="text-sm font-medium">
+                  <p className="text-xs" style={{color:'var(--text-dim)'}}>Last Seen</p>
+                  <p className="text-sm font-medium" style={{color:'var(--text-secondary)'}}>
                     {data.last_seen ? new Date(data.last_seen).toLocaleString() : '-'}
                   </p>
                 </div>
@@ -131,7 +131,7 @@ export default function AttackerDrawer({ ip, open, onOpenChange }: AttackerDrawe
               {/* Active hours */}
               {data.active_hours && data.active_hours.length > 0 && (
                 <div>
-                  <p className="text-xs text-muted-foreground mb-2">Active Hours (UTC)</p>
+                  <p className="text-xs mb-2" style={{color:'var(--text-dim)'}}>Active Hours (UTC)</p>
                   <div className="flex flex-wrap gap-1">
                     {data.active_hours.map((h) => (
                       <Badge key={h} variant="outline" className="text-xs">
@@ -145,22 +145,22 @@ export default function AttackerDrawer({ ip, open, onOpenChange }: AttackerDrawe
               {/* Recent events */}
               {data.recent_events && data.recent_events.length > 0 && (
                 <div>
-                  <p className="text-sm font-medium mb-3">Recent Events</p>
+                  <p className="text-sm font-medium mb-3" style={{color:'var(--text-secondary)'}}>Recent Events</p>
                   <div className="space-y-2">
                     {data.recent_events.map((event: LogEventItem) => (
                       <div
                         key={event.id}
-                        className="flex items-center justify-between rounded-md border px-3 py-2 text-sm"
+                        className="flex items-center justify-between rounded-md border border-black/10 dark:border-white/10 px-3 py-2 text-sm bg-black/5 dark:bg-white/5"
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <Badge variant={severityVariant(event.severity)} className="text-xs shrink-0">
                             {event.severity}
                           </Badge>
-                          <span className="truncate">{event.attack_type}</span>
+                          <span className="truncate" style={{color:'var(--text-secondary)'}}>{event.attack_type}</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0 ml-2">
-                          <span className="text-xs text-muted-foreground">{event.action}</span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs" style={{color:'var(--text-dim)'}}>{event.action}</span>
+                          <span className="text-xs" style={{color:'var(--text-dim)'}}>
                             {event.timestamp ? new Date(event.timestamp).toLocaleTimeString() : ''}
                           </span>
                         </div>
@@ -175,7 +175,7 @@ export default function AttackerDrawer({ ip, open, onOpenChange }: AttackerDrawe
 
         {/* QuickActionToolbar pinned at bottom */}
         {ip && (
-          <div className="border-t bg-background px-6 py-3 rounded-b-lg">
+          <div className="border-t border-black/10 dark:border-white/10 px-6 py-3 rounded-b-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
             <QuickActionToolbar sourceIp={ip} />
           </div>
         )}
