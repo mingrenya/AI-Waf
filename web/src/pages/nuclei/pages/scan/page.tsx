@@ -1,13 +1,16 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { getTaskDetail, cancelTask } from '@/api/nuclei';
-import { listTasks } from '@/api/nuclei';
-import type { ScanTaskResponse, ScanTaskDetail, NucleiFinding } from '@/types/nuclei';
+import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { startScan, getTaskDetail, listTasks, cancelTask } from '@/api/nuclei';
+import type { ScanTaskResponse, ScanTaskDetail, NucleiFinding, TemplateInfo } from '@/types/nuclei';
+import { listTemplates } from '@/api/nuclei';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { X, AlertTriangle, Bug, Shield, Info, Terminal, Loader2, Eye } from 'lucide-react';
+import { X, AlertTriangle, Bug, Info, Terminal, Loader2, Eye } from 'lucide-react';
 
 const SEVERITY_MAP: Record<string, { color: string; bg: string; icon: typeof Bug }> = {
   critical: { color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', icon: AlertTriangle },
@@ -18,12 +21,23 @@ const SEVERITY_MAP: Record<string, { color: string; bg: string; icon: typeof Bug
 };
 
 export default function ScanPage() {
+  const [siteId, setSiteId] = useState('');
+  const [targetUrl, setTargetUrl] = useState('');
+  const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
+  const [severity, setSeverity] = useState('critical,high,medium');
+  const [loading, setLoading] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const { data: tasks = [], refetch: refetchTasks, isLoading } = useQuery({
+  const { data: tasks = [], refetch: refetchTasks, isLoading: tasksLoading } = useQuery({
     queryKey: ['nuclei-tasks'],
     queryFn: () => listTasks().then((res) => (res as unknown as { data?: ScanTaskResponse[] })?.data ?? []),
     refetchInterval: 5000,
+  });
+
+  const { data: templates = [] } = useQuery({
+    queryKey: ['nuclei-templates'],
+    queryFn: () => listTemplates().then((res) => (res as unknown as { data?: TemplateInfo[] })?.data ?? []),
   });
 
   const { data: taskDetail, isLoading: detailLoading } = useQuery({
@@ -32,9 +46,46 @@ export default function ScanPage() {
     enabled: !!selectedTaskId,
   });
 
-  const handleCancel = async (id: string) => {
-    await cancelTask(id);
-    refetchTasks();
+  const fetchTasks = useCallback(async () => {
+    try {
+      const data = await listTasks() as unknown as ScanTaskResponse[];
+      return data || [];
+    } catch {
+      return [];
+    }
+  }, []);
+
+  const handleStartScan = async () => {
+    if (!siteId || !targetUrl) return;
+    setLoading(true);
+    try {
+      await startScan({
+        site_id: siteId,
+        target_url: targetUrl,
+        templates: selectedTemplates.length > 0 ? selectedTemplates : undefined,
+        severity,
+      });
+      refetchTasks();
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelTask = async (id: string) => {
+    try {
+      await cancelTask(id);
+      refetchTasks();
+    } catch {
+      // ignore
+    }
+  };
+
+  const toggleTemplate = (path: string) => {
+    setSelectedTemplates((prev) =>
+      prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path]
+    );
   };
 
   const statusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
@@ -48,88 +99,143 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4 h-full">
+    <div className="flex flex-col gap-4 p-4">
+      {/* ===== 发起扫描表单 ===== */}
       <Card className="surface-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Terminal className="h-5 w-5" style={{ color: 'var(--color-primary-5)' }} />
-            Scan Tasks
+            Start Scan
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Loading tasks...
-            </div>
-          ) : tasks.length === 0 ? (
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No scan tasks yet.</p>
-          ) : (
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedTaskId === task.id
-                      ? 'border-primary bg-primary/5'
-                      : 'border-transparent hover:border-border'
-                  }`}
-                  style={{
-                    borderColor: selectedTaskId === task.id ? 'var(--color-primary-5)' : 'var(--surface-root-border)',
-                    background: selectedTaskId === task.id ? 'var(--surface-card-bg)' : undefined,
-                  }}
-                  onClick={() => setSelectedTaskId(task.id)}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                        {task.target_url}
-                      </span>
-                      <Badge variant={statusVariant(task.status)} className="text-xs">
-                        {task.status}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-3 mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <span className="font-mono">{task.id.slice(0, 8)}</span>
-                      <span>findings: {task.findings}/{task.total}</span>
-                      {task.created_at && <span>{new Date(task.created_at).toLocaleString()}</span>}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => { e.stopPropagation(); setSelectedTaskId(task.id); }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    {task.status === 'running' && (
-                      <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleCancel(task.id); }}>
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+              <Label htmlFor="siteId">Site ID</Label>
+              <Input
+                id="siteId"
+                value={siteId}
+                onChange={(e) => setSiteId(e.target.value)}
+                placeholder="Enter site ID"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="targetUrl">Target URL</Label>
+              <Input
+                id="targetUrl"
+                value={targetUrl}
+                onChange={(e) => setTargetUrl(e.target.value)}
+                placeholder="https://example.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="severity">Severity</Label>
+              <Select value={severity} onValueChange={setSeverity}>
+                <SelectTrigger id="severity">
+                  <SelectValue placeholder="Select severity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="critical,high,medium,low,info">All</SelectItem>
+                  <SelectItem value="critical,high,medium">Critical, High, Medium</SelectItem>
+                  <SelectItem value="critical">Critical Only</SelectItem>
+                  <SelectItem value="critical,high">Critical, High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2 flex items-end">
+              <Button onClick={handleStartScan} disabled={loading}>
+                {loading ? 'Starting...' : 'Start Scan'}
+              </Button>
+            </div>
+          </div>
+          {templates.length > 0 && (
+            <div className="space-y-2">
+              <Label>Templates ({selectedTemplates.length} selected)</Label>
+              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto border rounded-md p-2">
+                {templates.map((t) => (
+                  <Badge
+                    key={t.path}
+                    variant={selectedTemplates.includes(t.path) ? 'default' : 'outline'}
+                    className="cursor-pointer"
+                    onClick={() => toggleTemplate(t.path)}
+                  >
+                    {t.name}
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* 任务详情 — Findings 列表 */}
+      {/* ===== 任务列表 ===== */}
+      <Card className="surface-card">
+        <CardHeader>
+          <CardTitle>Scan Tasks</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {tasks.length === 0 ? (
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No scan tasks yet.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Site ID</TableHead>
+                  <TableHead>Target URL</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Findings / Total</TableHead>
+                  <TableHead>Created At</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tasks.map((task) => (
+                  <TableRow
+                    key={task.id}
+                    className={selectedTaskId === task.id ? 'bg-primary/5' : ''}
+                  >
+                    <TableCell className="font-mono text-xs">{task.id.slice(0, 8)}</TableCell>
+                    <TableCell>{task.site_id}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{task.target_url}</TableCell>
+                    <TableCell>
+                      <Badge variant={statusVariant(task.status)}>{task.status}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {task.findings} / {task.total}
+                    </TableCell>
+                    <TableCell className="text-xs">{new Date(task.created_at).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setSelectedTaskId(selectedTaskId === task.id ? null : task.id)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        {task.status === 'running' && (
+                          <Button size="sm" variant="outline" onClick={() => handleCancelTask(task.id)}>
+                            Cancel
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ===== Findings 详情面板 ===== */}
       {selectedTaskId && (
         <Card className="surface-card">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Search className="h-5 w-5" style={{ color: 'var(--color-primary-5)' }} />
-                Scan Findings
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSelectedTaskId(null)}
-              >
+              <span>Scan Findings</span>
+              <Button variant="ghost" size="icon" onClick={() => setSelectedTaskId(null)}>
                 <X className="h-4 w-4" />
               </Button>
             </CardTitle>
@@ -147,7 +253,7 @@ export default function ScanPage() {
             ) : (
               <div className="space-y-3">
                 {taskDetail.findings.map((f, idx) => (
-                  <FindingCard key={idx} finding={f} index={idx} />
+                  <FindingCard key={`${f.template_id}-${idx}`} finding={f} index={idx} />
                 ))}
               </div>
             )}
@@ -212,15 +318,5 @@ function FindingCard({ finding, index }: { finding: NucleiFinding; index: number
         </details>
       )}
     </div>
-  );
-}
-
-// 搜索图标组件
-function Search({ className }: { className?: string }) {
-  return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/>
-      <path d="m21 21-4.3-4.3"/>
-    </svg>
   );
 }
