@@ -112,7 +112,7 @@ export function UserDialog({ open, onOpenChange, mode, user, submitting = false,
                             </SelectContent>
                         </Select>
                         {role && (
-                            <p className="text-xs text-white/50 mt-1 italic">{roleDescriptions[role]}</p>
+                            <p className="text-xs mt-1 italic" style={{color:'var(--text-muted)'}}>{roleDescriptions[role]}</p>
                         )}
                     </div>
 

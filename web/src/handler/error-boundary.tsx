@@ -115,7 +115,7 @@ export function ErrorDisplay({ error }: ErrorDisplayProps) {
 
                 {error?.stack && (
                     <div className="mb-6 mx-auto max-w-md">
-                        <div className="bg-muted dark:bg-gray-800/30 p-3 rounded-md text-left overflow-x-auto text-xs font-mono text-muted-foreground dark:text-gray-300 dark:text-shadow-glow-white mb-4">
+                        <div className="bg-muted dark:bg-gray-800/30 p-3 rounded-md text-left overflow-x-auto text-xs font-mono text-muted-foreground dark:text-gray-300  mb-4">
                             {error.stack.split('\n').slice(0, 3).join('\n')}
                         </div>
                     </div>

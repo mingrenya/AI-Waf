@@ -72,9 +72,6 @@ export function ConditionBuilder({
     // 检查是否达到最大深度
     const isMaxDepth = currentDepth >= MAX_NESTING_DEPTH
 
-    // Common styles
-    const shadowTextStyles = ""
-
     // Get current condition type
     const conditionType = form.watch(`${path}.type` as FieldPath<MicroRuleCreateRequest>) as "simple" | "composite"
 
@@ -185,7 +182,7 @@ export function ConditionBuilder({
                             name={`${path}.target` as FieldPath<MicroRuleCreateRequest>}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className={shadowTextStyles + " text-xs"}>{t("microRule.condition.target")}</FormLabel>
+                                    <FormLabel className="text-xs">{t("microRule.condition.target")}</FormLabel>
                                     <Select
                                         onValueChange={(value: TargetType) => {
                                             field.onChange(value)
@@ -196,7 +193,7 @@ export function ConditionBuilder({
                                         value={field.value as TargetType}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className={shadowTextStyles}>
+                                            <SelectTrigger>
                                                 <SelectValue placeholder={t("microRule.condition.selectTarget")} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -219,12 +216,12 @@ export function ConditionBuilder({
                             name={`${path}.match_type` as FieldPath<MicroRuleCreateRequest>}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className={shadowTextStyles + " text-xs"}>
+                                    <FormLabel className="text-xs">
                                         {t("microRule.condition.matchType")} <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value as MatchType} value={field.value as MatchType}>
                                         <FormControl>
-                                            <SelectTrigger className={shadowTextStyles}>
+                                            <SelectTrigger>
                                                 <SelectValue placeholder={t("microRule.condition.selectMatchType")} />
                                             </SelectTrigger>
                                         </FormControl>
@@ -250,12 +247,11 @@ export function ConditionBuilder({
                                 name={`${path}.match_value` as FieldPath<MicroRuleCreateRequest>}
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className={shadowTextStyles + " text-xs"}>
+                                        <FormLabel className="text-xs">
                                             {t("microRule.condition.matchValue")} <span className="text-red-500">*</span>
                                         </FormLabel>
                                         <FormControl>
                                             <Input
-                                                className={shadowTextStyles}
                                                 placeholder={
                                                     target === "source_ip" ? "e.g: 192.168.10.10" : t("microRule.condition.enterMatchValue")
                                                 }
@@ -305,13 +301,13 @@ export function ConditionBuilder({
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className={`p-1 mr-2 ${shadowTextStyles}`}
+                            className="p-1 mr-2"
                             onClick={() => setExpanded(!expanded)}
                         >
                             {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                         </Button>
                         <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium ${shadowTextStyles}`}>
+                            <span className="text-sm font-medium">
                                 {t("microRule.condition.conditionGroup")}
                             </span>
                             <OperatorBadge operator={operator} onClick={toggleOperator} className="h-6 px-2 font-medium" />

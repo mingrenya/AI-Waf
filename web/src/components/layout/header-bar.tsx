@@ -34,7 +34,7 @@ export function HeaderBar() {
           className="w-7 h-7 rounded-md flex items-center justify-center"
           style={{ background: 'linear-gradient(135deg, var(--color-primary-5), var(--color-primary-9))' }}
         >
-          <Shield className="w-4 h-4 text-white" />
+          <Shield className="w-4 h-4" style={{color:'#ffffff'}} />
         </div>
         <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
           MRYa WAF

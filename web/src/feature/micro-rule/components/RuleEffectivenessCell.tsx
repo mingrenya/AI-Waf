@@ -155,7 +155,7 @@ export function RuleEffectivenessCell({ ruleId, ruleName }: RuleEffectivenessCel
         <TooltipContent side="right" className="max-w-sm p-4 bg-slate-950/95 text-slate-100 border border-white/20">
           <div className="space-y-3">
             <div>
-              <h4 className="font-semibold mb-1 text-sm text-white">规则有效性详情</h4>
+              <h4 className="font-semibold mb-1 text-sm" style={{color:'var(--text-primary)'}}>规则有效性详情</h4>
               <p className="text-xs text-slate-300">{ruleName}</p>
             </div>
 
@@ -163,7 +163,7 @@ export function RuleEffectivenessCell({ ruleId, ruleName }: RuleEffectivenessCel
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-300">真阳性率</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold tabular-nums text-white">{(score.true_positive_rate * 100).toFixed(1)}%</span>
+                  <span className="font-semibold tabular-nums" style={{color:'var(--text-primary)'}}>{(score.true_positive_rate * 100).toFixed(1)}%</span>
                   {score.true_positive_rate >= 0.8 ? (
                     <TrendingUp className="h-3 w-3 text-emerald-500" />
                   ) : (
@@ -175,7 +175,7 @@ export function RuleEffectivenessCell({ ruleId, ruleName }: RuleEffectivenessCel
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-300">假阳性率</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold tabular-nums text-white">{(score.false_positive_rate * 100).toFixed(1)}%</span>
+                  <span className="font-semibold tabular-nums" style={{color:'var(--text-primary)'}}>{(score.false_positive_rate * 100).toFixed(1)}%</span>
                   {score.false_positive_rate <= 0.1 ? (
                     <CheckCircle2 className="h-3 w-3 text-emerald-500" />
                   ) : (
@@ -186,19 +186,19 @@ export function RuleEffectivenessCell({ ruleId, ruleName }: RuleEffectivenessCel
 
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-300">拦截率</span>
-                <span className="font-semibold tabular-nums text-white">{(score.block_rate * 100).toFixed(1)}%</span>
+                <span className="font-semibold tabular-nums" style={{color:'var(--text-primary)'}}>{(score.block_rate * 100).toFixed(1)}%</span>
               </div>
 
               <div className="flex items-center justify-between gap-4">
                 <span className="text-slate-300">平均匹配时间</span>
-                <span className="font-semibold tabular-nums text-white">{score.avg_match_time.toFixed(2)}ms</span>
+                <span className="font-semibold tabular-nums" style={{color:'var(--text-primary)'}}>{score.avg_match_time.toFixed(2)}ms</span>
               </div>
             </div>
 
             {score.recommendation && (
               <div className="pt-2 border-t border-white/20">
                 <p className="text-xs text-slate-200 leading-relaxed">
-                  <span className="font-medium text-white">建议：</span> {score.recommendation}
+                  <span className="font-medium" style={{color:'var(--text-primary)'}}>建议：</span> {score.recommendation}
                 </p>
               </div>
             )}

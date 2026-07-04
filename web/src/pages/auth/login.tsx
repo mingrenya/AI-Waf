@@ -35,7 +35,7 @@ export default function LoginPage() {
     }, [isAuthenticated, needPasswordReset, navigate, from])
 
     return (
-        <div className="dark glass-bg-animated min-h-screen flex flex-col relative overflow-hidden">
+        <div className="glass-bg-animated min-h-screen flex flex-col relative overflow-hidden">
             {/* Floating particles */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div className="glass-particle w-72 h-72 top-[10%] left-[5%]" style={{ animationDelay: '0s' }} />
