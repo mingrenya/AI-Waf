@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -87,12 +86,9 @@ export default function AttackChainTimeline({ onSelectAttacker }: AttackChainTim
           <div className="absolute left-5 top-0 bottom-0 w-px" style={{background:'var(--surface-root-border)'}} />
 
           <div className="space-y-0">
-            {data.chains.map((chain: ChainSummary, idx: number) => (
-              <motion.div
+            {data.chains.map((chain: ChainSummary) => (
+              <div
                 key={chain.id}
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.04, duration: 0.3 }}
                 className="relative flex items-start gap-4 py-3 pl-12 pr-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-md transition-colors"
                 onClick={() => onSelectAttacker?.(chain.source_ip)}
               >
@@ -143,7 +139,7 @@ export default function AttackChainTimeline({ onSelectAttacker }: AttackChainTim
                     Last seen: {timeAgo(chain.last_seen)}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

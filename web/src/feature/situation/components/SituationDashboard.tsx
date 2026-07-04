@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOverview } from '../hooks/useSituationData';
@@ -21,7 +20,6 @@ function StatCard({
   title,
   value,
   subtitle,
-  index,
 }: {
   title: string;
   value: string | number;
@@ -29,35 +27,23 @@ function StatCard({
   index: number;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.35, ease: 'easeOut' }}
-    >
-      <div className="surface-card p-5 h-full">
-        <p className="text-xs font-medium mb-2" style={{color:'var(--text-muted)'}}>{title}</p>
-        <div className="text-3xl font-bold font-mono" style={{color:'var(--text-primary)'}}>{value}</div>
-        {subtitle && (
-          <p className="mt-1 text-xs" style={{color:'var(--text-dim)'}}>{subtitle}</p>
-        )}
-      </div>
-    </motion.div>
+    <div className="surface-card p-5 h-full">
+      <p className="text-xs font-medium mb-2" style={{color:'var(--text-muted)'}}>{title}</p>
+      <div className="text-3xl font-bold font-mono" style={{color:'var(--text-primary)'}}>{value}</div>
+      {subtitle && (
+        <p className="mt-1 text-xs" style={{color:'var(--text-dim)'}}>{subtitle}</p>
+      )}
+    </div>
   );
 }
 
-function StatCardSkeleton({ index }: { index: number }) {
+function StatCardSkeleton() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.35, ease: 'easeOut' }}
-    >
-      <div className="surface-card p-5 h-full">
-        <Skeleton className="h-4 w-24 mb-3 bg-white/10" />
-        <Skeleton className="h-8 w-16 mb-2 bg-white/10" />
-        <Skeleton className="h-3 w-20 bg-white/10" />
-      </div>
-    </motion.div>
+    <div className="surface-card p-5 h-full">
+      <Skeleton className="h-4 w-24 mb-3 bg-white/10" />
+      <Skeleton className="h-8 w-16 mb-2 bg-white/10" />
+      <Skeleton className="h-3 w-20 bg-white/10" />
+    </div>
   );
 }
 
@@ -76,22 +62,16 @@ function OverviewStats({ data }: { data: SituationOverview }) {
         value={data.total_attackers_24h}
         index={2}
       />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 3 * 0.08, duration: 0.35, ease: 'easeOut' }}
-      >
-        <div className="surface-card p-5 h-full">
-          <p className="text-xs font-medium mb-2" style={{color:'var(--text-muted)'}}>Overall Risk Score</p>
-          <div className="flex items-center gap-2">
-            <span className="text-3xl font-bold font-mono" style={{color:'var(--text-primary)'}}>{data.overall_risk_score}</span>
-            <Badge variant={risk.variant}>{risk.label}</Badge>
-          </div>
-          <p className="mt-1 text-xs" style={{color:'var(--text-dim)'}}>
-            Trend: {trendIcon(data.risk_trend)} {data.risk_trend}
-          </p>
+      <div className="surface-card p-5 h-full">
+        <p className="text-xs font-medium mb-2" style={{color:'var(--text-muted)'}}>Overall Risk Score</p>
+        <div className="flex items-center gap-2">
+          <span className="text-3xl font-bold font-mono" style={{color:'var(--text-primary)'}}>{data.overall_risk_score}</span>
+          <Badge variant={risk.variant}>{risk.label}</Badge>
         </div>
-      </motion.div>
+        <p className="mt-1 text-xs" style={{color:'var(--text-dim)'}}>
+          Trend: {trendIcon(data.risk_trend)} {data.risk_trend}
+        </p>
+      </div>
     </div>
   );
 }
@@ -127,7 +107,7 @@ export default function SituationDashboard() {
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[0, 1, 2, 3].map((i) => (
-            <StatCardSkeleton key={i} index={i} />
+            <StatCardSkeleton key={i} />
           ))}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
