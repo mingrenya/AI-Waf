@@ -79,6 +79,7 @@ type Application struct {
 	onAttack          cwtypes.AttackCallback // 攻击事件回调（取证捕获等）
 	botDetector       *BotDetector           // Bot管理检测器
 	antiEvasion       *AntiEvasion           // 反逃逸编码处理器
+	ddosBlocklist     *DDoSSharedBlocklist   // DDoS协同黑名单
 
 	AppConfig
 }
@@ -306,6 +307,20 @@ func (a *Application) HandleRequest(ctx context.Context, writer *encoding.Action
 	}
 
 	// 检查IP是否已被限制
+	// DDoS 协同黑名单检查
+	if a.ddosBlocklist != nil && a.ddosBlocklist.IsEnabled() {
+		if blocked, entry := a.ddosBlocklist.IsBlocklisted(realIP); blocked {
+			a.Logger.Info().Str("ip", realIP).Str("source", entry.Source).Int("confidence", entry.Confidence).Msg("IP on shared blocklist, blocked")
+			return ErrInterrupted{
+				Interruption: &types.Interruption{
+					Action: "deny",
+					Status: 403,
+					Data:   fmt.Sprintf("IP blocklisted: %s (%d%% confidence)", entry.Description, entry.Confidence),
+				},
+			}
+		}
+	}
+
 	if a.ipRecorder != nil {
 		if blocked, record := a.ipRecorder.IsIPBlocked(realIP); blocked {
 			a.Logger.Info().
