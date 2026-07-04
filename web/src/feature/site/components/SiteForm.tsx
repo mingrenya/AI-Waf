@@ -246,14 +246,43 @@ export function SiteForm({
                                     render={({ field }) => (
                                         <div className="flex flex-col gap-1.5">
                                             <FormLabel className="text-sm font-medium">{t('site.listenPort')}</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="80"
-                                                    className="rounded-md p-3 h-12 "
-                                                    {...field}
-                                                    onChange={(e) => field.onChange(Number(e.target.value))}
-                                                />
-                                            </FormControl>
+                                            <div className="flex gap-2">
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="80"
+                                                        className="rounded-md p-3 h-12 font-mono"
+                                                        {...field}
+                                                        value={field.value || ''}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value.replace(/\D/g, '')
+                                                            field.onChange(val === '' ? 0 : Number(val))
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                {/* 端口快捷预设 */}
+                                                <div className="flex gap-1 items-center">
+                                                    {[80, 443, 8080, 8443, 3000].map((p) => (
+                                                        <button
+                                                            key={p}
+                                                            type="button"
+                                                            onClick={() => field.onChange(p)}
+                                                            className={`px-2 py-1 text-xs rounded border transition-colors font-mono ${
+                                                                field.value === p
+                                                                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                                                                    : 'border-border text-muted-foreground hover:border-primary/50'
+                                                            }`}
+                                                        >
+                                                            {p}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            {field.value > 0 && field.value <= 1024 && field.value !== 80 && field.value !== 443 && (
+                                                <p className="text-xs text-amber-500 flex items-center gap-1">
+                                                    <AlertCircle className="h-3 w-3" />
+                                                    {t('site.dialog.portWarning', { defaultValue: '端口 ≤1024 可能需要 root 权限' })}
+                                                </p>
+                                            )}
                                             <FormMessage />
                                         </div>
                                     )}
