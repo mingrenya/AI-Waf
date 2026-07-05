@@ -10,6 +10,18 @@ import { getGeoIPConfig, updateGeoIPConfig } from '@/api/geoip';
 import type { GeoIPConfig } from '@/types/geoip';
 import { toast } from '@/hooks/use-toast';
 
+const EMPTY_CONFIG: GeoIPConfig = {
+  block_countries: [],
+  allow_mode: false,
+};
+
+function normalizeConfig(value: GeoIPConfig | null | undefined): GeoIPConfig {
+  return {
+    block_countries: Array.isArray(value?.block_countries) ? value.block_countries : [],
+    allow_mode: Boolean(value?.allow_mode),
+  };
+}
+
 export function GeoIPFilter() {
   const { t } = useTranslation();
   const [config, setConfig] = useState<GeoIPConfig | null>(null);
@@ -24,9 +36,9 @@ export function GeoIPFilter() {
   const loadConfig = async () => {
     try {
       const res = await getGeoIPConfig();
-      setConfig(res.data.data);
+      setConfig(normalizeConfig(res));
     } catch {
-      // 静默失败
+      setConfig(EMPTY_CONFIG);
     } finally {
       setLoading(false);
     }
@@ -36,8 +48,9 @@ export function GeoIPFilter() {
     const code = newCountry.trim().toUpperCase();
     if (!code || code.length !== 2) return;
     if (!config) return;
-    if (config.block_countries.includes(code)) return;
-    setConfig({ ...config, block_countries: [...config.block_countries, code] });
+    const countries = Array.isArray(config.block_countries) ? config.block_countries : [];
+    if (countries.includes(code)) return;
+    setConfig({ ...config, block_countries: [...countries, code] });
     setNewCountry('');
   };
 
@@ -45,7 +58,7 @@ export function GeoIPFilter() {
     if (!config) return;
     setConfig({
       ...config,
-      block_countries: config.block_countries.filter((c) => c !== code),
+      block_countries: (config.block_countries ?? []).filter((c) => c !== code),
     });
   };
 
@@ -59,7 +72,7 @@ export function GeoIPFilter() {
     setSaving(true);
     try {
       await updateGeoIPConfig({
-        block_countries: config.block_countries,
+        block_countries: config.block_countries ?? [],
         allow_mode: config.allow_mode,
       });
       toast({ title: t('common.saved') });
@@ -130,12 +143,12 @@ export function GeoIPFilter() {
           </div>
 
           <div className="flex flex-wrap gap-2 min-h-[36px]">
-            {config?.block_countries.length === 0 && (
+            {(config?.block_countries ?? []).length === 0 && (
               <span className="text-sm text-muted-foreground italic">
                 {t('globalSetting.geoip.empty', '未配置任何国家/地区')}
               </span>
             )}
-            {config?.block_countries.map((code) => (
+            {(config?.block_countries ?? []).map((code) => (
               <Badge key={code} variant="secondary" className="gap-1 pr-1">
                 {code}
                 <button

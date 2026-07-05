@@ -47,6 +47,7 @@ export default function StatsPage() {
                                 icon={<ArrowDown size={16} />}
                                 loading={isLoading}
                                 isTraffic
+                                iconTone="inbound"
                             />
                             <StatsCard
                                 title={t('stats.outboundTraffic')}
@@ -54,6 +55,7 @@ export default function StatsPage() {
                                 icon={<ArrowUp size={16} />}
                                 loading={isLoading}
                                 isTraffic
+                                iconTone="outbound"
                             />
                             <StatsCard
                                 title={t('stats.maxQPS')}
@@ -67,6 +69,7 @@ export default function StatsPage() {
                                 icon={<AlertCircle size={16} />}
                                 change={`${statsData?.error4xxRate?.toFixed(2)}%`}
                                 loading={isLoading}
+                                iconTone="danger"
                             />
                             <StatsCard
                                 title={t('stats.5xxErrors')}
@@ -74,6 +77,7 @@ export default function StatsPage() {
                                 icon={<Server size={16} />}
                                 change={`${statsData?.error5xxRate?.toFixed(2)}%`}
                                 loading={isLoading}
+                                iconTone="danger"
                             />
                             <StatsCard
                                 title={t('stats.blockCount')}

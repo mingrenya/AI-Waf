@@ -12,6 +12,7 @@ interface StatsCardProps {
     loading?: boolean
     isTraffic?: boolean
     link?: string
+    iconTone?: 'default' | 'inbound' | 'outbound' | 'danger'
 }
 
 export function StatsCard({
@@ -23,6 +24,7 @@ export function StatsCard({
     loading = false,
     isTraffic = false,
     link,
+    iconTone = 'default',
 }: StatsCardProps) {
     const navigate = useNavigate()
 
@@ -61,13 +63,28 @@ export function StatsCard({
         }
     }
 
+    const iconToneClass = {
+        default: 'bg-primary/10 text-primary border-primary/20',
+        inbound: 'bg-sky-500/10 text-sky-500 border-sky-500/20 dark:text-sky-300',
+        outbound: 'bg-violet-500/10 text-violet-500 border-violet-500/20 dark:text-violet-300',
+        danger: 'bg-red-500/10 text-red-500 border-red-500/20 dark:text-red-300',
+    }[iconTone]
+
     return (
         <Card 
-            className={`border-none shadow-none p-4 hover:bg-blue-50 dark:hover:bg-white/5 transition-colors ${link ? 'cursor-pointer' : ''}`}
+            className={`border p-4 transition-colors duration-150 ${link ? 'cursor-pointer' : ''}`}
+            style={{
+                background: 'var(--surface-card-bg)',
+                borderColor: 'var(--surface-card-border)',
+            }}
             onClick={link ? handleCardClick : undefined}
         >
             <CardTitle className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
-                {icon && <span className="text-primary flex-shrink-0">{icon}</span>}
+                {icon && (
+                    <span className={`inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md border ${iconToneClass}`}>
+                        {icon}
+                    </span>
+                )}
                 {title}
             </CardTitle>
 

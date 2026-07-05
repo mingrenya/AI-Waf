@@ -10,7 +10,7 @@ export function StatusBar({ online = true, lastSync }: StatusBarProps) {
     <div className={cn(
       'flex items-center justify-between px-4 py-2.5 rounded-xl text-sm border',
       online
-        ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+        ? 'bg-blue-50 dark:bg-primary/10 border-blue-200 dark:border-primary/20 text-blue-600 dark:text-primary'
         : 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400',
     )}>
       <div className="flex items-center gap-2">

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { X, AlertTriangle, Bug, Info, Terminal, Loader2, Eye } from 'lucide-react';
+import { formatDateTime } from '@/lib/utils';
 
 const SEVERITY_MAP: Record<string, { color: string; bg: string; icon: typeof Bug }> = {
   critical: { color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20', icon: AlertTriangle },
@@ -19,6 +20,30 @@ const SEVERITY_MAP: Record<string, { color: string; bg: string; icon: typeof Bug
   low: { color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20', icon: Info },
   info: { color: 'text-slate-400', bg: 'bg-slate-500/10 border-slate-500/20', icon: Info },
 };
+
+function unwrapData<T>(value: unknown): T | unknown {
+  if (value && typeof value === 'object' && 'data' in value) {
+    return (value as { data?: unknown }).data;
+  }
+
+  return value;
+}
+
+function normalizeArray<T>(value: unknown): T[] {
+  const unwrapped = unwrapData<T[]>(value);
+  return Array.isArray(unwrapped) ? unwrapped : [];
+}
+
+function normalizeTaskDetail(value: unknown): ScanTaskDetail | null {
+  const unwrapped = unwrapData<ScanTaskDetail>(value);
+  if (!unwrapped || typeof unwrapped !== 'object') return null;
+
+  const detail = unwrapped as ScanTaskDetail;
+  return {
+    ...detail,
+    findings: Array.isArray(detail.findings) ? detail.findings : [],
+  };
+}
 
 export default function ScanPage() {
   const [siteId, setSiteId] = useState('');
@@ -31,25 +56,25 @@ export default function ScanPage() {
 
   const { data: tasks = [], refetch: refetchTasks, isLoading: tasksLoading } = useQuery({
     queryKey: ['nuclei-tasks'],
-    queryFn: () => listTasks().then((res) => (res as unknown as { data?: ScanTaskResponse[] })?.data ?? []),
+    queryFn: () => listTasks().then((res) => normalizeArray<ScanTaskResponse>(res)),
     refetchInterval: 5000,
   });
 
   const { data: templates = [] } = useQuery({
     queryKey: ['nuclei-templates'],
-    queryFn: () => listTemplates().then((res) => (res as unknown as { data?: TemplateInfo[] })?.data ?? []),
+    queryFn: () => listTemplates().then((res) => normalizeArray<TemplateInfo>(res)),
   });
 
   const { data: taskDetail, isLoading: detailLoading } = useQuery({
     queryKey: ['nuclei-task-detail', selectedTaskId],
-    queryFn: () => getTaskDetail(selectedTaskId!).then((r) => (r as unknown as { data: ScanTaskDetail }).data),
+    queryFn: () => getTaskDetail(selectedTaskId!).then((res) => normalizeTaskDetail(res)),
     enabled: !!selectedTaskId,
   });
 
   const fetchTasks = useCallback(async () => {
     try {
-      const data = await listTasks() as unknown as ScanTaskResponse[];
-      return data || [];
+      const data = await listTasks();
+      return normalizeArray<ScanTaskResponse>(data);
     } catch {
       return [];
     }
@@ -174,7 +199,12 @@ export default function ScanPage() {
           <CardTitle>Scan Tasks</CardTitle>
         </CardHeader>
         <CardContent>
-          {tasks.length === 0 ? (
+          {tasksLoading ? (
+            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Loading tasks...
+            </div>
+          ) : tasks.length === 0 ? (
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No scan tasks yet.</p>
           ) : (
             <Table>
@@ -204,7 +234,7 @@ export default function ScanPage() {
                     <TableCell>
                       {task.findings} / {task.total}
                     </TableCell>
-                    <TableCell className="text-xs">{new Date(task.created_at).toLocaleString()}</TableCell>
+                    <TableCell className="text-xs">{formatDateTime(task.created_at)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Button
@@ -248,7 +278,7 @@ export default function ScanPage() {
               </div>
             ) : !taskDetail ? (
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No detail available.</p>
-            ) : taskDetail.findings?.length === 0 ? (
+            ) : taskDetail.findings.length === 0 ? (
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No findings from this scan.</p>
             ) : (
               <div className="space-y-3">
@@ -292,11 +322,11 @@ function FindingCard({ finding, index }: { finding: NucleiFinding; index: number
         </div>
       )}
 
-      {finding.extracted_results?.length > 0 && (
+      {(finding.extracted_results ?? []).length > 0 && (
         <div className="mb-2">
           <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Extracted Results:</span>
           <div className="flex flex-wrap gap-1 mt-1">
-            {finding.extracted_results.map((r, i) => (
+            {(finding.extracted_results ?? []).map((r, i) => (
               <code key={i} className="text-xs font-mono bg-black/5 dark:bg-white/5 px-2 py-0.5 rounded" style={{ color: 'var(--text-secondary)' }}>
                 {r}
               </code>

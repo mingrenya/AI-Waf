@@ -1,0 +1,7 @@
+[mcp_servers.ai-waf]
+command = "/Users/duheling/Documents/AI-Waf/mcp-server/mcp-server"
+
+[mcp_servers.ai-waf.env]
+WAF_BACKEND_URL = "http://localhost:2333"
+WAF_USERNAME = "admin"
+WAF_PASSWORD = "admin@123"
